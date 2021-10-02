@@ -13,8 +13,6 @@ chardet==4.0.0
 charset-normalizer==2.0.4
 click==8.0.1
 colour==0.1.5
-discord-custom-help==0.0.6
-dismusic==1.0.1
 docopt==0.6.2
 Flask==2.0.1
 google-api-core==2.0.0
