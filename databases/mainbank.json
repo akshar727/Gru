@@ -1,0 +1,162 @@
+{
+    "717512097725939795": {
+        "wallet": 934293490445012688443519754543329999998322354725,
+        "bank": 190070024371447967120,
+        "booster": 20000000,
+        "bag": [
+            {
+                "item": "lamborghini",
+                "amount": 20
+            },
+            {
+                "item": "laptop",
+                "amount": 5
+            },
+            {
+                "item": "pc",
+                "amount": 10
+            },
+            {
+                "item": "macbook pro 13",
+                "amount": 20
+            },
+            {
+                "item": "gaming chair",
+                "amount": 5
+            },
+            {
+                "item": "gaming desk",
+                "amount": 7
+            },
+            {
+                "item": "iphone 13",
+                "amount": 3
+            },
+            {
+                "item": "monitor",
+                "amount": 2
+            },
+            {
+                "item": "ferrari",
+                "amount": 15
+            },
+            {
+                "item": "watch",
+                "amount": 12
+            },
+            {
+                "item": "quantum computer",
+                "amount": 7
+            }
+        ]
+    },
+    "739112359515390023": {
+        "wallet": 12001,
+        "bank": 5000000,
+        "booster": 3,
+        "bag": []
+    },
+    "873224037080371260": {
+        "wallet": 36345,
+        "bank": 177224,
+        "booster": 3,
+        "bag": [
+            {
+                "item": "pc",
+                "amount": 1
+            },
+            {
+                "item": "watch",
+                "amount": 1
+            },
+            {
+                "item": "macbook pro 13",
+                "amount": 1
+            },
+            {
+                "item": "monitor",
+                "amount": 1
+            },
+            {
+                "item": "ferrari",
+                "amount": 1
+            }
+        ]
+    },
+    "789197599001018378": {
+        "wallet": 251,
+        "bank": 20000,
+        "booster": 1
+    },
+    "754114742066479124": {
+        "wallet": 51000251,
+        "bank": 10000000,
+        "booster": 1
+    },
+    "859310142633803806": {
+        "wallet": 1372,
+        "bank": 10005000,
+        "booster": 1,
+        "bag": [
+            {
+                "item": "Iphone 13",
+                "amount": 20
+            }
+        ]
+    },
+    "735926478914715659": {
+        "wallet": 252,
+        "bank": 0,
+        "booster": 1
+    },
+    "864321522973016065": {
+        "wallet": 251,
+        "bank": 250,
+        "booster": 1
+    },
+    "226470121563095040": {
+        "wallet": 831765187742768821478,
+        "bank": 1000000000000079420,
+        "booster": 9000000
+    },
+    "764871153407229992": {
+        "wallet": 102,
+        "bank": 0,
+        "booster": 1
+    },
+    "747790347824005140": {
+        "wallet": 101,
+        "bank": 0,
+        "booster": 1
+    },
+    "693891589030019112": {
+        "wallet": 1663,
+        "bank": 1999998,
+        "booster": 1
+    },
+    "430882977858453507": {
+        "wallet": 19786,
+        "bank": 0,
+        "booster": 1
+    },
+    "394891794858377217": {
+        "wallet": 2205,
+        "bank": 0,
+        "booster": 1
+    },
+    "457330033875353601": {
+        "wallet": 39345,
+        "bank": 0,
+        "booster": 1,
+        "bag": [
+            {
+                "item": "laptop",
+                "amount": 1
+            },
+            {
+                "item": "monitor",
+                "amount": 1
+            }
+        ]
+    }
+}
