@@ -3111,7 +3111,7 @@ async def genderify(ctx, *, name = None):
 ####################################################################
 
 
-for filename in os.listdir("/Users/akshardesai/PycharmProjects/Akshar's_projects_and_games/bot/Economy-Bot/Economy_bot_code/cogs"):
+for filename in os.listdir("./cogs"):
     if filename.endswith('.py'):
         client.load_extension(f'cogs.{filename[:-3]}')
 
