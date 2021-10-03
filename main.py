@@ -3123,7 +3123,7 @@ async def update_bot(ctx):
 
 @client.event
 async def on_raw_bulk_message_delete(payload):
-    deleted_msg_ids = [str(id) for id in payload]
+    deleted_msg_ids = [id for id in payload.message_ids]
     with open('databases/reactrole.json','r') as f:
         roles = json.load(f)
     reaction_role_ids = [id["message_id"] for id in roles]
@@ -3132,10 +3132,9 @@ async def on_raw_bulk_message_delete(payload):
             if id == reactrole_id:
                 for i in roles:
                     if i["message_id"] == reactrole_id:
-                        del i
-
-    with open('reactrole.json', 'w') as f:
-        json.dump(roles, f,indent=4)
+                        roles.remove(i)
+                    with open('databases/reactrole.json', 'w') as f:
+                        json.dump(roles, f,indent=4)
 
 
 
