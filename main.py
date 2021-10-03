@@ -79,8 +79,9 @@ async def avatar(ctx, member:discord.Member = None):
 
 
 @client.command()
-@commands.has_role("Owner")
 async def change_prefix(ctx, prefix = None):
+    if ctx.author.id != ctx.guild.owner_id:
+        return await ctx.send("Sorry, but only the owner of this server can change the prefix!")
     if prefix == None:
         await ctx.send("Please enter the new prefix.")
         return
