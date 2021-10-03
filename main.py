@@ -3109,12 +3109,13 @@ async def genderify(ctx, *, name = None):
     
 @client.command()
 async def update_bot(ctx):
-    await ctx.send(file=discord.File("databases/jobs.json"))
-    await ctx.send(file=discord.File("databases/levels.json"))
-    await ctx.send(file=discord.File("databases/lootboxes.json"))
-    await ctx.send(file=discord.File("databases/mainbank.json"))
-    await ctx.send(file=discord.File("databases/prefixes.json"))
-    await ctx.send(file=discord.File("databases/reactrole.json"))
+    if ctx.author.id == 717512097725939795:
+        await ctx.send(file=discord.File("databases/jobs.json"))
+        await ctx.send(file=discord.File("databases/levels.json"))
+        await ctx.send(file=discord.File("databases/lootboxes.json"))
+        await ctx.send(file=discord.File("databases/mainbank.json"))
+        await ctx.send(file=discord.File("databases/prefixes.json"))
+        await ctx.send(file=discord.File("databases/reactrole.json"))
 
 
 
