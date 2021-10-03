@@ -117,7 +117,6 @@ client.lava_nodes = [
 async def on_ready():
     change_status.start()
     print("Connected to {0.user}".format(client))
-    client.load_extension("jishaku")
     while True:
         await asyncio.sleep(15)
         with open('databases/spam_detextion.txt', "r+") as file:
