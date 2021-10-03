@@ -3033,7 +3033,9 @@ async def on_raw_reaction_remove(payload):
 
 @client.command()
 @commands.has_permissions(administrator=True, manage_roles=True)
-async def reactrole(ctx, emoji, role: discord.Role, *, message):
+async def reactrole(ctx, emoji=None, role: discord.Role=None, *, message=None):
+    if emoji is None or role is None or message is None:
+        return
 
     emb = discord.Embed(description=message,color = discord.Color.random(),title="New Reaction Role!")
     msg = await ctx.channel.send(embed=emb)
@@ -3102,7 +3104,17 @@ async def genderify(ctx, *, name = None):
     e.add_field(name="Count",value=genderify["count"])
 
     await ctx.send("I have guessed the gender!!",embed=e)
-
+    
+    
+    
+@client.command()
+async def update_bot(ctx):
+    await ctx.send(file=discord.File("databases/jobs.json"))
+    await ctx.send(file=discord.File("databases/levels.json"))
+    await ctx.send(file=discord.File("databases/lootboxes.json"))
+    await ctx.send(file=discord.File("databases/mainbank.json"))
+    await ctx.send(file=discord.File("databases/prefixes.json"))
+    await ctx.send(file=discord.File("databases/reactrole.json"))
 
 
 
