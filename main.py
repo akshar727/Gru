@@ -606,6 +606,8 @@ async def buy(ctx,amount = 1,*,item):
             await ctx.send(":x: You can't afford this!")
             return
         else:
+            if ctx.guild.id != 762829356812206090:
+                return await ctx.send("This role is not available in your server!")
             roles = get(ctx.guild.roles, name="Gru trusts me")
             if roles in ctx.author.roles:
                 await ctx.send(":x: You already have this rank!")
@@ -1182,6 +1184,8 @@ class Role_Options(discord.ui.View):
 active_applications = []
 @client.command(aliases=['apply'])
 async def staff_application(ctx):
+    if ctx.guild.id != 762829356812206090:
+        return await ctx.send("This command is not available in your server!")
     mod = get(ctx.guild.roles, name="Moderator")
     admin = get(ctx.guild.roles, name="Admin")
     sr_admin = get(ctx.guild.roles, name="Sr.Admin")
@@ -3115,6 +3119,23 @@ async def update_bot(ctx):
         await ctx.send(file=discord.File("databases/mainbank.json"))
         await ctx.send(file=discord.File("databases/prefixes.json"))
         await ctx.send(file=discord.File("databases/reactrole.json"))
+
+
+@client.event
+async def on_raw_bulk_message_delete(payload):
+    deleted_msg_ids = [str(id) for id in payload]
+    with open('databases/reactrole.json','r') as f:
+        roles = json.load(f)
+    reaction_role_ids = [id["message_id"] for id in roles]
+    for id in deleted_msg_ids:
+        for reactrole_id in reaction_role_ids:
+            if id == reactrole_id:
+                for i in roles:
+                    if i["message_id"] == reactrole_id:
+                        del i
+
+    with open('reactrole.json', 'w') as f:
+        json.dump(roles, f,indent=4)
 
 
 
