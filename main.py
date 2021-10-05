@@ -680,7 +680,10 @@ async def buy(ctx, amount=1, *, item):
             await ctx.send("That Object isn't there!")
             return
         if res[1] == 2:
-            await ctx.send(f"You don't have enough money in your wallet to buy {amount} {item}")
+            if amount == 1:
+                await ctx.send(f"You don't have enough money in your wallet to buy {amount} {item}")
+            else:
+                await ctx.send(f"You don't have enough money in your wallet to buy {amount} {item}s")
             return
 
     if item == 'pc':
@@ -692,8 +695,10 @@ async def buy(ctx, amount=1, *, item):
         item = item + "es"
     if amount > 1 and item.lower() != 'watches':
         item = item + "s"
-
-    await ctx.send(f":white_check_mark: You just bought {amount} {item}")
+    if amount == 1:
+        await ctx.send(f":white_check_mark: You just bought {amount} {item}")
+    else:
+        await ctx.send(f":white_check_mark: You just bought {amount} {item}s")
 
 
 @client.command(aliases=['inv'])
