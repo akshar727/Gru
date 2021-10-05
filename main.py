@@ -153,7 +153,9 @@ mainshop = [{"name": "Watch", "price": 100, "description": "Time"},
             {"name": "Quantum computer", "price": 470000, "description": "ULTRA FAST COMPUTER"},
             {"name": "Gru trusts me role", "price": 500000,
              "description": "Allows you to see a exclusive channel for users with this role only!"},
-            {"name": "Lamborghini", "price": 1000000, "description": "Ultra cool sports car"}
+            {"name": "Lamborghini", "price": 1000000, "description": "Ultra cool sports car"},
+            {"name": "10x booster","price":3500000,"description":"Get a 10x money booster **__Permanent__**"}
+
             ]
 
 
@@ -350,6 +352,7 @@ async def work(ctx):
                     new_job_name = "Gru Super Programmer"
                 elif work_name == "Gru Super Programmer":
                     new_job_name = "Gru Super Code Compiler"
+
                 jobpays = {"Gru Gadgets Maker": 9000, "Gru Gadgets Tester": 12000, "Minion Refiner": 16000,
                            "Super Minion Refiner": 22000, "Minion Gadget Manager": 29000, "Gru Ship Mechanic": 35000,
                            "Gru Ship Pilot": 41000, "Minion Costume Maker": 45000, "Gru Assistant Hacker": 55000,
@@ -359,8 +362,7 @@ async def work(ctx):
                 new_job_pay = jobpays[new_job_name]
                 if work_amt > jobpays[work_name]:
                     new_job_pay += work_amt - jobpays[work_name]
-                await ctx.send(
-                    f"You were doing so good that your manager has **PROMOTED** you to a {new_job_name}! You now make `{new_job_pay} Gru coins` instead of `{work_amt} Gru coins`! :tada: :tada:")
+                await ctx.send(f"You were doing so good that your manager has **PROMOTED** you to a {new_job_name}! You now make `{new_job_pay} Gru coins` instead of `{work_amt} Gru coins`! :tada: :tada:")
                 if work_amt > jobpays[work_name]:
                     await ctx.send(
                         "Your base pay for this new job is higher because you got pay increases in your last job(s)!")
@@ -624,6 +626,21 @@ async def buy(ctx, amount=1, *, item):
                 users[str(ctx.author.id)]["wallet"] -= 400000
                 users[str(ctx.author.id)]["booster"] = 5
                 await ctx.send(":white_check_mark: You now have a booster for 5x the money!")
+                with open('databases/mainbank.json', 'w') as f:
+                    json.dump(users, f)
+                return
+            else:
+                await ctx.send("You can't afford this!")
+                return
+        else:
+            await ctx.send(":x: You already have a booster that's higher than this!")
+            return
+    if item == "10x booster":
+        if users[str(ctx.author.id)]["booster"] < 10:
+            if users[str(ctx.author.id)]["wallet"] >= 3500000:
+                users[str(ctx.author.id)]["wallet"] -= 3500000
+                users[str(ctx.author.id)]["booster"] = 10
+                await ctx.send(":white_check_mark: You now have a booster for 10x the money!")
                 with open('databases/mainbank.json', 'w') as f:
                     json.dump(users, f)
                 return
@@ -2806,7 +2823,7 @@ async def dogfact(ctx):
 @client.command()
 async def jail(ctx, user: discord.Member = None):
     if user is None:
-        return await ctx.send("Please enter a user!(unless you want to put yourself in jail)")
+        user = ctx.author
     await ctx.trigger_typing()
     async with aiohttp.ClientSession() as trigSession:
         async with trigSession.get(
@@ -2823,7 +2840,7 @@ async def jail(ctx, user: discord.Member = None):
 @client.command(aliases=["trigger"])
 async def triggered(ctx, user: discord.Member = None):
     if user is None:
-        return await ctx.send("Please enter a user!(unless you want to trigger yourself)")
+        user = ctx.author
     await ctx.trigger_typing()
     async with aiohttp.ClientSession() as trigSession:
         async with trigSession.get(
