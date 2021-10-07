@@ -4,7 +4,7 @@ import nextcord as discord
 from nextcord.ext import commands, tasks
 from nextcord.utils import get
 import asyncio
-from typing import List
+from typing import List, Optional
 import datetime
 from itertools import cycle
 import os
@@ -528,6 +528,8 @@ async def send(ctx, member: discord.Member, amount=None):
 @client.command(aliases=['steal'])
 @commands.cooldown(1, 60, commands.BucketType.user)
 async def rob(ctx, member: discord.Member):
+    if member.bot:
+        return await ctx.send("You are not allowed to steal from bots, back off my kind")
     await open_account(ctx.author)
     await open_account(member)
     bal = await update_bank(member)
@@ -602,7 +604,7 @@ async def shop(ctx):
 
 
 @client.command()
-async def buy(ctx, amount=1, *, item):
+async def buy(ctx, amount: Optional[int]=1, *, item):
     users = await get_bank_data()
     item = item.lower()
     if item == "2x booster":
@@ -681,9 +683,9 @@ async def buy(ctx, amount=1, *, item):
             return
         if res[1] == 2:
             if amount == 1:
-                await ctx.send(f"You don't have enough money in your wallet to buy {amount} {item}")
+                await ctx.send(f"You don't have enough money in your wallet to buy {amount} {item}!")
             else:
-                await ctx.send(f"You don't have enough money in your wallet to buy {amount} {item}s")
+                await ctx.send(f"You don't have enough money in your wallet to buy {amount} {item}s!")
             return
 
     if item == 'pc':
@@ -695,10 +697,9 @@ async def buy(ctx, amount=1, *, item):
         item = item + "es"
     if amount > 1 and item.lower() != 'watches':
         item = item + "s"
-    if amount == 1:
-        await ctx.send(f":white_check_mark: You just bought {amount} {item}")
-    else:
-        await ctx.send(f":white_check_mark: You just bought {amount} {item}s")
+
+    await ctx.send(f":white_check_mark: You just bought {amount} {item}!")
+
 
 
 @client.command(aliases=['inv'])
@@ -779,7 +780,7 @@ async def buy_this(user, item_name, amount):
 
 
 @client.command()
-async def sell(ctx, amount=1, *, item):
+async def sell(ctx,amount: Optional[int]=1, *, item):
     await open_account(ctx.author)
 
     res = await sell_this(ctx.author, item, amount)
@@ -1601,6 +1602,8 @@ async def unban(ctx, *, member):
 @client.command()
 @commands.cooldown(1, 300, commands.BucketType.user)
 async def bankrob(ctx, user: discord.Member):
+    if user.bot:
+        return await ctx.send("You are not allowed to steal from bots, back off my kind")
     await open_account(ctx.author)
     await open_account(user)
     bal1 = await update_bank(user)
