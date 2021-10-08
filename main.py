@@ -14,7 +14,6 @@ from PIL import Image
 from io import BytesIO
 from googleapiclient.discovery import build
 import urllib.parse, urllib.request
-import bot_token
 import string
 import base64
 from num2words import num2words
@@ -22,7 +21,7 @@ import alexflipnote
 from cogs.utils import http
 
 alex_api = alexflipnote.Client("JKY6JzdiMO5xBqkncoONDdvrlQj7LVaF0N5IFae2")
-os.chdir("/Users/akshardesai/PycharmProjects/Akshar's_projects_and_games/bot/Economy-Bot/Economy_bot_code")
+
 
 api_key = "AIzaSyAhNZnU6pStK8eYcm83IeQAR_OEdhjJURw"
 
@@ -1294,8 +1293,7 @@ async def staff_application(ctx):
                     role = get(member.guild.roles, name="Moderator")
                     await ctx.author.add_roles(role)
                     channl = await member.create_dm()
-                    await channl.send(
-                        "Congratulations!You have received the Moderator rank in the server Private server for Akshar's friends!")
+                    await channl.send("Congratulations!You have received the Moderator rank in the server Private server for Akshar's friends!")
                     await asyncio.sleep(1)
                     await p.delete()
                     active_applications.remove(str(ctx.author.id))
@@ -1345,8 +1343,8 @@ async def on_message(message):
                     counter += 1
 
         file.writelines(f"{str(message.author.id)}\n")
-        if counter > 5 and str(message.author.id) != "717512097725939795" and message.author != client.user:
-            await message.channel.send("Please stop spamming! Or you will get muted by a staff member")
+        if counter > 5 and str(message.author.id) != "717512097725939795" and message.author != client.user and message.author != message.guild.owner:
+            await message.channel.send("Please stop spamming! Or you will get muted.")
 
     try:
         if message.mentions[0] == client.user and message.content == '<@!874328552965820416>':
@@ -1533,15 +1531,16 @@ async def usertoid_error(ctx, error):
 @commands.has_any_role("Owner")
 async def gcreate(ctx, time=None, *, prize=None):
     giveaway_role = get(ctx.author.guild.roles, name="Giveaway Ping")
+    time_convert = {"s": 1, "m": 60, "h": 3600, "d": 86400}
+    gawtime = int(time[:-1]) * time_convert[time[-1]]
+    time_stamp = datetime.datetime.now() + datetime.timedelta(seconds=gawtime)
     if time == None:
         return await ctx.send('Please include a time!')
     elif prize == None:
         return await ctx.send('Please include a prize!')
     embed = discord.Embed(title='New Giveaway!', description=f'{ctx.author.mention} is giving away **{prize}**!!',
                           color=discord.Color.random())
-    time_convert = {"s": 1, "m": 60, "h": 3600, "d": 86400}
-    gawtime = int(time[:-1]) * time_convert[time[-1]]
-    embed.set_footer(text=f'Giveaway ends in {time}.React with the "🎉" to enter!')
+    embed.set_footer(text=f'Giveaway ends at {time_stamp.strftime("%A, %B %d %Y @ %H:%M:%S %p")}.\nReact with the "🎉" to enter!')
     gaw_msg = await ctx.send(f"{giveaway_role.mention}", embed=embed)
 
     await gaw_msg.add_reaction("🎉")
@@ -1549,9 +1548,13 @@ async def gcreate(ctx, time=None, *, prize=None):
 
     await ctx.send("Picking a random user!")
     await asyncio.sleep(1)
-
+    embed.title = "GIVEAWAY ENDED"
+    embed.set_footer(text=f'Giveaway ended at {time_stamp.strftime("%A, %B %d %Y @ %H:%M:%S %p")}')
+    try:
+        await gaw_msg.edit(embed=embed)
+    except:
+        return await ctx.send("Couldn't find the original giveaway message! :(")
     new_gaw_msg = await ctx.channel.fetch_message(gaw_msg.id)
-
     users = await new_gaw_msg.reactions[0].users().flatten()
     users.pop(users.index(client.user))
     try:
@@ -1559,8 +1562,15 @@ async def gcreate(ctx, time=None, *, prize=None):
     except:
         await ctx.send("No one won since no one entered!")
         return
+    e = discord.Embed(description="None",color=discord.Color.random())
+    if len(users) == 1:
+        e.description="1 entrant"
+    else:
+        e.description = f"{len(users)} entrants"
+    embed.description += f"\nWinner: {winner.mention}"
+    await gaw_msg.edit(embed=embed)
 
-    await ctx.send(f"YAYYYYY!!!! {winner.mention} has won the giveaway for **{prize}**!!")
+    await ctx.send(f"YAYYYYY!!!! {winner.mention} has won the giveaway for **{prize}**!!",embed=e)
 
 
 @client.command()
@@ -3071,4 +3081,6 @@ for filename in os.listdir("cogs"):
     if filename.endswith('.py'):
         client.load_extension(f'cogs.{filename[:-3]}')
 
-client.run(bot_token.token)
+token = os.environ["discord_bot_token"]
+
+client.run(token)
