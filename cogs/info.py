@@ -7,6 +7,7 @@ import asyncio
 
 
 
+
 class Info(commands.Cog):
     def __init__(self, client):
         self.client = client
@@ -16,36 +17,7 @@ class Info(commands.Cog):
     async def on_ready(self):
         print('Info Cog Loaded Succesfully')
         print("Bot is ready to use.")
-
-    @commands.command(aliases=['python', 'botinfo'])
-    async def bot(self, ctx):
-        values = psutil.virtual_memory()
-        val2 = values.available * 0.001
-        val3 = val2 * 0.001
-        val4 = val3 * 0.001
-
-        values2 = psutil.virtual_memory()
-        value21 = values2.total
-        values22 = value21 * 0.001
-        values23 = values22 * 0.001
-        values24 = values23 * 0.001
-
-        embedve = discord.Embed(
-            title="Bot Info", color=0x9370DB)
-        embedve.add_field(
-            name="Bot Latency", value=f"Bot latency - {round(self.client.latency * 1000)}ms", inline=False)
-        embedve.add_field(name='Hosting Stats', value=f'Cpu usage- {psutil.cpu_percent(1)}%'
-                          f'\n(Actual Cpu Usage May Differ)'
-                          f'\n'
-
-                          f'\nNumber of Cores - {psutil.cpu_count()} '
-                          f'\nNumber of Physical Cores- {psutil.cpu_count(logical=False)}'
-                          f'\n'
-
-                          f'\nTotal ram- {round(values24, 2)} GB'
-                          f'\nAvailable Ram - {round(val4, 2)} GB')
-
-        await ctx.send(embed=embedve)
+        
 
     @commands.command(aliases=['help'])
     async def _help(self, ctx,type=None):
@@ -54,7 +26,7 @@ class Info(commands.Cog):
         prefix = prefixes[str(ctx.guild.id)]
         if type is None:
             embedvar = discord.Embed(title="Help Commands",description='All the commands in the bot.', color=0x00ff00)
-            embedvar.add_field(name="Moderation",value=f"Do `{prefix}adminhelp` to see all the moderation commands(**staff only**).")
+            embedvar.add_field(name="Moderation",value=f"Do `{prefix}adminhelp` to see all the moderation commands(**staff only**)(**MAINTINENCE**).")
             embedvar.add_field(name="Economy",value=f"All the economy commands in the bot.Do `{prefix}help economy` to see them.")
             embedvar.add_field(name="Misc",value=f"All the miscellaneous commands in the bot.Do `{prefix}help misc` to see them.")
             embedvar.add_field(name="Fun",value=f"All the fun commands in the bot.Do `{prefix}help fun` to see them.")
@@ -62,12 +34,12 @@ class Info(commands.Cog):
 
             embedvar.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
             await ctx.send(embed=embedvar)
-        elif type.lower() == "economy":
+        elif type.lower() == "economy" or type.lower() == "eco":
             embedvar = discord.Embed(title="Help Commands",description='All the **Economy** commands in the bot.', color=0x00ff00)
             embedvar.add_field(name=f'{prefix}bankrob <user>', value='''Allows you to rob a user's bank''', inline=False)
             embedvar.add_field(name=f'{prefix}get_job', value='Allows you to get a job a Gru enterprises™!', inline=False)
             embedvar.add_field(name=f'{prefix}crates', value='Allows you to view all the crates you have.', inline=False)
-            embedvar.add_field(name=f'{prefix}opencrate <type> <amount>', value='Allows you to open your crates!', inline=False)
+            embedvar.add_field(name=f'{prefix}open <type> <amount>', value='Allows you to open your crates!', inline=False)
             embedvar.add_field(name=f'{prefix}crate_info', value='Allows you to view the cash ranges of all the crates.', inline=False)
             embedvar.add_field(name=f'{prefix}jobs', value='Shows a list of all jobs in Gru enterprises™!', inline=False)
             embedvar.add_field(name=f'{prefix}work', value='''Allows you to work and make some money!''', inline=False)
@@ -77,13 +49,16 @@ class Info(commands.Cog):
             embedvar.add_field(name=f'{prefix}withdraw / {prefix}with', value='To withdraw money from bank', inline=False)
             embedvar.add_field(name=f'{prefix}send', value='Send money to someone', inline=False)
             embedvar.add_field(name=f'{prefix}rob <user>', value='Allows you to rob a user!', inline=False)
-            embedvar.add_field(name=f'{prefix}slots', value='To bet some money', inline=False)
+            embedvar.add_field(name=f'{prefix}slots <amount>', value='To bet some money', inline=False)
             embedvar.add_field(name=f'{prefix}shop', value='To view shop', inline=False)
-            embedvar.add_field(name=f'{prefix}buy <amount> <item>', value='To, buy an item', inline=False)
-            embedvar.add_field(name=f'{prefix}sell', value='To sell an item', inline=False)
+            embedvar.add_field(name=f'{prefix}buy [amount] <item>', value='To, buy an item', inline=False)
+            embedvar.add_field(name=f'{prefix}sell <item>', value='To sell an item', inline=False)
             embedvar.add_field(name=f'{prefix}inventory / {prefix}inv', value='To view your inventory', inline=False)
             embedvar.add_field(name=f'{prefix}viewbal <user>',value='''Allows you to view someone else's balance''',inline=False)
+            embedvar.add_field(name=f'{prefix}leaderboard [amount] [type] / {prefix}lb [amount] <type>', value='''Allows you to see the richest people in the bot!The types are `all` to see al users in the leaderboard and `server` to see only users in this server.''', inline=False)
+
             embedvar.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
+            embedvar.set_footer(text="Arguments that are surrounded in [] are optional.")
             await ctx.send(embed=embedvar)
 
 
@@ -91,8 +66,7 @@ class Info(commands.Cog):
             page1 = discord.Embed(title="Help Commands", description='All the **Fun** commands in the bot. (Page 1)', color=0x00ff00)
             page1.add_field(name=f'{prefix}showpic <query> / {prefix}show <query>', value='Allows you to search a image on the web with a query', inline=False)
             page1.add_field(name=f'{prefix}youtube <query>', value='Allows you to search a video on youtube with a query', inline=False)
-            page1.add_field(name=f'{prefix}counter', value='Opens a virtual counter!', inline=False)
-            page1.add_field(name=f'{prefix}color', value='Allows you to choose your favorite color!', inline=False)
+
             page1.add_field(name=f'{prefix}hack <user>', value='Does a very real and serious hack(I swear)...', inline=False)
             page1.add_field(name=f'{prefix}num2text <number>', value='Converts numbers to words!', inline=False)
             page1.add_field(name=f'{prefix}reverse <text>', value='Reverses your text!', inline=False)
@@ -100,20 +74,23 @@ class Info(commands.Cog):
             page1.add_field(name=f'{prefix}level / {prefix}lvl / {prefix}rank', value='''Tells you your level with how much xp you have in that level!''', inline=False)
             page1.add_field(name=f'{prefix}guessing', value='''Opens up a guessing game!''', inline=False)
             page1.add_field(name=f'{prefix}calc', value='''Opens up a virtual calculator!''', inline=False)
-
+            page1.add_field(name=f'{prefix}gayrate <user>', value='''Check how gay someone is!''', inline=False)
             
             page2 = discord.Embed(title="Help Commands",description='All the **Fun** commands in the bot. (Page 2)', color=0x00ff00)
             page2.add_field(name=f'{prefix}avatar <user> ', value="Allows you to see someone's avatar picture!",inline=False)
-            page2.add_field(name=f'{prefix}encode',value="Allows you to encode text!")
-            page2.add_field(name=f'{prefix}decode', value="Allows you to decode text!")
+            page2.add_field(name=f'{prefix}encode <method> <text>',value="Allows you to encode text!")
+            page2.add_field(name=f'{prefix}decode <method> <text>', value="Allows you to decode text!")
             page2.add_field(name=f'{prefix}dogfact', value="Allows you to learn a fact about dogs!",inline=False)
             page2.add_field(name=f'{prefix}jail <user>', value="Sends a user to jail...",inline=False)
-            page2.add_field(name=f'{prefix}triggered <user> / {prefix}trigger <user>', value="Makes a user really triggered...",inline=False)
+            page2.add_field(name=f'{prefix}trigger <user> / {prefix}trigger <user>', value="Makes a user really triggered...",inline=False)
             page2.add_field(name=f'{prefix}joke', value="Gives you a joke!",inline=False)
-            page2.add_field(name=f'{prefix}captcha <text>', value="Allows you to make your very own captcha!", inline=False)
-            page2.add_field(name=f'{prefix}achievement <text> [icon]', value=f"Allows you to make a custom Minecraft™ achievement!View all icons by doing '{prefix}ac_icons'", inline=False)
             page2.add_field(name=f'{prefix}genderify <name> / {prefix}gender <name>', value="I guess your gender by your name!", inline=False)
-            
+            page2.add_field(name=f'{prefix}imposter', value="You have to find the imposter before the reactor has a meltdown!", inline=False)
+            page2.add_field(name=f'{prefix}sqrt <number/expression>', value="Gives you the square root of a number or expression!", inline=False)
+            page2.add_field(name=f'{prefix}spam', value="Type as many characters as you can in 30 seconds!", inline=False)
+            page2.add_field(name=f'{prefix}gay <user>', value="Makes a gay overlay!", inline=False)
+            page2.add_field(name=f'{prefix}hunt', value="Allows you to hunt for animals and sell them in the shop!", inline=False)
+        
             fun_pages = [page1, page2]
             
             page1.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
@@ -159,11 +136,14 @@ class Info(commands.Cog):
 
         elif type.lower() == "misc":
             embedvar = discord.Embed(title="Help Commands",description='All the **Misc** commands in the bot.', color=0x00ff00)
-            embedvar.add_field(name=f'{prefix}bot', value='To see bot info', inline=False)
+            embedvar.add_field(name=f'{prefix}stats', value='''Allows you to see the bot's stats!''', inline=False)
             embedvar.add_field(name=f'{prefix}members', value='''Allows you to see how many people are in the server!''', inline=False)
-            embedvar.add_field(name=f'{prefix}leaderboard / {prefix}lb', value='''Allows you to see the richest people!''', inline=False)
-            embedvar.add_field(name=f'{prefix}apply', value='''Allows you to apply for staff.''', inline=False)
+            if ctx.guild.id == 762829356812206090:
+                embedvar.add_field(name=f'{prefix}apply', value='''Allows you to apply for staff.''', inline=False)
             embedvar.add_field(name=f'{prefix}covid <country> / {prefix}covid19 <country>', value='''Allows you to see the covid statistics of a country!''', inline=False)
+            embedvar.add_field(name=f'{prefix}roles', value='''Allows you to see all roles in the server!''', inline=False)
+            embedvar.add_field(name='idtouser <id>', value='Allows you to get a user from their id.',inline=False)
+            embedvar.add_field(name='usertoid <user> ', value="Allows you to get a user's id", inline=False)
             embedvar.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
             await ctx.send(embed=embedvar)
 
@@ -174,28 +154,28 @@ class Info(commands.Cog):
 
 
     @commands.command()
-    @commands.has_any_role("Owner", "Admin", "Sr.Admin", "Moderator")
+    @commands.has_permissions(manage_guild=True)
     async def adminhelp(self, ctx):
-        embedvar = discord.Embed(title="Admin Help Commands", description='All the commands in the bot that admins and mods can use.', color=0x00ff00)
-        embedvar.add_field(name='gcreate <amount of time> <prize>',value='Allows you to create a giveaway(Sr.Admin only)')
-        embedvar.add_field(name='idtouser <id>', value='Allows you to get a user from their id.')
-        embedvar.add_field(name='usertoid <user> ', value="Allows you to get a user's id")
-        embedvar.add_field(name='takerole <user> <role> ', value="Allows you to take a role away from someone.**NOTE** taking a role away from another staff member could result in your rank being lost and a 2day mute.")
-        embedvar.add_field(name='scn / set_channel_name  <original channel name> <new channel name> ', value="Allows you to change a channel's name")
-        embedvar.add_field(name='giverole <user> <role> ', value="Allows you to give a role to someone.**NOTE** You can only give roles up to your highest rank.")
-        embedvar.add_field(name='registeruser <user> / ,rgu <user> ', value="Allows you to register a user manually.Moderators cannot do this.")
-        embedvar.add_field(name='change_prefix <prefix> ', value="Allows you to change the prefix of the bot in this server(**Owner only**)")
-        embedvar.add_field(name='kick <user> <reason> ', value="Allows you to kick a user with a reason(**Owner and Sr.Admin only**)")
-        embedvar.add_field(name='ban <user> <reason> ', value="Allows you to ban a user with a reason(**Owner and Sr.Admin only**)")
-        embedvar.add_field(name='unban <user> ', value="Allows you to unban a user(**Owner and Sr.Admin only**)")
-        embedvar.add_field(name='mute <user> ', value="Allows you to mute a user")
-        embedvar.add_field(name='unmute <user> ', value="Allows you to unmute a user")
+        ##FIXXXXXX
+        embedvar = discord.Embed(title="Admin Help Commands", description='All the commands in the bot that users with permissions can use.', color=0x00ff00)
+        embedvar.add_field(name='gcreate <amount of time> <prize>',value='Allows you to create a giveaway. Requires Manage Guild')
+        embedvar.add_field(name='config',value='Allows you to change server configurations. Requires Manage Guild')
+        embedvar.add_field(name='takerole <user> <role> ', value="Allows you to take a role away from someone. Requires Manage Roles.")
+        embedvar.add_field(name='reactrole <emoji> <role> <message> ', value="Allows you to create reactions roles. Requires Manage Roles.")
+        embedvar.add_field(name='scn / set_channel_name  <original channel name> <new channel name> ', value="Allows you to change a channel's name. Requires Manage Channels.")
+        embedvar.add_field(name='giverole <user> <role> ', value="Allows you to give a role to someone.**NOTE** You can only give roles up to your highest rank. Requires Manage Roles.")
+        embedvar.add_field(name='prefix <prefix> ', value="Allows you to change the prefix of the bot in this server(**Owner only**)")
+        embedvar.add_field(name='kick <user> <reason> ', value="Allows you to kick a user with a reason. Requires Kick Users.")
+        embedvar.add_field(name='ban <user> <reason> ', value="Allows you to ban a user with a reason. Requires Ban Users.")
+        embedvar.add_field(name='unban <user> ', value="Allows you to unban a user. Requires Ban Users.")
+        embedvar.add_field(name='mute <user> ', value="Allows you to mute a user. Requires Manage Roles.")
+        embedvar.add_field(name='unmute <user> ', value="Allows you to unmute a user. Requires Manage Roles.")
         embedvar.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
         await ctx.send(embed=embedvar)
 
     @adminhelp.error
     async def adminhelp_error(self, ctx, error):
-        if isinstance(error, commands.MissingAnyRole):
+        if isinstance(error, commands.MissingPermissions):
             await ctx.send("You can't view this!")
             return
 def setup(client):

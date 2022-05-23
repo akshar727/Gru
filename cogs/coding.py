@@ -303,7 +303,7 @@ class Encryption(commands.Cog):
 
             """ Invite me to your server """
             await ctx.send(
-                f"**{ctx.author.name}**, use this URL to invite me\n<{discord.utils.oauth_url(self.bot.user.id)}>")
+                f"**{ctx.author.name}**, use this URL to invite me\n<https://discord.com/api/oauth2/authorize?client_id=874328552965820416&permissions=8&scope=bot>")
         else:
             await ctx.send(
                 'Currently, no one but the owner of this bot can invite me.')

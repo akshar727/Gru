@@ -1,12 +1,12 @@
 {
     "717512097725939795": {
-        "common": 686,
-        "uncommon": 200,
-        "rare": 400,
-        "epic": 300,
-        "legendary": 800,
-        "mythic": 2499,
-        "admin": 3000
+        "common": 6,
+        "uncommon": 333,
+        "rare": 829,
+        "epic": 11,
+        "legendary": 8602,
+        "mythic": 2501,
+        "admin": 565664453956635
     },
     "394891794858377217": {
         "common": 0,
@@ -35,15 +35,6 @@
         "mythic": 0,
         "admin": 0
     },
-    "739112359515390023": {
-        "common": 0,
-        "uncommon": 0,
-        "rare": 0,
-        "epic": 0,
-        "legendary": 0,
-        "mythic": 0,
-        "admin": 0
-    },
     "693891589030019112": {
         "common": 0,
         "uncommon": 0,
@@ -54,9 +45,9 @@
         "admin": 0
     },
     "873224037080371260": {
-        "common": 0,
+        "common": 2,
         "uncommon": 0,
-        "rare": 0,
+        "rare": 2,
         "epic": 0,
         "legendary": 0,
         "mythic": 0,
@@ -99,9 +90,9 @@
         "admin": 0
     },
     "747790347824005140": {
-        "common": 0,
-        "uncommon": 0,
-        "rare": 0,
+        "common": 1,
+        "uncommon": 3,
+        "rare": 1,
         "epic": 0,
         "legendary": 0,
         "mythic": 0,
@@ -126,12 +117,48 @@
         "admin": 0
     },
     "457330033875353601": {
+        "common": 1,
+        "uncommon": 2,
+        "rare": 0,
+        "epic": 0,
+        "legendary": 1,
+        "mythic": 0,
+        "admin": 5
+    },
+    "838528660293287956": {
         "common": 0,
         "uncommon": 0,
         "rare": 0,
         "epic": 0,
         "legendary": 0,
+        "mythic": 1,
+        "admin": 0
+    },
+    "863076945180098600": {
+        "common": 2,
+        "uncommon": 3,
+        "rare": 0,
+        "epic": 0,
+        "legendary": 0,
         "mythic": 0,
-        "admin": 5
+        "admin": 0
+    },
+    "972282561642496060": {
+        "common": 3,
+        "uncommon": 1,
+        "rare": 0,
+        "epic": 0,
+        "legendary": 0,
+        "mythic": 0,
+        "admin": 0
+    },
+    "891800285863882773": {
+        "common": 1,
+        "uncommon": 0,
+        "rare": 0,
+        "epic": 0,
+        "legendary": 0,
+        "mythic": 0,
+        "admin": 0
     }
 }

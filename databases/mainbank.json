@@ -1,65 +1,211 @@
 {
     "717512097725939795": {
-        "wallet": 934293490445012688443519764543329999998322354724,
-        "bank": 190070024371447967120,
+        "wallet": 1.0000000000000001e+37,
+        "bank": 0.0,
         "booster": 20000000,
         "bag": [
             {
-                "item": "lamborghini",
-                "amount": 20
-            },
-            {
-                "item": "laptop",
-                "amount": 5
-            },
-            {
-                "item": "pc",
-                "amount": 10
-            },
-            {
-                "item": "macbook pro 13",
-                "amount": 20
-            },
-            {
-                "item": "gaming chair",
-                "amount": 5
-            },
-            {
-                "item": "gaming desk",
-                "amount": 7
-            },
-            {
-                "item": "iphone 13",
-                "amount": 3
-            },
-            {
-                "item": "monitor",
-                "amount": 2
-            },
-            {
-                "item": "ferrari",
-                "amount": 15
+                "item": "hunting sniper",
+                "amount": 1
             },
             {
                 "item": "watch",
-                "amount": 12
+                "amount": 30
+            },
+            {
+                "item": "gaming chair",
+                "amount": 25
             },
             {
                 "item": "quantum computer",
+                "amount": 50
+            },
+            {
+                "item": "lamborghini",
+                "amount": 5000000030
+            },
+            {
+                "item": "iphone 13",
+                "amount": 28
+            },
+            {
+                "item": "pc",
+                "amount": 11
+            },
+            {
+                "item": "ferrari",
+                "amount": 18
+            },
+            {
+                "item": "monitor",
+                "amount": 25
+            },
+            {
+                "item": "macbook pro 13",
+                "amount": 25
+            },
+            {
+                "item": "fishing rod",
+                "amount": 1
+            },
+            {
+                "item": "laptop",
+                "amount": 6
+            },
+            {
+                "item": "shell",
                 "amount": 7
+            },
+            {
+                "item": "great white shark",
+                "amount": 7
+            },
+            {
+                "item": "dumbo octopus",
+                "amount": 2
+            },
+            {
+                "item": "donald duck",
+                "amount": 5
+            },
+            {
+                "item": "water bottle",
+                "amount": 5
+            },
+            {
+                "item": "mosasaurus",
+                "amount": 6
+            },
+            {
+                "item": "fish",
+                "amount": 6
+            },
+            {
+                "item": "blobfish",
+                "amount": 4
+            },
+            {
+                "item": "nemo",
+                "amount": 5
+            },
+            {
+                "item": "mosquito",
+                "amount": 1
+            },
+            {
+                "item": "flying lizard",
+                "amount": 3
+            },
+            {
+                "item": "rabbit",
+                "amount": 6
+            },
+            {
+                "item": "hawk",
+                "amount": 9
+            },
+            {
+                "item": "moose",
+                "amount": 7
+            },
+            {
+                "item": "bengal tiger",
+                "amount": 8
+            },
+            {
+                "item": "angry bird",
+                "amount": 9
+            },
+            {
+                "item": "pigeon",
+                "amount": 2
+            },
+            {
+                "item": "pterodactyl",
+                "amount": 2
+            },
+            {
+                "item": "eagle",
+                "amount": 6
+            },
+            {
+                "item": "unicorn",
+                "amount": 2
+            },
+            {
+                "item": "evil minion",
+                "amount": 8
+            },
+            {
+                "item": "mountain lion",
+                "amount": 3
+            },
+            {
+                "item": "hummingbird",
+                "amount": 13
+            },
+            {
+                "item": "duck",
+                "amount": 5
+            },
+            {
+                "item": "garbage",
+                "amount": 6
+            },
+            {
+                "item": "crab",
+                "amount": 4
+            },
+            {
+                "item": "chicken",
+                "amount": 10
+            },
+            {
+                "item": "bumblebee",
+                "amount": 8
+            },
+            {
+                "item": "bat",
+                "amount": 3
+            },
+            {
+                "item": "ladybug",
+                "amount": 5
+            },
+            {
+                "item": "bird",
+                "amount": 6
+            },
+            {
+                "item": "vulture",
+                "amount": 2
+            },
+            {
+                "item": "white tiger",
+                "amount": 3
+            },
+            {
+                "item": "deer",
+                "amount": 5
+            },
+            {
+                "item": "minion",
+                "amount": 1
+            },
+            {
+                "item": "wolf",
+                "amount": 1
+            },
+            {
+                "item": "gaming desk",
+                "amount": 25
             }
         ]
     },
-    "739112359515390023": {
-        "wallet": 12001,
-        "bank": 5000000,
-        "booster": 3,
-        "bag": []
-    },
     "873224037080371260": {
-        "wallet": 36345,
-        "bank": 177224,
-        "booster": 3,
+        "wallet": 0.0,
+        "bank": 543241.0,
+        "booster": 5,
         "bag": [
             {
                 "item": "pc",
@@ -79,6 +225,10 @@
             },
             {
                 "item": "ferrari",
+                "amount": 1
+            },
+            {
+                "item": "hunting sniper",
                 "amount": 1
             }
         ]
@@ -94,13 +244,53 @@
         "booster": 1
     },
     "859310142633803806": {
-        "wallet": 1372,
-        "bank": 10005000,
-        "booster": 1,
+        "wallet": 60478674.0,
+        "bank": 6942000,
+        "booster": 10,
         "bag": [
             {
                 "item": "Iphone 13",
-                "amount": 20
+                "amount": 2
+            },
+            {
+                "item": "hunting sniper",
+                "amount": 1
+            },
+            {
+                "item": "ladybug",
+                "amount": 2
+            },
+            {
+                "item": "pigeon",
+                "amount": 2
+            },
+            {
+                "item": "angry bird",
+                "amount": 2
+            },
+            {
+                "item": "minion",
+                "amount": 1
+            },
+            {
+                "item": "unicorn",
+                "amount": 1
+            },
+            {
+                "item": "hummingbird",
+                "amount": 1
+            },
+            {
+                "item": "wolf",
+                "amount": 1
+            },
+            {
+                "item": "bengal tiger",
+                "amount": 1
+            },
+            {
+                "item": "fishing rod",
+                "amount": 1
             }
         ]
     },
@@ -109,28 +299,23 @@
         "bank": 0,
         "booster": 1
     },
-    "864321522973016065": {
-        "wallet": 251,
-        "bank": 250,
-        "booster": 1
-    },
     "226470121563095040": {
         "wallet": 831765187742768821478,
         "bank": 1000000000000079420,
         "booster": 9000000
     },
     "764871153407229992": {
-        "wallet": 102,
-        "bank": 0,
-        "booster": 1
-    },
-    "747790347824005140": {
         "wallet": 101,
         "bank": 0,
         "booster": 1
     },
+    "747790347824005140": {
+        "wallet": 0,
+        "bank": 947,
+        "booster": 1
+    },
     "693891589030019112": {
-        "wallet": 1663,
+        "wallet": 1355,
         "bank": 1999998,
         "booster": 1
     },
@@ -145,9 +330,9 @@
         "booster": 1
     },
     "457330033875353601": {
-        "wallet": 39345,
-        "bank": 0,
-        "booster": 1,
+        "wallet": 10902585.0,
+        "bank": 1028532101.0,
+        "booster": 10,
         "bag": [
             {
                 "item": "laptop",
@@ -155,8 +340,45 @@
             },
             {
                 "item": "monitor",
+                "amount": 2
+            },
+            {
+                "item": "fishing rod",
+                "amount": 1
+            },
+            {
+                "item": "hunting sniper",
+                "amount": 1
+            },
+            {
+                "item": "lamborghini",
                 "amount": 1
             }
         ]
+    },
+    "739112359515390023": {
+        "wallet": 1,
+        "bank": 0,
+        "booster": 1
+    },
+    "838528660293287956": {
+        "wallet": 71654.0,
+        "bank": 0,
+        "booster": 1
+    },
+    "863076945180098600": {
+        "wallet": 0.0,
+        "bank": 405135.0,
+        "booster": 1
+    },
+    "972282561642496060": {
+        "wallet": 0.0,
+        "bank": 10305053.0,
+        "booster": 1
+    },
+    "891800285863882773": {
+        "wallet": 897,
+        "bank": 0,
+        "booster": 1
     }
 }
