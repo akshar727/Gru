@@ -1,0 +1,50 @@
+[
+    {
+        "role_name": "Gru bot updates",
+        "role_id": 881210395078041621,
+        "emoji": "\ud83c\udfa7",
+        "message_id": 893654734383235093
+    },
+    {
+        "role_name": "Giveaway Ping",
+        "role_id": 881320049275723826,
+        "emoji": "\ud83c\udf89",
+        "message_id": 893654929716174879
+    },
+    {
+        "role_name": "C# Coder",
+        "role_id": 896823518828843029,
+        "emoji": "<:csharp:897638740825092116>",
+        "message_id": 897648472084349010
+    },
+    {
+        "role_name": "Java Coder",
+        "role_id": 896823329778987038,
+        "emoji": "<:java:897637236399550515>",
+        "message_id": 897648660173701210
+    },
+    {
+        "role_name": "Python Coder",
+        "role_id": 896823116255338517,
+        "emoji": "<:python:897637654013812838>",
+        "message_id": 897648816105357324
+    },
+    {
+        "role_name": "News",
+        "role_id": 902305937715494924,
+        "emoji": "\ud83d\udcf0",
+        "message_id": 902682984812007424
+    },
+    {
+        "role_name": "News",
+        "role_id": 902305937715494924,
+        "emoji": "\ud83e\uddea",
+        "message_id": 903043642917273620
+    },
+    {
+        "role_name": "Giveaway Ping",
+        "role_id": 976814120592613466,
+        "emoji": "\ud83d\udd3a",
+        "message_id": 976814687087898684
+    }
+]
