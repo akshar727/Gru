@@ -56,6 +56,7 @@ class Info(commands.Cog):
             embedvar.add_field(name=f'{prefix}inventory / {prefix}inv', value='To view your inventory', inline=False)
             embedvar.add_field(name=f'{prefix}viewbal <user>',value='''Allows you to view someone else's balance''',inline=False)
             embedvar.add_field(name=f'{prefix}leaderboard [amount] [type] / {prefix}lb [amount] <type>', value='''Allows you to see the richest people in the bot!The types are `all` to see al users in the leaderboard and `server` to see only users in this server.''', inline=False)
+            embedvar.add_field(name=f'{prefix}daily / {prefix}weekly', value='''Allows you to earn some Minions™️!''', inline=False)
 
             embedvar.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
             embedvar.set_footer(text="Arguments that are surrounded in [] are optional.")
@@ -72,6 +73,7 @@ class Info(commands.Cog):
             page1.add_field(name=f'{prefix}reverse <text>', value='Reverses your text!', inline=False)
             page1.add_field(name=f'{prefix}wanted <user>', value='''Makes a wanted picture for that user!''', inline=False)
             page1.add_field(name=f'{prefix}level / {prefix}lvl / {prefix}rank', value='''Tells you your level with how much xp you have in that level!''', inline=False)
+            page1.add_field(name=f'{prefix}lvllb', value='''Shows people in the server with the highest XP!''', inline=False)
             page1.add_field(name=f'{prefix}guessing', value='''Opens up a guessing game!''', inline=False)
             page1.add_field(name=f'{prefix}calc', value='''Opens up a virtual calculator!''', inline=False)
             page1.add_field(name=f'{prefix}gayrate <user>', value='''Check how gay someone is!''', inline=False)
@@ -138,12 +140,8 @@ class Info(commands.Cog):
             embedvar = discord.Embed(title="Help Commands",description='All the **Misc** commands in the bot.', color=0x00ff00)
             embedvar.add_field(name=f'{prefix}stats', value='''Allows you to see the bot's stats!''', inline=False)
             embedvar.add_field(name=f'{prefix}members', value='''Allows you to see how many people are in the server!''', inline=False)
-            if ctx.guild.id == 762829356812206090:
-                embedvar.add_field(name=f'{prefix}apply', value='''Allows you to apply for staff.''', inline=False)
             embedvar.add_field(name=f'{prefix}covid <country> / {prefix}covid19 <country>', value='''Allows you to see the covid statistics of a country!''', inline=False)
             embedvar.add_field(name=f'{prefix}roles', value='''Allows you to see all roles in the server!''', inline=False)
-            embedvar.add_field(name='idtouser <id>', value='Allows you to get a user from their id.',inline=False)
-            embedvar.add_field(name='usertoid <user> ', value="Allows you to get a user's id", inline=False)
             embedvar.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
             await ctx.send(embed=embedvar)
 
@@ -159,6 +157,7 @@ class Info(commands.Cog):
         ##FIXXXXXX
         embedvar = discord.Embed(title="Admin Help Commands", description='All the commands in the bot that users with permissions can use.', color=0x00ff00)
         embedvar.add_field(name='gcreate <amount of time> <prize>',value='Allows you to create a giveaway. Requires Manage Guild')
+        embedvar.add_field(name='reroll <giveaway message id>',value='Allows you reroll a giveaway. Can also be used to forcefully end a giveaway. Requires Manage Guild')
         embedvar.add_field(name='config',value='Allows you to change server configurations. Requires Manage Guild')
         embedvar.add_field(name='takerole <user> <role> ', value="Allows you to take a role away from someone. Requires Manage Roles.")
         embedvar.add_field(name='reactrole <emoji> <role> <message> ', value="Allows you to create reactions roles. Requires Manage Roles.")

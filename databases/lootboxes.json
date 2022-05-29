@@ -3,8 +3,8 @@
         "common": 1,
         "uncommon": 342,
         "rare": 837,
-        "epic": 17,
-        "legendary": 8600,
+        "epic": 18,
+        "legendary": 8605,
         "mythic": 2502,
         "admin": 565664453956635
     },
@@ -146,7 +146,7 @@
     "972282561642496060": {
         "common": 3,
         "uncommon": 1,
-        "rare": 0,
+        "rare": 1,
         "epic": 1,
         "legendary": 0,
         "mythic": 0,
@@ -162,6 +162,15 @@
         "admin": 0
     },
     "978419485365121114": {
+        "common": 1,
+        "uncommon": 0,
+        "rare": 0,
+        "epic": 0,
+        "legendary": 0,
+        "mythic": 0,
+        "admin": 0
+    },
+    "926683363207708703": {
         "common": 1,
         "uncommon": 0,
         "rare": 0,
