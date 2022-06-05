@@ -524,12 +524,10 @@ async def weekly(ctx):
     with open('databases/lootboxes.json', 'w') as f:
         json.dump(lootbox_data, f, indent=4)
     weekly_users.append(ctx.author)
-    
     await ctx.send(
         "You just recieved `500,000 Minions™` and 5 `Legendary` crates!")
     await asyncio.sleep(86400*7)
     weekly_users.pop(weekly_users.index(ctx.author))
-    
 
 
 @client.event
@@ -3864,9 +3862,7 @@ async def fish(ctx):
 
 @client.command()
 async def gayrate(ctx, user: discord.Member):
-    if user.id == 457330033875353601:
-        percent = 4757458784575999999999977897878976457478395758345738957348934578945378934578934578984374547573347878347534875357843578458734785378378547354573894537845378
-    elif user.id == 717512097725939795:
+    if user.id == 717512097725939795:
         percent = 0
     else:
         percent = random.randint(0, 100)

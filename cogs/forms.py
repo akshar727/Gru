@@ -20,6 +20,7 @@ class NextButton(discord.ui.View):
         await interaction.response.send_modal(mod)
         msg = await interaction.original_message()
         await msg.edit(view=self)
+        self.stop()
 
 
 class ConfirmDeletion(discord.ui.View):
@@ -44,12 +45,14 @@ class ConfirmDeletion(discord.ui.View):
         await interaction.response.edit_message(content="Form Deleted!",view=self)
         with open('databases/applications.json','w') as f:
             json.dump(self.apps,f,indent=4)
+        self.stop()
     @discord.ui.button(label="No",style=discord.ButtonStyle.green)
     async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
         for item in self.children:
             item.disabled = True
         await interaction.response.edit_message(view=self)
-        return await interaction.send("Cancelling.",ephemeral=True,delete_after=5)
+        await interaction.send("Cancelling.",ephemeral=True,delete_after=5)
+        self.stop()
     async def on_timeout(self):
         for x in self.children:
             x.disabled = True
@@ -104,6 +107,7 @@ class FormEditor(discord.ui.View):
         ch = interaction.channel
         _forms = FormsView(self.apps[str(interaction.guild_id)],self.msg_id,await ch.fetch_message(self.msg_id))
         await interaction.response.edit_message(embed=None,view=_forms,content=None)
+        self.parent.stop()
 
     async def on_timeout(self):
         for x in self.children:
@@ -111,8 +115,9 @@ class FormEditor(discord.ui.View):
         await self.msg_obj.edit(view=self)
 
 class Forms(discord.ui.Select):
-    def __init__(self,forms,id=None):
+    def __init__(self,forms,id,parent):
         items = []
+        self.parent = parent
         self.msg_id = id
         for item in forms:
             items.append(discord.SelectOption(label=f"{item} Form"))
@@ -125,6 +130,7 @@ class Forms(discord.ui.Select):
         ch = interaction.channel
         view = FormEditor(self.values[0][:-5],self.msg_id, await ch.fetch_message(self.msg_id))
         await interaction.response.edit_message(view=view,embed=e)
+        self.parent.stop()
 
 
 class Questions(discord.ui.Select):
@@ -155,7 +161,7 @@ class Questions(discord.ui.Select):
 class Responses(discord.ui.Select):
     ...
 
-# weird glitching?
+# force timeouts
 class QuestionsView(discord.ui.View):
     def __init__(self,form,id,msg_obj,guild_id):
         super().__init__(timeout=10)
@@ -195,7 +201,7 @@ class ResponsesView(discord.ui.View):
 class FormsView(discord.ui.View):
     def __init__(self,forms,id,msg_obj):
         super().__init__(timeout=100)
-        self.add_item(Forms(forms,id))
+        self.add_item(Forms(forms,id,self))
         self.id = id
         self.msg_obj = msg_obj
 
