@@ -12,6 +12,7 @@ import urllib.parse, urllib.request
 from num2words import num2words
 from cogs.utils import http
 from easy_pil import Editor, Font, Canvas, load_image_async
+import humanfriendly
 
 api_key = "AIzaSyAhNZnU6pStK8eYcm83IeQAR_OEdhjJURw"
 
@@ -2816,35 +2817,19 @@ async def roles(ctx):
 
 @client.command()
 @commands.has_permissions(manage_roles=True)
-async def mute(ctx, member: discord.Member):
-    role = get(ctx.guild.roles, name="Muted")
-    guild = ctx.guild
-    if role not in guild.roles:
-        perms = discord.Permissions(send_messages=False, speak=False)
-        await guild.create_role(name="Muted", permissions=perms)
-        if role in member.roles:
-            await ctx.send("They are already muted!")
-            return
-        await member.add_roles(role)
-        await ctx.send(f"🔨{member} was muted.")
-    else:
-        if role in member.roles:
-            await ctx.send("They are already muted!")
-            return
-        await member.add_roles(role)
-        await ctx.send(f"🔨{member} was muted.")
+async def mute(ctx, member: discord.Member,time: str):
+    _time = humanfriendly.parse_timespan(time)
+    await member.timeout(timeout=discord.utils.utcnow()+datetime.timedelta(seconds=_time))
+    await ctx.send(f"🔨{member} was muted for {time}.")
 
 
 @client.command()
 @commands.has_permissions(manage_roles=True)
 async def unmute(ctx, member: discord.Member):
-    role = get(ctx.guild.roles, name="Muted")
-    if role not in member.roles:
-        await ctx.send("They are not muted!")
-        return
-    else:
-        await member.remove_roles(role)
-        await ctx.send(f":white_check_mark:{member} was unmuted.")
+    if not member.communication_disabled_until:
+        return await ctx.send(f":x:{member} is not muted.")
+    await member.timeout(timeout=None)
+    await ctx.send(f":white_check_mark:{member} was unmuted.")
 
 
 @client.command()

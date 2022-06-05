@@ -84,9 +84,10 @@ class FormEditor(discord.ui.View):
         ch = interaction.channel
         view = QuestionsView(self.form,self.msg_id, await ch.fetch_message(self.msg_id),interaction.guild_id)
         await interaction.response.edit_message(content="Showing All Questions",view=view,embed=None)
+        self.stop()
     @discord.ui.button(label="View Responses", style=discord.ButtonStyle.gray)
     async def responses(self,button: discord.ui.Button, interaction: discord.Interaction):
-        ...
+        self.stop()
     @discord.ui.button(label="Form Open/Closed", style=discord.ButtonStyle.green)
     async def form_toggle(self,button: discord.ui.Button, interaction: discord.Interaction):
         _open = self.apps[str(interaction.guild_id)][str(self.form)]['open']
@@ -107,7 +108,7 @@ class FormEditor(discord.ui.View):
         ch = interaction.channel
         _forms = FormsView(self.apps[str(interaction.guild_id)],self.msg_id,await ch.fetch_message(self.msg_id))
         await interaction.response.edit_message(embed=None,view=_forms,content=None)
-        self.parent.stop()
+        self.stop()
 
     async def on_timeout(self):
         for x in self.children:

@@ -186,18 +186,18 @@ class CategoriesView(discord.ui.View):
         await interaction.response.edit_message(embed=em,view=self)
     @discord.ui.button(emoji="<:right_one:982622882469404683>",style=discord.ButtonStyle.green, disabled=True)
     async def forward(self, button: discord.ui.Button, interaction: discord.Interaction):
-            em = self.select.embeds[self.select.embeds.index(self.select.current_embed)+1]
-            self.select.current_embed = em
-            if self.select.embeds[-1] == em:
-                button.disabled = True
-                self.children[3].disabled = True
-                self.children[0].disabled = False
-                self.children[1].disabled = False
-            else:
-                self.children[3].disabled = False
-                self.children[0].disabled = False
-                self.children[1].disabled = False
-            await interaction.response.edit_message(embed=em,view=self)
+        em = self.select.embeds[self.select.embeds.index(self.select.current_embed)+1]
+        self.select.current_embed = em
+        if self.select.embeds[-1] == em:
+            button.disabled = True
+            self.children[3].disabled = True
+            self.children[0].disabled = False
+            self.children[1].disabled = False
+        else:
+            self.children[3].disabled = False
+            self.children[0].disabled = False
+            self.children[1].disabled = False
+        await interaction.response.edit_message(embed=em,view=self)
     @discord.ui.button(emoji="<:right_two:982622978279899206>",style=discord.ButtonStyle.green, disabled=True)
     async def end(self, button: discord.ui.Button, interaction: discord.Interaction):
         em = self.select.embeds[-1]
@@ -215,8 +215,6 @@ class CategoriesView(discord.ui.View):
             await self.message.edit(view=self)
         except:
             pass
-    
-            
 
 
 
@@ -229,7 +227,6 @@ class Info(commands.Cog):
     async def on_ready(self):
         print('Info Cog Loaded Succesfully')
         print("Bot is ready to use.")
-        
 
     @commands.command(aliases=['help'])
     async def _help(self, ctx):
@@ -255,8 +252,8 @@ class Info(commands.Cog):
         embedvar.add_field(name='kick <user> <reason> ', value="Allows you to kick a user with a reason. Requires Kick Users.")
         embedvar.add_field(name='ban <user> <reason> ', value="Allows you to ban a user with a reason. Requires Ban Users.")
         embedvar.add_field(name='unban <user> ', value="Allows you to unban a user. Requires Ban Users.")
-        embedvar.add_field(name='mute <user> ', value="Allows you to mute a user. Requires Manage Roles.")
-        embedvar.add_field(name='unmute <user> ', value="Allows you to unmute a user. Requires Manage Roles.")
+        embedvar.add_field(name='mute <user> <time> ', value="Allows you to mute a user. Requires Manage Roles.")
+        embedvar.add_field(name='unmute <user> <time>', value="Allows you to unmute a user. Requires Manage Roles.")
         embedvar.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
         await ctx.send(embed=embedvar)
 def setup(client):
