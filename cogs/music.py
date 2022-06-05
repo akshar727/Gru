@@ -7,7 +7,7 @@ import asyncio
 
 class ControlPanel(discord.ui.View):
     def __init__(self, vc, ctx):
-        super().__init__()
+        super().__init__(timeout=200)
         self.vc = vc
         self.ctx = ctx
     
@@ -69,6 +69,11 @@ class ControlPanel(discord.ui.View):
         await self.vc.disconnect()
         await interaction.message.edit(content="Disconnect", view=self)
 
+    async def on_timeout(self):
+        for x in self.children:
+            x.disabled = True
+        await self.message.edit(view=self)
+
 class Music(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -77,9 +82,9 @@ class Music(commands.Cog):
     async def node_connect(self):
         await self.bot.wait_until_ready()
         await wavelink.NodePool.create_node(bot=self.bot,
-                                            host='lavalinkinc.ml',
+                                            host='connect.freelavalink.ga',
                                             port=443,
-                                            password='incognito',
+                                            password='www.freelavalink.ga',
                                             https=True)
 
     @commands.Cog.listener()
@@ -103,7 +108,6 @@ class Music(commands.Cog):
         await ctx.send(f"Now playing: `{next_song.title}`")
 
     @commands.command()
-    @commands.is_owner()
     async def play(self, ctx: commands.Context, *,
                    search: wavelink.YouTubeTrack):
         if not ctx.voice_client:
@@ -126,9 +130,19 @@ class Music(commands.Cog):
             setattr(vc,"loop",False)
 
 
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        if (before.channel is not None) and (after.channel is None):
+            if member == self.bot.user:
+                node = wavelink.NodePool().get_node()
+                player = node.get_player(before.channel.guild)
+                if player != None:
+                    await player.disconnect()
+
+
     @commands.command()
     async def panel(self, ctx: commands.Context):
-        if not ctx.voice_client:
+        if not ctx.voice_client and getattr(ctx.author.voice, "channel", None):
             vc: wavelink.Player = await ctx.author.voice.channel.connect(
                 cls=wavelink.Player)
         elif not getattr(ctx.author.voice, "channel", None):
@@ -140,7 +154,7 @@ class Music(commands.Cog):
         
         em = discord.Embed(title="Music Panel", description="Control the bot by clicking on the buttons below")
         view = ControlPanel(vc, ctx)
-        await ctx.send(embed=em, view=view)
+        view.message = await ctx.send(embed=em, view=view)
 
     @commands.command()
     async def pause(self, ctx: commands.Context):
@@ -230,10 +244,7 @@ class Music(commands.Cog):
             return await ctx.send("Just stop the music if you don't wanna hear anything.")
 
         await ctx.send(f"Set the volume to `{volume}%`!")
-        try:
-            await vc.set_volume(volume)
-        except Exception as e:
-            print(e)
+        await vc.set_volume(volume)
 
     @commands.command()
     async def skip(self, ctx: commands.Context):
@@ -247,7 +258,6 @@ class Music(commands.Cog):
             return await ctx.send("I'm not playing any music!")
         try:
             await vc.stop()
-            print(vc.is_playing())
         except Exception:
             return await ctx.send("The queue is empty!")
     @commands.command(aliases=["np","playing","current"])
@@ -260,7 +270,7 @@ class Music(commands.Cog):
             vc: wavelink.Player = ctx.voice_client
         if not vc.is_playing():
             return await ctx.send("I'm not playing any music!")
-        em = discord.Embed(title=f"Now Playing: {vc.track.title}",description=f"Artist {vc.track.author}", color=discord.Color.random())
+        em = discord.Embed(title=f"Now Playing: {vc.track.title}",description=f"Artist: {vc.track.author}", color=discord.Color.random())
         em.add_field(name="Duration",value=f"`{str(timedelta(seconds=vc.track.length))}`")
         em.add_field(name="Song URL",value=f"[Click Here]({str(vc.track.uri)})")
         return await ctx.send(embed=em)

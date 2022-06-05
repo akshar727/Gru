@@ -328,8 +328,6 @@ class Calculator(commands.Cog):
         self.bot = bot
         self.calculator_users = []
 
-
-
     @commands.command()
     async def calc(self,ctx):
         if f'{ctx.author.id}' in self.calculator_users:

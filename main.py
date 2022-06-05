@@ -50,7 +50,7 @@ async def on_guild_join(guild):
     configs[str(guild.id)] = {}
     configs[str(guild.id)]["giveaway_role"] = "None"
     configs[str(guild.id)]["levels"] = False
-    prefixes[str(guild.id)] = ','
+    prefixes[str(guild.id)] = 'gru '
 
     with open('databases/prefixes.json', 'w') as f:
         json.dump(prefixes, f, indent=4)
@@ -101,7 +101,7 @@ async def prefix(ctx, prefix=None):
     with open('databases/prefixes.json', 'r') as f:
         prefixes = json.load(f)
 
-    prefixes[str(ctx.guild.id)] = prefix
+    prefixes[str(ctx.guild.id)] = f"{prefix.strip()} "
 
     with open('databases/prefixes.json', 'w') as f:
         json.dump(prefixes, f, indent=4)
@@ -110,7 +110,7 @@ async def prefix(ctx, prefix=None):
 
 
 status = cycle([
-    'Try ,help', 'Prefix - ,', 'Minecraft 1.19: The Wild Update', 'PoKeMon',
+    'Try gru help', 'Prefix - gru', 'Minecraft 1.19: The Wild Update', 'PoKeMon',
     'Try @Gru', 'Bill Nye the Science Guy', 'Dank Memer', 'RTX 3090 ti',
     'Warzone: Season 6', 'Minecraft 1.18: Caves and Cliffs',
     'Call of Duty: Vanguard', 'Destiny 2: The Witch Queen', 'Battlefield 2042',
@@ -548,7 +548,7 @@ async def on_command_error(ctx, error):
             prefixes = json.load(f)
         prefix = prefixes[str(ctx.guild.id)]
         await ctx.send(
-            f"Unknown command.Try {prefix}help for a list of commands")
+            f"Unknown command. Try {prefix}help for a list of commands")
         return
     elif isinstance(error, commands.CommandOnCooldown):
         if error.retry_after <= 60:
@@ -1080,14 +1080,20 @@ async def rob(ctx, member: discord.Member):
         await ctx.send("Why are you trying to rob yourself?")
         rob.reset_cooldown(ctx)
         return
-
+    chance = random.choice([0,1,2,3])
     earning = random.randrange(0, bal[0])
-
-    await update_bank(ctx.author, earning)
-    await update_bank(member, -1 * earning)
-    await ctx.send(
-        f':white_check_mark:{ctx.author.mention} You robbed {member} and got {earning} coins'
-    )
+    if chance == 1:
+        await update_bank(ctx.author, earning)
+        await update_bank(member, -1 * earning)
+        await ctx.send(
+            f':white_check_mark:{ctx.author.mention} You robbed {member} and got {earning} coins'
+        )
+    else:
+        await ctx.send(
+            f':x:{ctx.author.mention} You failed to robb {member} and lost {earning} coins to them.'
+        )
+        await update_bank(member, earning)
+        await update_bank(ctx.author, -1 * earning)
 
 
 @client.command()
@@ -2651,8 +2657,10 @@ async def check_giveaway_ended():
         json.dump(g, f,indent=4)
 
 
-            
-            
+
+
+
+
     
         
     
@@ -3452,27 +3460,6 @@ async def joke(ctx):
                 await ses.close()
 
 
-@client.event  # This event runs whenever a user updates: status, game playing, avatar, nickname or role
-async def on_member_update(before, after):
-    n = after.nick
-    try:
-        if n != before.nick:
-            if n.lower().replace(
-                    " ",
-                    "").count("gru") > 0 and not before.user == client.user:
-                await after.edit(nick="NO ONE ELSE CAN BE GRU YOU BOZO")
-            if n.lower().count("akshar") or n.lower().count("fuck") or n.lower(
-            ).count("bitch") or n.lower().count("ass") or n.lower().count(
-                    "f3ck") or n.lower().count("a s s") or n.lower().count(
-                        "f u c k") or n.lower().count("b i t c h") or n.lower(
-                        ).count("f2ck") > 0:  # If username contains tim
-                last = before.nick
-                if last:  # If they had a username before change it back to that
-                    await after.edit(nick="NICKNAME NOT ALLOWED")
-                else:  # Otherwise set it to "NO STOP THAT"
-                    await after.edit(nick="NO STOP THAT")
-    except Exception as e:
-        print(e)
 
 
 @client.event
@@ -3784,7 +3771,7 @@ async def give_animal(user, animal):
 
 
 @client.command()
-@commands.cooldown(1, 60, commands.BucketType.user)
+@commands.cooldown(1, 20, commands.BucketType.user)
 async def hunt(ctx):
     vowels = ["a", "e", "i", "o", "u"]
     users = await get_bank_data()
@@ -3808,7 +3795,9 @@ async def hunt(ctx):
         return await ctx.send(
             f"You don't have a hunting sniper! Buy one by doing `{prefix}buy hunting sniper`!"
         )
-
+    chance = random.choice([0,1,2,3])
+    if chance != 0:
+        return await ctx.send("LOL all the animals ran away.")
     animal = random.choice(animal_shop[0] + animal_shop[2])
     if animal["name"][0].lower() in vowels:
         await ctx.send(
@@ -3822,7 +3811,7 @@ async def hunt(ctx):
 
 
 @client.command()
-@commands.cooldown(1, 60, commands.BucketType.user)
+@commands.cooldown(1, 20, commands.BucketType.user)
 async def fish(ctx):
     vowels = ["a", "e", "i", "o", "u"]
     special = ["garbage", "donald duck", "nemo"]
@@ -3847,7 +3836,9 @@ async def fish(ctx):
         return await ctx.send(
             f"You don't have a fishing rod! Buy one by doing `{prefix}buy fishing rod`!"
         )
-
+    chance = random.choice([0,1,2,3])
+    if chance != 0:
+        return await ctx.send("LOL all the animals swam away.")
     animal = random.choice(animal_shop[1])
     if animal["name"][0].lower() in vowels:
         await ctx.send(

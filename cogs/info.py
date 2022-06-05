@@ -1,10 +1,222 @@
 import nextcord as discord
 from nextcord.ext import commands
-import psutil
 import json
 import asyncio
 
 
+def get_economy_embed(prefix):
+    economy_embed = discord.Embed(title="Help Commands",description='All the **Economy** commands in the bot. (Page 1)', color=0x00ff00)
+    economy_embed.add_field(name=f'{prefix}bankrob <user>', value='''Allows you to rob a user's bank''', inline=False)
+    economy_embed.add_field(name=f'{prefix}get_job', value='Allows you to get a job a Gru enterprises™!', inline=False)
+    economy_embed.add_field(name=f'{prefix}crates', value='Allows you to view all the crates you have.', inline=False)
+    economy_embed.add_field(name=f'{prefix}open <type> <amount>', value='Allows you to open your crates!', inline=False)
+    economy_embed.add_field(name=f'{prefix}crate_info', value='Allows you to view the cash ranges of all the crates.', inline=False)
+    economy_embed.add_field(name=f'{prefix}jobs', value='Shows a list of all jobs in Gru enterprises™!', inline=False)
+    economy_embed.add_field(name=f'{prefix}work', value='''Allows you to work and make some money!''', inline=False)
+    economy_embed.add_field(name=f'{prefix}balance / {prefix}bal', value='To see your balance', inline=False)
+    economy_embed.set_footer(text="Arguments that are surrounded in [] are optional. Page 1/3")
+
+    economy_embed_2 = discord.Embed(title="Help Commands",description='All the **Economy** commands in the bot. (Page 2)', color=0x00ff00)
+    economy_embed_2.add_field(name=f'{prefix}beg', value='To beg some money', inline=False)
+    economy_embed_2.add_field(name=f'{prefix}deposit / {prefix}dep', value='To deposit money in bank', inline=False)
+    economy_embed_2.add_field(name=f'{prefix}withdraw / {prefix}with', value='To withdraw money from bank', inline=False)
+    economy_embed_2.add_field(name=f'{prefix}send', value='Send money to someone', inline=False)
+    economy_embed_2.add_field(name=f'{prefix}rob <user>', value='Allows you to rob a user!', inline=False)
+    economy_embed_2.add_field(name=f'{prefix}slots <amount>', value='To bet some money', inline=False)
+    economy_embed_2.add_field(name=f'{prefix}shop', value='To view shop', inline=False)
+    economy_embed_2.add_field(name=f'{prefix}buy [amount] <item>', value='To, buy an item', inline=False)
+    economy_embed_2.set_footer(text="Arguments that are surrounded in [] are optional. Page 2/3")
+    
+    economy_embed_3 = discord.Embed(title="Help Commands",description='All the **Economy** commands in the bot. (Page 3)', color=0x00ff00)
+    economy_embed_3.add_field(name=f'{prefix}sell [amount] <item>', value='Allows you to sell items you get.', inline=False)
+    economy_embed_3.add_field(name=f'{prefix}inventory / {prefix}inv', value='Shows you inventory', inline=False)
+    economy_embed_3.add_field(name=f'{prefix}viewbal <user>',value='''Allows you to view someone else's balance''',inline=False)
+    economy_embed_3.add_field(name=f'{prefix}leaderboard [amount] [type] / {prefix}lb [amount] <type>', value='''Allows you to see the richest people in the bot!The types are `all` to see al users in the leaderboard and `server` to see only users in this server.''', inline=False)
+    economy_embed_3.add_field(name=f'{prefix}daily / {prefix}weekly', value='''Allows you to earn some Minions™️!''', inline=False)
+    economy_embed_3.add_field(name=f'{prefix}hunt', value="Allows you to hunt for animals and sell them in the shop!", inline=False)
+    economy_embed_3.add_field(name=f'{prefix}fish', value="Allows you to fish for animals and sell them in the shop!", inline=False)
+    economy_embed_3.set_footer(text="Arguments that are surrounded in [] are optional. Page 3/3")
+    ems = [economy_embed, economy_embed_2, economy_embed_3]
+    return ems
+
+
+def get_music_embeds(prefix):
+    page1 = discord.Embed(title="Help Commands", description='All the **Music** commands in the bot. (Page 1)', color=0x00ff00)
+    page1.add_field(name=f"{prefix}play <query>",value="Allows you to play/add a song to the queue.", inline=False)
+    page1.add_field(name=f"{prefix}pause",value="Pauses the music.", inline=False)
+    page1.add_field(name=f"{prefix}resume",value="Resumes the music.", inline=False)
+    page1.add_field(name=f"{prefix}disconnect/ {prefix}dc", value="Disconnects the bot from the voice channel.", inline=False)
+    page1.add_field(name=f"{prefix}loop",value="Toggles looping.", inline=False)
+    page1.add_field(name=f"{prefix}panel",value="Opens an interactive panel to control the bot.", inline=False)
+    page1.add_field(name=f"{prefix}volume <volume>", value="Changes the volume of the music.", inline=False)
+    page1.add_field(name=f"{prefix}skip",value="Skips the current song to the next one in the queue.", inline=False)
+    page1.set_footer(text="Arguments that are surrounded in [] are optional. Page 1/2")
+
+    page2 = discord.Embed(title="Help Commands", description='All the **Music** commands in the bot. (Page 2)', color=0x00ff00)
+    page2.add_field(name=f"{prefix}queue / {prefix}q", value="Shows the queue for music.", inline=False)
+    page2.add_field(name=f"{prefix}np / {prefix}nowplaying",value="Shows th ecurrently playing song and details.", inline=False)
+
+    pages = [page1, page2]
+    return pages
+
+def get_fun_embeds(prefix):
+    page1 = discord.Embed(title="Help Commands", description='All the **Fun** commands in the bot. (Page 1)', color=0x00ff00)
+    page1.add_field(name=f'{prefix}showpic <query> / {prefix}show <query>', value='Allows you to search a image on the web with a query', inline=False)
+    page1.add_field(name=f'{prefix}youtube <query>', value='Allows you to search a video on youtube with a query', inline=False)
+
+    page1.add_field(name=f'{prefix}hack <user>', value='Does a very real and serious hack(I swear)...', inline=False)
+    page1.add_field(name=f'{prefix}num2text <number>', value='Converts numbers to words!', inline=False)
+    page1.add_field(name=f'{prefix}reverse <text>', value='Reverses your text!', inline=False)
+    page1.add_field(name=f'{prefix}wanted <user>', value='''Makes a wanted picture for that user!''', inline=False)
+    page1.add_field(name=f'{prefix}level / {prefix}lvl / {prefix}rank', value='''Tells you your level with how much xp you have in that level!''', inline=False)
+    page1.add_field(name=f'{prefix}lvllb', value='''Shows people in the server with the highest XP!''', inline=False)
+    page1.set_footer(text="Arguments that are surrounded in [] are optional. Page 1/4")
+    
+    page2 = discord.Embed(title="Help Commands",description='All the **Fun** commands in the bot. (Page 2)', color=0x00ff00)
+    page2.add_field(name=f'{prefix}guessing', value='''Opens up a guessing game!''', inline=False)
+    page2.add_field(name=f'{prefix}calc', value='''Opens up a virtual calculator!''', inline=False)
+    page2.add_field(name=f'{prefix}gayrate <user>', value='''Check how gay someone is!''', inline=False)
+    page2.add_field(name=f'{prefix}avatar <user> ', value="Allows you to see someone's avatar picture!",inline=False)
+    page2.add_field(name=f'{prefix}encode <method> <text>',value="Allows you to encode text!",inline=False)
+    page2.add_field(name=f'{prefix}decode <method> <text>', value="Allows you to decode text!",inline=False)
+    page2.add_field(name=f'{prefix}dogfact', value="Allows you to learn a fact about dogs!",inline=False)
+    page2.add_field(name=f'{prefix}jail <user>', value="Sends a user to jail...",inline=False)
+    page2.set_footer(text="Arguments that are surrounded in [] are optional. Page 2/4")
+    
+    page3 = discord.Embed(title="Help Commands",description='All the **Fun** commands in the bot. (Page 3)', color=0x00ff00)
+    page3.add_field(name=f'{prefix}trigger <user> / {prefix}trigger <user>', value="Makes a user really triggered...",inline=False)
+    page3.add_field(name=f'{prefix}joke', value="Gives you a joke!",inline=False)
+    page3.add_field(name=f'{prefix}genderify <name> / {prefix}gender <name>', value="I guess your gender by your name!", inline=False)
+    page3.add_field(name=f'{prefix}imposter', value="You have to find the imposter before the reactor has a meltdown!", inline=False)
+    page3.add_field(name=f'{prefix}sqrt <number/expression>', value="Gives you the square root of a number or expression!", inline=False)
+    page3.add_field(name=f'{prefix}spam', value="Type as many characters as you can in 30 seconds!", inline=False)
+    page3.add_field(name=f'{prefix}gay <user>', value="Makes a gay overlay!", inline=False)
+    page3.add_field(name=f'{prefix}stats', value='''Allows you to see the bot's stats!''', inline=False)
+    page3.set_footer(text="Arguments that are surrounded in [] are optional. Page 3/4")
+    
+    page4 = discord.Embed(title="Help Commands",description='All the **Fun** commands in the bot. (Page 4)', color=0x00ff00)
+    page4.add_field(name=f'{prefix}members', value='''Allows you to see how many people are in the server!''', inline=False)
+    page4.add_field(name=f'{prefix}covid <country> / {prefix}covid19 <country>', value='''Allows you to see the covid statistics of a country!''', inline=False)
+    page4.add_field(name=f'{prefix}roles', value='''Allows you to see all roles in the server!''', inline=False)
+    page4.set_footer(text="Arguments that are surrounded in [] are optional. Page 4/4")
+
+    fun_pages = [page1, page2,page3, page4]
+    return fun_pages
+            
+
+class HelpOptions(discord.ui.Select):
+    def __init__(self, buttons):
+        self.parent = buttons
+        self.items = [discord.SelectOption(label="Economy"),
+                discord.SelectOption(label="Fun"),
+                discord.SelectOption(label="Moderation"),
+                discord.SelectOption(label="Music")]
+        super().__init__(placeholder="Choose a category.",min_values=1,max_values=1,options=self.items)
+        with open('databases/prefixes.json', 'r') as f:
+            self.prefixes = json.load(f)
+        
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        type = self.values[0]
+        prefix = self.prefixes[str(interaction.guild_id)]
+        if type == "Economy":
+            self.parent.children[0].disabled = True
+            self.parent.children[1].disabled = True
+            self.parent.children[2].disabled = False
+            self.parent.children[3].disabled = False
+            em = get_economy_embed(prefix)
+            for i in em:
+                i.set_author(name=interaction.user.name, icon_url=interaction.user.display_avatar)
+            self.current_embed = em[0]
+            self.embeds = em
+            await interaction.response.edit_message(embed=em[0],view=self.parent)
+        elif type == "Fun":
+            self.parent.children[0].disabled = True
+            self.parent.children[1].disabled = True
+            self.parent.children[2].disabled = False
+            self.parent.children[3].disabled = False
+            em = get_fun_embeds(prefix)
+            for i in em:
+                i.set_author(name=interaction.user.name, icon_url=interaction.user.display_avatar)
+            self.current_embed = em[0]
+            self.embeds = em
+            await interaction.response.edit_message(embed=em[0],view = self.parent)
+        elif type == "Music":
+            self.parent.children[0].disabled = True
+            self.parent.children[1].disabled = True
+            self.parent.children[2].disabled = False
+            self.parent.children[3].disabled = False
+            em = get_music_embeds(prefix)
+            for i in em:
+                i.set_author(name=interaction.user.name, icon_url=interaction.user.display_avatar)
+            self.current_embed = em[0]
+            self.embeds = em
+            await interaction.response.edit_message(embed=em[0],view = self.parent)
+
+class CategoriesView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=100)
+        self.select = HelpOptions(self)
+        self.add_item(self.select)
+
+    @discord.ui.button(emoji="<:left_two:982623041228013570>",style=discord.ButtonStyle.green, disabled=True)
+    async def begin(self, button: discord.ui.Button, interaction: discord.Interaction):
+        em = self.select.embeds[0]
+        self.select.current_embed = em
+        button.disabled = True
+        self.children[1].disabled = True
+        self.children[2].disabled = False
+        self.children[3].disabled = False
+        await interaction.response.edit_message(embed=em,view=self)
+    @discord.ui.button(emoji="<:left_one:982623094235615232>",style=discord.ButtonStyle.green, disabled=True)
+    async def back(self, button: discord.ui.Button, interaction: discord.Interaction):
+        em = self.select.embeds[self.select.embeds.index(self.select.current_embed)-1]
+        self.select.current_embed = em
+        if self.select.embeds[0] == em:
+            button.disabled = True
+            self.children[3].disabled = False
+            self.children[0].disabled = True
+            self.children[1].disabled = True
+            self.children[2].disabled = False
+        else:
+            self.children[3].disabled = False
+            self.children[0].disabled = False
+            self.children[1].disabled = False
+            self.children[2].disabled = False
+        await interaction.response.edit_message(embed=em,view=self)
+    @discord.ui.button(emoji="<:right_one:982622882469404683>",style=discord.ButtonStyle.green, disabled=True)
+    async def forward(self, button: discord.ui.Button, interaction: discord.Interaction):
+            em = self.select.embeds[self.select.embeds.index(self.select.current_embed)+1]
+            self.select.current_embed = em
+            if self.select.embeds[-1] == em:
+                button.disabled = True
+                self.children[3].disabled = True
+                self.children[0].disabled = False
+                self.children[1].disabled = False
+            else:
+                self.children[3].disabled = False
+                self.children[0].disabled = False
+                self.children[1].disabled = False
+            await interaction.response.edit_message(embed=em,view=self)
+    @discord.ui.button(emoji="<:right_two:982622978279899206>",style=discord.ButtonStyle.green, disabled=True)
+    async def end(self, button: discord.ui.Button, interaction: discord.Interaction):
+        em = self.select.embeds[-1]
+        self.select.current_embed = em
+        button.disabled = True
+        self.children[2].disabled = True
+        self.children[0].disabled = False
+        self.children[1].disabled = False
+        await interaction.response.edit_message(embed=em,view=self)
+    async def on_timeout(self):
+        try:
+            for x in self.children:
+                x.disabled = True
+            self.select.disabled = True
+            await self.message.edit(view=self)
+        except:
+            pass
+    
+            
 
 
 
@@ -20,139 +232,15 @@ class Info(commands.Cog):
         
 
     @commands.command(aliases=['help'])
-    async def _help(self, ctx,type=None):
-        with open('databases/prefixes.json', 'r') as f:
-            prefixes = json.load(f)
-        prefix = prefixes[str(ctx.guild.id)]
-        if type is None:
-            embedvar = discord.Embed(title="Help Commands",description='All the commands in the bot.', color=0x00ff00)
-            embedvar.add_field(name="Moderation",value=f"Do `{prefix}adminhelp` to see all the moderation commands(**staff only**)(**MAINTINENCE**).")
-            embedvar.add_field(name="Economy",value=f"All the economy commands in the bot.Do `{prefix}help economy` to see them.")
-            embedvar.add_field(name="Misc",value=f"All the miscellaneous commands in the bot.Do `{prefix}help misc` to see them.")
-            embedvar.add_field(name="Fun",value=f"All the fun commands in the bot.Do `{prefix}help fun` to see them.")
-
-
-            embedvar.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
-            await ctx.send(embed=embedvar)
-        elif type.lower() == "economy" or type.lower() == "eco":
-            embedvar = discord.Embed(title="Help Commands",description='All the **Economy** commands in the bot.', color=0x00ff00)
-            embedvar.add_field(name=f'{prefix}bankrob <user>', value='''Allows you to rob a user's bank''', inline=False)
-            embedvar.add_field(name=f'{prefix}get_job', value='Allows you to get a job a Gru enterprises™!', inline=False)
-            embedvar.add_field(name=f'{prefix}crates', value='Allows you to view all the crates you have.', inline=False)
-            embedvar.add_field(name=f'{prefix}open <type> <amount>', value='Allows you to open your crates!', inline=False)
-            embedvar.add_field(name=f'{prefix}crate_info', value='Allows you to view the cash ranges of all the crates.', inline=False)
-            embedvar.add_field(name=f'{prefix}jobs', value='Shows a list of all jobs in Gru enterprises™!', inline=False)
-            embedvar.add_field(name=f'{prefix}work', value='''Allows you to work and make some money!''', inline=False)
-            embedvar.add_field(name=f'{prefix}balance / {prefix}bal', value='To see your balance', inline=False)
-            embedvar.add_field(name=f'{prefix}beg', value='To beg some money', inline=False)
-            embedvar.add_field(name=f'{prefix}deposit / {prefix}dep', value='To deposit money in bank', inline=False)
-            embedvar.add_field(name=f'{prefix}withdraw / {prefix}with', value='To withdraw money from bank', inline=False)
-            embedvar.add_field(name=f'{prefix}send', value='Send money to someone', inline=False)
-            embedvar.add_field(name=f'{prefix}rob <user>', value='Allows you to rob a user!', inline=False)
-            embedvar.add_field(name=f'{prefix}slots <amount>', value='To bet some money', inline=False)
-            embedvar.add_field(name=f'{prefix}shop', value='To view shop', inline=False)
-            embedvar.add_field(name=f'{prefix}buy [amount] <item>', value='To, buy an item', inline=False)
-            embedvar.add_field(name=f'{prefix}sell <item>', value='To sell an item', inline=False)
-            embedvar.add_field(name=f'{prefix}inventory / {prefix}inv', value='To view your inventory', inline=False)
-            embedvar.add_field(name=f'{prefix}viewbal <user>',value='''Allows you to view someone else's balance''',inline=False)
-            embedvar.add_field(name=f'{prefix}leaderboard [amount] [type] / {prefix}lb [amount] <type>', value='''Allows you to see the richest people in the bot!The types are `all` to see al users in the leaderboard and `server` to see only users in this server.''', inline=False)
-            embedvar.add_field(name=f'{prefix}daily / {prefix}weekly', value='''Allows you to earn some Minions™️!''', inline=False)
-
-            embedvar.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
-            embedvar.set_footer(text="Arguments that are surrounded in [] are optional.")
-            await ctx.send(embed=embedvar)
-
-
-        elif type.lower() == "fun":
-            page1 = discord.Embed(title="Help Commands", description='All the **Fun** commands in the bot. (Page 1)', color=0x00ff00)
-            page1.add_field(name=f'{prefix}showpic <query> / {prefix}show <query>', value='Allows you to search a image on the web with a query', inline=False)
-            page1.add_field(name=f'{prefix}youtube <query>', value='Allows you to search a video on youtube with a query', inline=False)
-
-            page1.add_field(name=f'{prefix}hack <user>', value='Does a very real and serious hack(I swear)...', inline=False)
-            page1.add_field(name=f'{prefix}num2text <number>', value='Converts numbers to words!', inline=False)
-            page1.add_field(name=f'{prefix}reverse <text>', value='Reverses your text!', inline=False)
-            page1.add_field(name=f'{prefix}wanted <user>', value='''Makes a wanted picture for that user!''', inline=False)
-            page1.add_field(name=f'{prefix}level / {prefix}lvl / {prefix}rank', value='''Tells you your level with how much xp you have in that level!''', inline=False)
-            page1.add_field(name=f'{prefix}lvllb', value='''Shows people in the server with the highest XP!''', inline=False)
-            page1.add_field(name=f'{prefix}guessing', value='''Opens up a guessing game!''', inline=False)
-            page1.add_field(name=f'{prefix}calc', value='''Opens up a virtual calculator!''', inline=False)
-            page1.add_field(name=f'{prefix}gayrate <user>', value='''Check how gay someone is!''', inline=False)
-            
-            page2 = discord.Embed(title="Help Commands",description='All the **Fun** commands in the bot. (Page 2)', color=0x00ff00)
-            page2.add_field(name=f'{prefix}avatar <user> ', value="Allows you to see someone's avatar picture!",inline=False)
-            page2.add_field(name=f'{prefix}encode <method> <text>',value="Allows you to encode text!")
-            page2.add_field(name=f'{prefix}decode <method> <text>', value="Allows you to decode text!")
-            page2.add_field(name=f'{prefix}dogfact', value="Allows you to learn a fact about dogs!",inline=False)
-            page2.add_field(name=f'{prefix}jail <user>', value="Sends a user to jail...",inline=False)
-            page2.add_field(name=f'{prefix}trigger <user> / {prefix}trigger <user>', value="Makes a user really triggered...",inline=False)
-            page2.add_field(name=f'{prefix}joke', value="Gives you a joke!",inline=False)
-            page2.add_field(name=f'{prefix}genderify <name> / {prefix}gender <name>', value="I guess your gender by your name!", inline=False)
-            page2.add_field(name=f'{prefix}imposter', value="You have to find the imposter before the reactor has a meltdown!", inline=False)
-            page2.add_field(name=f'{prefix}sqrt <number/expression>', value="Gives you the square root of a number or expression!", inline=False)
-            page2.add_field(name=f'{prefix}spam', value="Type as many characters as you can in 30 seconds!", inline=False)
-            page2.add_field(name=f'{prefix}gay <user>', value="Makes a gay overlay!", inline=False)
-            page2.add_field(name=f'{prefix}hunt', value="Allows you to hunt for animals and sell them in the shop!", inline=False)
-        
-            fun_pages = [page1, page2]
-            
-            page1.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
-            page1.set_footer(text="Page 1/2")
-
-            page2.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
-            page2.set_footer(text="Page 2/2. Arguments that are surrounded in [] are optional.")
-
-            buttons = [u"\u23F9",u"\u2B05", u"\u27A1"] #start, exit, right
-            current = 0
-            msg = await ctx.send(embed=fun_pages[current])
-
-            for button in buttons:
-                await msg.add_reaction(button)
-
-            while True:
-                try:
-                    reaction, user = await self.client.wait_for("reaction_add", check=lambda reaction, user: user == ctx.author and reaction.emoji in buttons, timeout=60.0)
-                except asyncio.TimeoutError:
-                    fun_pages[current].set_footer(text="Timed out :(")
-                    await msg.edit(embed=fun_pages[current])
-                    break
-                else:
-                    previous_page = current
-
-                    if reaction.emoji == u"\u2B05":
-                        if current > 0:
-                            current -= 1
-
-                    elif reaction.emoji == u"\u27A1":
-                        if current < len(fun_pages) - 1:
-                            current += 1
-                    elif reaction.emoji == u"\u23F9":
-                        await msg.delete()
-                        break
-
-
-                    if current != previous_page:
-                        await msg.edit(embed=fun_pages[current])
-
-                    for button in buttons:
-                        await msg.remove_reaction(button, ctx.author)
-
-        elif type.lower() == "misc":
-            embedvar = discord.Embed(title="Help Commands",description='All the **Misc** commands in the bot.', color=0x00ff00)
-            embedvar.add_field(name=f'{prefix}stats', value='''Allows you to see the bot's stats!''', inline=False)
-            embedvar.add_field(name=f'{prefix}members', value='''Allows you to see how many people are in the server!''', inline=False)
-            embedvar.add_field(name=f'{prefix}covid <country> / {prefix}covid19 <country>', value='''Allows you to see the covid statistics of a country!''', inline=False)
-            embedvar.add_field(name=f'{prefix}roles', value='''Allows you to see all roles in the server!''', inline=False)
-            embedvar.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
-            await ctx.send(embed=embedvar)
-
-
-
-
-
+    async def _help(self, ctx):
+        embedvar = discord.Embed(title="Help Commands", color=0x00ff00)
+        embedvar.description = "Choose a category below!"
+        embedvar.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
+        view = CategoriesView()
+        view.message = await ctx.send(embed=embedvar,view=view)
 
 
     @commands.command()
-    @commands.has_permissions(manage_guild=True)
     async def adminhelp(self, ctx):
         ##FIXXXXXX
         embedvar = discord.Embed(title="Admin Help Commands", description='All the commands in the bot that users with permissions can use.', color=0x00ff00)
@@ -171,11 +259,5 @@ class Info(commands.Cog):
         embedvar.add_field(name='unmute <user> ', value="Allows you to unmute a user. Requires Manage Roles.")
         embedvar.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
         await ctx.send(embed=embedvar)
-
-    @adminhelp.error
-    async def adminhelp_error(self, ctx, error):
-        if isinstance(error, commands.MissingPermissions):
-            await ctx.send("You can't view this!")
-            return
 def setup(client):
     client.add_cog(Info(client))

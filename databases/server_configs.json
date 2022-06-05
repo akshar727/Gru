@@ -24,7 +24,7 @@
         "levels": true
     },
     "977019030026215515": {
-        "giveaway_role": 977242532905910374,
-        "levels": true
+        "giveaway_role": "None",
+        "levels": false
     }
 }
