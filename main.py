@@ -3697,6 +3697,13 @@ async def eadd(ctx, url: str = None, *, name=None):
     else:
         await ctx.send("Only server owners can create custom emojis!")
 
+def calculator(exp):
+    o = exp.replace('x', '*')
+    o = o.replace('÷', '/')
+    try:
+        result = str(eval(o))
+    except:
+        result = "An error occurred"
 
 @client.command()
 async def sqrt(ctx, expression):
@@ -3994,5 +4001,5 @@ for filename in os.listdir("cogs"):
         client.load_extension(f'cogs.{filename[:-3]}')
 
 keep_alive()
-token = os.environ["discord_bot_token"]
+token = os.environ["DISCORD_BOT_TOKEN"]
 client.run(token)

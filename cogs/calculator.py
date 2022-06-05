@@ -4,14 +4,14 @@ import asyncio
 
 
 def calculator(exp):
-        o = exp.replace('x', '*')
-        o = o.replace('÷', '/')
-        try:
-            result = str(eval(o))
-        except:
-            result = "An error occurred"
-    
-        return result
+    o = exp.replace('x', '*')
+    o = o.replace('÷', '/')
+    try:
+        result = str(eval(o))
+    except:
+        result = "An error occurred"
+
+    return result
 class Calculator_Buttons(discord.ui.View):
     def __init__(self, author, message, embed, calculator_users):
         super().__init__(timeout=300)
