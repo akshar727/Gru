@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/nextcord/ext/commands/core.py", line 168, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "main.py", line 1596, in sell
+    e.set_footer(text=f"You got {int(res[2]-animal_obj['price']):,} more minions because you had a {bal[3]:,}x booster!")
+KeyError: 'price'
+

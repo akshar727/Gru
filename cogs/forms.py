@@ -162,10 +162,10 @@ class Questions(discord.ui.Select):
 class Responses(discord.ui.Select):
     ...
 
-# force timeouts
+
 class QuestionsView(discord.ui.View):
     def __init__(self,form,id,msg_obj,guild_id):
-        super().__init__(timeout=10)
+        super().__init__(timeout=100)
         self.add_item(Questions(form,id,guild_id,msg_obj))
         self.msg_id = id
         self.msg_obj = msg_obj
@@ -188,6 +188,7 @@ class QuestionsView(discord.ui.View):
         e.add_field(name="Responses",value=len(self.apps[str(interaction.guild_id)][self.form]['responses']))
         _forms = FormEditor(self.form,self.msg_id,await ch.fetch_message(self.msg_id))
         await interaction.response.edit_message(embed=e,view=_forms,content=None)
+        self.stop()
 
     async def on_timeout(self):
         for x in self.children:

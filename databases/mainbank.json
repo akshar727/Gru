@@ -1,13 +1,10 @@
 {
     "717512097725939795": {
-        "wallet": 1.0000000000000001e+37,
-        "bank": 4.0000000000000003e+37,
+        "wallet": 17180000000.0,
+        "bank": 1.166666666666667e+38,
         "booster": 20000000,
+        "max": 600000000000000024271790803693372453894,
         "bag": [
-            {
-                "item": "hunting sniper",
-                "amount": 1
-            },
             {
                 "item": "watch",
                 "amount": 30
@@ -81,10 +78,6 @@
                 "amount": 6
             },
             {
-                "item": "blobfish",
-                "amount": 4
-            },
-            {
                 "item": "nemo",
                 "amount": 5
             },
@@ -102,7 +95,7 @@
             },
             {
                 "item": "hawk",
-                "amount": 9
+                "amount": 10
             },
             {
                 "item": "moose",
@@ -122,7 +115,7 @@
             },
             {
                 "item": "pterodactyl",
-                "amount": 2
+                "amount": 3
             },
             {
                 "item": "eagle",
@@ -199,13 +192,18 @@
             {
                 "item": "gaming desk",
                 "amount": 25
+            },
+            {
+                "item": "hunting sniper",
+                "amount": 1
             }
         ]
     },
     "873224037080371260": {
-        "wallet": 0.0,
-        "bank": 543241.0,
+        "wallet": 325453.0,
+        "bank": 596142.0,
         "booster": 5,
+        "max": 609725,
         "bag": [
             {
                 "item": "pc",
@@ -230,23 +228,30 @@
             {
                 "item": "hunting sniper",
                 "amount": 1
+            },
+            {
+                "item": "fishing rod",
+                "amount": 1
             }
         ]
     },
     "789197599001018378": {
         "wallet": 251,
         "bank": 20000,
-        "booster": 1
+        "booster": 1,
+        "max": 22000
     },
     "754114742066479124": {
         "wallet": 51000251,
         "bank": 10000000,
-        "booster": 1
+        "booster": 1,
+        "max": 11000000
     },
     "859310142633803806": {
-        "wallet": 0.0,
-        "bank": 63040023.0,
+        "wallet": 2.0,
+        "bank": 63040025.0,
         "booster": 10,
+        "max": 63042997,
         "bag": [
             {
                 "item": "Iphone 13",
@@ -297,42 +302,50 @@
     "735926478914715659": {
         "wallet": 252,
         "bank": 0,
-        "booster": 1
+        "booster": 1,
+        "max": 10
     },
     "226470121563095040": {
         "wallet": 831765187742768821478,
         "bank": 1000000000000079420,
-        "booster": 9000000
+        "booster": 9000000,
+        "max": 1000000000000079421
     },
     "764871153407229992": {
         "wallet": 101,
         "bank": 0,
-        "booster": 1
+        "booster": 1,
+        "max": 10
     },
     "747790347824005140": {
-        "wallet": 0,
+        "wallet": 0.0,
         "bank": 947,
-        "booster": 1
+        "booster": 1,
+        "max": 1000
     },
     "693891589030019112": {
         "wallet": 1355,
         "bank": 1999998,
-        "booster": 1
+        "booster": 1,
+        "max": 2000000
     },
     "430882977858453507": {
         "wallet": 19786,
         "bank": 0,
-        "booster": 1
+        "booster": 1,
+        "max": 10
     },
     "394891794858377217": {
         "wallet": 2205,
         "bank": 0,
-        "booster": 1
+        "booster": 1,
+        "max": 10
     },
     "457330033875353601": {
-        "wallet": 353811.0,
+        "wallet": 461780.0,
         "bank": 1031532101.0,
         "booster": 10,
+        "max": 10315321012,
         "bag": [
             {
                 "item": "laptop",
@@ -357,19 +370,22 @@
         ]
     },
     "739112359515390023": {
-        "wallet": 1,
+        "wallet": 1.0,
         "bank": 0,
-        "booster": 1
+        "booster": 1,
+        "max": 19778
     },
     "838528660293287956": {
         "wallet": 71654.0,
         "bank": 0,
-        "booster": 1
+        "booster": 1,
+        "max": 10
     },
     "863076945180098600": {
-        "wallet": 0.0,
-        "bank": 1025827716.0,
-        "booster": 1,
+        "wallet": 5000.0,
+        "bank": 1023653959.0,
+        "booster": 10,
+        "max": 1027490668,
         "bag": [
             {
                 "item": "hunting sniper",
@@ -416,36 +432,43 @@
     "972282561642496060": {
         "wallet": 5040000.0,
         "bank": 323053.0,
-        "booster": 1
+        "booster": 1,
+        "max": 323054
     },
     "891800285863882773": {
         "wallet": 897,
         "bank": 5000000.0,
-        "booster": 1
+        "booster": 1,
+        "max": 5000001
     },
     "978419485365121114": {
         "wallet": 2845,
         "bank": 0,
-        "booster": 1
+        "booster": 1,
+        "max": 10
     },
     "926683363207708703": {
         "wallet": 949,
         "bank": 0,
-        "booster": 1
+        "booster": 1,
+        "max": 10
     },
     "856654251132190751": {
         "wallet": 4540965.0,
         "bank": 0,
-        "booster": 1
+        "booster": 1,
+        "max": 10
     },
     "975884235908993077": {
         "wallet": 1783,
         "bank": 0,
-        "booster": 1
+        "booster": 1,
+        "max": 10
     },
     "938569864572964956": {
         "wallet": 292.0,
         "bank": 0,
-        "booster": 1
+        "booster": 1,
+        "max": 10
     }
 }

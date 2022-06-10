@@ -3,7 +3,7 @@ import nextcord as discord
 import wavelink
 from datetime import timedelta
 import asyncio
-
+import requests
 
 class ControlPanel(discord.ui.View):
     def __init__(self, vc, ctx):
@@ -158,7 +158,7 @@ class Music(commands.Cog):
 
     @commands.command()
     async def pause(self, ctx: commands.Context):
-        if not ctx.voice_client:
+        if not ctx.voice_client or not vc.is_playing():
             return await ctx.send("You're not playing any music!")
         elif not getattr(ctx.author.voice, "channel", None):
             return await ctx.send("Please join a voice channel!")
@@ -169,7 +169,7 @@ class Music(commands.Cog):
 
     @commands.command()
     async def resume(self, ctx: commands.Context):
-        if not ctx.voice_client:
+        if not ctx.voice_client or not vc.is_playing():
             return await ctx.send("You're not playing any music!")
         elif not getattr(ctx.author.voice, "channel", None):
             return await ctx.send("Please join a voice channel!")
@@ -208,6 +208,8 @@ class Music(commands.Cog):
         else:
             return await ctx.send("Looping is now disabled!")
 
+                
+            
     @commands.command(aliases=['q'])
     async def queue(self,ctx: commands.Context):
         if not ctx.voice_client:

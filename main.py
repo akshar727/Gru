@@ -4,7 +4,6 @@ from nextcord.ext import commands, tasks
 from nextcord.utils import get
 from typing import Optional
 from webserver import keep_alive
-from itertools import cycle
 from PIL import Image
 from io import BytesIO
 from googleapiclient.discovery import build
@@ -33,7 +32,6 @@ class GruBot(commands.Bot):
             return True
         else:
             return False
-
 
 client = GruBot(command_prefix=get_prefix,
                 intents=discord.Intents.all(),
@@ -110,40 +108,51 @@ async def prefix(ctx, prefix=None):
     await ctx.send(f"The prefix was changed to `{prefix}`")
 
 
-status = cycle([
-    'Try gru help', 'Prefix - gru', 'Minecraft 1.19: The Wild Update', 'PoKeMon',
-    'Try @Gru', 'Bill Nye the Science Guy', 'Dank Memer', 'RTX 3090 ti',
-    'Warzone: Season 6', 'Minecraft 1.18: Caves and Cliffs',
-    'Call of Duty: Vanguard', 'Destiny 2: The Witch Queen', 'Battlefield 2042',
-    "Tom Clancy's: Rainbow Six Extraction", 'Halo Infinite', 'Splitgate',
-    'Perfect Dark', 'Hitman', 'GTA 6', 'amogus', 'CS:GO', 'Team Fortress 2',
-    'Mortal Kombat', 'Injustice 3', 'Arkham Knight', 'Gotham Knights',
-    'Suicide Squad: Kill the Justice Leauge', 'Spiderman 2 PS5',
-    'Spiderman PS4', 'Spiderman: Miles Morales', 'Hogwarts Legacy',
-    'God of War: Ragnorak', 'Forza Horizon 5', 'Forza Motorsport 5',
-    'Far Cry 6', 'Jurassic World Evolution 2',
-    "Marvel's Guardians of the Galaxy", "Marvel's Avengers", 'Dying Light 2',
-    'Back 4 Blood', 'Clash of Clans', 'Clash Royale', 'Xbox One', 'Xbox One S',
-    'Xbox One X', 'Xbox Series X', 'Xbox Series S', 'PS4', 'PS4 Pro',
-    'PS4 Slim', 'PS5', 'NextCord', 'Nintendo Switch', 'Nintendo Switch Lite',
-    'Wii U', 'Nintendo DS', 'Xbox 360', 'PS3', 'Da Computer', 'Pac-Man',
-    'Super Smash Bros Ultimate', 'Super Mario', 'Sonic the Hedgehog', 'Pong',
-    'Legend of Zelda: Breath of the Wild', 'Battlefront 3',
-    'Jedi Fallen Order 2', 'Mario Kart', 'Fallout', 'Elder Scrolls 6',
-    'Starfield', 'Star Citizen', 'Planetside 3', 'Fortnite Chapter 3',
-    'Demon Souls...', 'Cyberpunk 2069', 'Wolverine', 'Uncharted 5', 'FIFA',
-    'MADDEN', 'NHL', 'UFC', 'Lego Star Wars: The Skywalker Saga',
-    'Star Wars: Knights of the Old Republic Remake', 'Dead Space 4',
-    'Project 007', 'Dark Pictures Anthology', 'Riders Republic',
-    'Assasins Creed Infinity', 'The Last of Us: Part 3',
-    'Red Dead Redemption 3', 'Agent', 'Bully 2', 'Portal', 'Elden Ring',
-    'Borderlands 4', 'Deathloop', 'Redfall', 'Crash Bandicoot 5',
-    'Destiny 2: Lightfall', 'Destiny 3', 'Stalker 2', 'Bugsnax', 'Diablo',
-    'ARK', 'Overcooked', 'Gears 6', 'Animal Crossing: New Horizons',
-    'Metroid Dread', 'Street Fighter', 'Roblox', 'Tetris', 'Horizon Zero Dawn',
-    'Horizon Forbidden West', 'Horizon Zero Dawn', 'Terraria', 'Bioshock',
-    'Wicher 4', 'Resident Evil'
-])
+def convert_str_to_number(x):
+    total_stars = 0
+    num_map = {'K':1000, 'M':1000000, 'B':1000000000}
+    if x.isdigit():
+        total_stars = int(x)
+    else:
+        if len(x) > 1:
+            total_stars = float(x[:-1]) * num_map.get(x[-1].upper(), 1)
+    return int(total_stars)
+
+
+# status = cycle([
+#     'Try gru help', 'Prefix - gru', 'Minecraft 1.19: The Wild Update', 'PoKeMon',
+#     'Try @Gru', 'Bill Nye the Science Guy', 'Dank Memer', 'RTX 3090 ti',
+#     'Warzone: Season 6', 'Minecraft 1.18: Caves and Cliffs',
+#     'Call of Duty: Vanguard', 'Destiny 2: The Witch Queen', 'Battlefield 2042',
+#     "Tom Clancy's: Rainbow Six Extraction", 'Halo Infinite', 'Splitgate',
+#     'Perfect Dark', 'Hitman', 'GTA 6', 'amogus', 'CS:GO', 'Team Fortress 2',
+#     'Mortal Kombat', 'Injustice 3', 'Arkham Knight', 'Gotham Knights',
+#     'Suicide Squad: Kill the Justice Leauge', 'Spiderman 2 PS5',
+#     'Spiderman PS4', 'Spiderman: Miles Morales', 'Hogwarts Legacy',
+#     'God of War: Ragnorak', 'Forza Horizon 5', 'Forza Motorsport 5',
+#     'Far Cry 6', 'Jurassic World Evolution 2',
+#     "Marvel's Guardians of the Galaxy", "Marvel's Avengers", 'Dying Light 2',
+#     'Back 4 Blood', 'Clash of Clans', 'Clash Royale', 'Xbox One', 'Xbox One S',
+#     'Xbox One X', 'Xbox Series X', 'Xbox Series S', 'PS4', 'PS4 Pro',
+#     'PS4 Slim', 'PS5', 'NextCord', 'Nintendo Switch', 'Nintendo Switch Lite',
+#     'Wii U', 'Nintendo DS', 'Xbox 360', 'PS3', 'Da Computer', 'Pac-Man',
+#     'Super Smash Bros Ultimate', 'Super Mario', 'Sonic the Hedgehog', 'Pong',
+#     'Legend of Zelda: Breath of the Wild', 'Battlefront 3',
+#     'Jedi Fallen Order 2', 'Mario Kart', 'Fallout', 'Elder Scrolls 6',
+#     'Starfield', 'Star Citizen', 'Planetside 3', 'Fortnite Chapter 3',
+#     'Demon Souls...', 'Cyberpunk 2069', 'Wolverine', 'Uncharted 5', 'FIFA',
+#     'MADDEN', 'NHL', 'UFC', 'Lego Star Wars: The Skywalker Saga',
+#     'Star Wars: Knights of the Old Republic Remake', 'Dead Space 4',
+#     'Project 007', 'Dark Pictures Anthology', 'Riders Republic',
+#     'Assasins Creed Infinity', 'The Last of Us: Part 3',
+#     'Red Dead Redemption 3', 'Agent', 'Bully 2', 'Portal', 'Elden Ring',
+#     'Borderlands 4', 'Deathloop', 'Redfall', 'Crash Bandicoot 5',
+#     'Destiny 2: Lightfall', 'Destiny 3', 'Stalker 2', 'Bugsnax', 'Diablo',
+#     'ARK', 'Overcooked', 'Gears 6', 'Animal Crossing: New Horizons',
+#     'Metroid Dread', 'Street Fighter', 'Roblox', 'Tetris', 'Horizon Zero Dawn',
+#     'Horizon Forbidden West', 'Horizon Zero Dawn', 'Terraria', 'Bioshock',
+#     'Wicher 4', 'Resident Evil'
+# ])
 
 
 @client.event
@@ -156,7 +165,7 @@ async def on_ready():
         g = json.load(f)
     if not client.persistent_views_added:
         for giveaway in g:
-            client.add_view(view=JoinGiveaway(g[giveaway]['author'],int(giveaway)),message_id=int(giveaway))
+            client.add_view(view=JoinGiveaway(int(giveaway)),message_id=int(giveaway))
         client.persistent_views_added = True
         print('Added Giveaway Buttons!')
     print("Connected to {0.user}".format(client))
@@ -165,7 +174,7 @@ async def on_ready():
 
 @tasks.loop(seconds=4)
 async def change_status():
-    await client.change_presence(activity=discord.Game(next(status)))
+    await client.change_presence(activity=discord.Game("Try: @Gru | gru help"))
 
 
 ts = 0
@@ -208,39 +217,7 @@ async def on_member_join(member):
 ####################################################################
 # Main code starts :)
 
-mainshop = [{
-    "name": "Watch",
-    "price": 100,
-    "description": "Time"
-}, {
-    "name": "Gaming chair",
-    "price": 100,
-    "description": "Comfort"
-}, {
-    "name": "Gaming desk",
-    "price": 500,
-    "description": "Comfort v2"
-}, {
-    "name": "Laptop",
-    "price": 1000,
-    "description": "Work"
-}, {
-    "name": "Iphone 13",
-    "price": 2000,
-    "description": "STYLE"
-}, {
-    "name": "Monitor",
-    "price": 1000,
-    "description": "Work"
-}, {
-    "name": "PC",
-    "price": 10000,
-    "description": "Gaming"
-}, {
-    "name": "MacBook Pro 13",
-    "price": 15000,
-    "description": "SUPER STYLE"
-}, {
+mainshop = [ {
     "name": "Fishing Rod",
     "price": 25000,
     "description": "Allows you to fish and catch sea animals!"
@@ -255,10 +232,6 @@ mainshop = [{
     "name": "2x booster",
     "price": 50000,
     "description": "Get a 2x money booster **__Permanent__**"
-}, {
-    "name": "Ferrari",
-    "price": 99999,
-    "description": "Sports Car"
 }, {
     "name": "5x booster",
     "price": 400000,
@@ -275,7 +248,13 @@ mainshop = [{
     "name": "10x booster",
     "price": 3500000,
     "description": "Get a 10x money booster **__Permanent__**"
-}]
+},
+   {
+    "name": "Bank Record",
+    "price": 250000,
+    "description": "Expands your bank. Automatically used when bought."
+}
+]
 
 animal_shop = [[{
     "name": "Wolf",
@@ -408,13 +387,13 @@ async def stats(ctx):
     await ctx.reply(embed=e)
 
 
+
 @client.command(aliases=['bal'])
 async def balance(ctx, user: discord.Member = None):
     if user is None:
         user = ctx.author
     await open_account(ctx.author)
     await open_account(user)
-
     users = await get_bank_data()
     jobs = await get_job_data()
     wallet_amt = users[str(user.id)]["wallet"]
@@ -422,27 +401,18 @@ async def balance(ctx, user: discord.Member = None):
     booster_amt = users[str(user.id)]["booster"]
     job_name = jobs[str(user.id)]["job"]["name"]
     job_pay = jobs[str(user.id)]["job"]["pay"]
+    max = users[str(user.id)]['max']
 
     em = discord.Embed(title=f"{user.display_name}'s Balance",
                        color=discord.Color.green())
-    if wallet_amt + bank_amt >= 1000000000000000:
-        em.add_field(name="Wallet Balance",
-                     value=f"{float(wallet_amt)} Minions™")
-        em.add_field(name='Bank Balance', value=f"{float(bank_amt)} Minions™")
-        em.add_field(name='Job', value=job_name)
-        em.add_field(name='Job salary',
-                     value=f"{float(job_pay)} Minions™ per hour")
-        if booster_amt != 1:
-            em.add_field(name='Booster', value=f'{float(booster_amt)}x')
-    else:
-        em.add_field(name="Wallet Balance",
-                     value=f"{int(wallet_amt)} Minions™")
-        em.add_field(name='Bank Balance', value=f"{int(bank_amt)} Minions™")
-        em.add_field(name='Job', value=job_name)
-        em.add_field(name='Job salary',
-                     value=f"{int(job_pay)} Minions™ per hour")
-        if booster_amt != 1:
-            em.add_field(name='Booster', value=f'{int(booster_amt)}x')
+    em.add_field(name="Wallet Balance",
+                     value=f"{int(wallet_amt):,} Minions™",inline=False)
+    em.add_field(name='Bank Balance', value=f"{int(bank_amt):,} **/** {int(max):,} Minions™ `({round(float(int(bank_amt)/int(max))*100,2)}% full)`",inline=False)
+    em.add_field(name='Job', value=job_name,inline=False)
+    em.add_field(name='Job salary',
+                     value=f"{int(job_pay):,} Minions™ per hour",inline=False)
+    if booster_amt != 1:
+        em.add_field(name='Booster', value=f'{float(booster_amt) if not booster_amt % 1 == 0 else int(booster_amt):,}x',inline=False)
     await ctx.send(embed=em)
 
 
@@ -468,20 +438,20 @@ async def beg(ctx):
     trybeg = random.choice(nums)
 
     if trybeg == 0:
-        message = f'"Oh you beggar take `{earnings * booster} Minions™`"'
+        message = f'"Oh you beggar take `{(earnings * booster):,} Minions™`"'
         beg_embed = discord.Embed(description=message,
                                   color=discord.Color.random())
         beg_embed.set_author(name=person)
         if booster != 1:
             beg_embed.set_footer(
                 text=
-                f"You earned {earnings * (booster - 1)} extra Minions™ since you had a {booster}x booster!(Original amount:{earnings})"
+                f"You earned {(earnings * (booster - 1)):,} extra Minions™ since you had a {booster:,}x booster!"
             )
         await ctx.reply(embed=beg_embed)
         users[str(user.id)]["wallet"] += earnings * booster
 
     else:
-        message = 'no'
+        message = random.choice(['no','ur mom','credit card is maxed','why u','nah bro','not today','nu uh'])
         beg_embed = discord.Embed(description=message,
                                   color=discord.Color.random())
         beg_embed.set_author(name=person)
@@ -660,180 +630,174 @@ jobpays = {
 }
 
 
-@client.command()
+@client.group()
 @commands.cooldown(1, 3600, commands.BucketType.user)
 async def work(ctx):
-    with open('databases/prefixes.json') as f:
-        prefixes = json.load(f)
-    prefix = prefixes[str(ctx.guild.id)]
-    await open_account(ctx.author)
-    jobs = await get_job_data()
-    user = ctx.author
-    work_amt = jobs[str(user.id)]["job"]["pay"]
-    work_name = jobs[str(user.id)]["job"]["name"]
-    if work_name == 'None':
-        await ctx.send(
-            f"You don't have a job! Get one by doing `{prefix}get_job` !!")
-        work.reset_cooldown(ctx)
-        return
-
-    def check(m):
-        return m.channel == ctx.channel and m.author == ctx.author
-
-    typeofwork = "memory"
-    if typeofwork == 'memory':
-        await ctx.reply(
-            f'''**Working as a {work_name}** - Memory Game - A fact about  Gru things™  will come up on the screen! then it will disappear after a few seconds. Your job is to rewrite the fact!'''
-        )
-        fact = "\u200B" + random.choice(facts)
-
-        fact_sended = await ctx.send(f'**{fact}**')
-        await asyncio.sleep(4)
-        await fact_sended.delete()
-        await asyncio.sleep(0.5)
-        await ctx.send("Now, retype the sentence!")
-        msg = None
-        try:
-            msg = await client.wait_for('message', check=check, timeout=20)
-        except asyncio.TimeoutError:
-            work_em = discord.Embed(
-                title="Terrible job!",
-                description=
-                f"You were given `{int(work_amt / 3):,} Minions™` for 1/3 of an hour of pay",
-                color=discord.Color.random())
-            work_em.set_footer(text=f'Working as a {work_name}')
-            await update_bank(ctx.author, int(work_amt / 3))
-            await ctx.reply(embed=work_em)
+    if ctx.invoked_subcommand is None:
+        with open('databases/prefixes.json') as f:
+            prefixes = json.load(f)
+        prefix = prefixes[str(ctx.guild.id)]
+        await open_account(ctx.author)
+        jobs = await get_job_data()
+        user = ctx.author
+        work_amt = jobs[str(user.id)]["job"]["pay"]
+        work_name = jobs[str(user.id)]["job"]["name"]
+        if work_name == 'None':
+            await ctx.send(
+                f"You don't have a job! Get one by doing `{prefix}work <job name>` !!")
+            work.reset_cooldown(ctx)
             return
-        if msg.content.lower() == fact.lower()[1:]:
-            promote_pay = random.randint(0, 8)
-            promote_job = random.randint(0, 8)
-            get_crate = random.randint(0, 5)
-
-            work_em = discord.Embed(
-                title="Great job!",
-                description=
-                f"You were given `{work_amt:,} Minions™` for an hour of pay",
-                color=discord.Color.random())
-            work_em.set_footer(text=f'Working as a {work_name}')
-            await update_bank(ctx.author, work_amt)
-            await ctx.reply(embed=work_em)
-            if get_crate == 5:
-                with open('databases/lootboxes.json', 'r') as f:
-                    lootboxes = json.load(f)
-                crate_type = random.choice([
-                    "mythic", "legendary", "legendary", "epic", "epic", "epic",
-                    "epic", "rare", "rare", "rare", "rare", "rare", "rare",
-                    "rare", "uncommon", "uncommon", "uncommon", "uncommon",
-                    "uncommon", "uncommon", "uncommon", "uncommon", "uncommon",
-                    "common", "common", "common", "common", "common", "common",
-                    "common", "common", "common", "common"
-                ])
-                await ctx.send(
-                    f"Your boss saw that you were doing so well, he gave you a **{crate_type.capitalize()}** <:chest:898333946557894716> lootbox!! :tada:"
-                )
-                lootboxes[str(ctx.author.id)][crate_type] += 1
-                with open('databases/lootboxes.json', 'w') as f:
-                    json.dump(lootboxes, f, indent=4)
-
-            if promote_job == 8 and work_name != "God Of Money" and work_name != "Groogle Custom Computer Language Programmer":
-                new_job_name = ""
-                if work_name == "Gru Gadgets Maker":
-                    new_job_name = "Gru Gadgets Tester"
-                elif work_name == "Gru Gadgets Tester":
-                    new_job_name = "Minion Refiner"
-                elif work_name == "Minion Refiner":
-                    new_job_name = "Super Minion Refiner"
-                elif work_name == "Super Minion Refiner":
-                    new_job_name = "Minion Gadget Manager"
-                elif work_name == "Minion Gadget Manager":
-                    new_job_name = "Gru Ship Mechanic"
-                elif work_name == "Gru Ship Mechanic":
-                    new_job_name = "Gru Ship Pilot"
-                elif work_name == "Gru Ship Pilot":
-                    new_job_name = "Minion Costume Maker"
-                elif work_name == "Minion Costume Maker":
-                    new_job_name = "Gru Assistant Hacker"
-                elif work_name == "Gru Assistant Hacker":
-                    new_job_name = "Gru Hacker"
-                elif work_name == "Gru Hacker":
-                    new_job_name = "Gru Senior Hacker"
-                elif work_name == "Gru Senior Hacker":
-                    new_job_name = "Gru's Barber"
-                elif work_name == "Gru's Barber":
-                    new_job_name = "Gru Gadget Programmer"
-                elif work_name == "Gru Gadget Programmer":
-                    new_job_name = "Gru Code Compiler"
-                elif work_name == "Gru Code Compiler":
-                    new_job_name = "Gru Super Programmer"
-                elif work_name == "Gru Super Programmer":
-                    new_job_name = "Gru Super Code Compiler"
-                elif work_name == "Gru Super Code Compiler":
-                    new_job_name = "Gru Enterprises™ Supervisor"
-                elif work_name == "Gru Enterprises™ Supervisor":
-                    new_job_name = "Gru Enterprises™ Manager"
-                elif work_name == "Gru Enterprises™ Manager":
-                    new_job_name = "Gru Enterprises™ CO"
-                elif work_name == "Gru Enterprises™ CO":
-                    new_job_name = "Gru Enterprises™ CEO"
-                elif work_name == "Gru Enterprises™ CEO":
-                    new_job_name = "Gru Enterprises™ Super CEO"
-                elif work_name == "Gru Enterprises™ Super CEO":
-                    new_job_name = "Gru Enterprises™ Owner"
-                elif work_name == "Gru Enterprises™ Owner":
-                    new_job_name = "Gru™"
-                elif work_name == "Gru™":
-                    new_job_name = "Groogle Progammer"
-                elif work_name == "Groogle Programmer":
-                    new_job_name = "Gru Movie Director"
-                elif work_name == "Gru Movie Director":
-                    new_job_name = "Groogle Owner"
-                elif work_name == "Groogle Owner":
-                    new_job_name = "Groogle Creator"
-                elif work_name == "Groogle Creator":
-                    new_job_name = "Groogle Custom Computer Language Pogrammer"
-
-                new_job_pay = jobpays[new_job_name]
-                if work_amt > jobpays[work_name]:
-                    new_job_pay += work_amt - jobpays[work_name]
-                await ctx.send(
-                    f"You were doing so good that your manager has **PROMOTED** you to a {new_job_name}! You now make `{new_job_pay} Minions™` instead of `{work_amt} Minions™`! :tada: :tada:"
-                )
-                if work_amt > jobpays[work_name]:
-                    await ctx.send(
-                        "Your base pay for this new job is higher because you got pay increases in your last job(s)!"
-                    )
-                jobs[str(user.id)]["job"]["pay"] = new_job_pay
-                jobs[str(user.id)]["job"]["name"] = new_job_name
-                with open('databases/jobs.json', 'w') as f:
-                    json.dump(jobs, f, indent=4)
+    
+        def check(m):
+            return m.channel == ctx.channel and m.author == ctx.author
+    
+        typeofwork = "memory"
+        if typeofwork == 'memory':
+            await ctx.reply(
+                f'''**Working as a {work_name}** - Memory Game - A fact about  Gru things™  will come up on the screen! then it will disappear after a few seconds. Your job is to rewrite the fact!'''
+            )
+            fact = "\u200B" + random.choice(facts)
+    
+            fact_sended = await ctx.send(f'**{fact}**')
+            await asyncio.sleep(4)
+            await fact_sended.delete()
+            await asyncio.sleep(0.5)
+            await ctx.send("Now, retype the sentence!")
+            msg = None
+            try:
+                msg = await client.wait_for('message', check=check, timeout=20)
+            except asyncio.TimeoutError:
+                work_em = discord.Embed(
+                    title="Terrible job!",
+                    description=
+                    f"You were given `{int(work_amt / 3):,} Minions™` for 1/3 of an hour of pay",
+                    color=discord.Color.random())
+                work_em.set_footer(text=f'Working as a {work_name.title()}')
+                await update_bank(ctx.author, int(work_amt / 3))
+                await ctx.reply(embed=work_em)
                 return
-            if promote_pay == 8:
-                pay_increase1 = str(random.randrange(1, 7))
-                pay_increase = pay_increase1 + "000"
-                await ctx.reply(
-                    f"Since you are doing really well in your work, your manager has decided to increase your pay by `{int(pay_increase):,} Minions™`!! :tada: :tada:"
-                )
-                jobs[str(user.id)]["job"]["pay"] = work_amt + int(pay_increase)
-                with open('databases/jobs.json', 'w') as f:
-                    json.dump(jobs, f, indent=4)
-            return
+            if msg.content.lower() == fact.lower()[1:]:
+                promote_pay = random.randint(0, 8)
+                promote_job = random.randint(0, 8)
+                get_crate = random.randint(0, 5)
+    
+                work_em = discord.Embed(
+                    title="Great job!",
+                    description=
+                    f"You were given `{work_amt:,} Minions™` for an hour of pay",
+                    color=discord.Color.random())
+                work_em.set_footer(text=f'Working as a {work_name.title()}')
+                await update_bank(ctx.author, work_amt)
+                await ctx.reply(embed=work_em)
+                if get_crate == 5:
+                    with open('databases/lootboxes.json', 'r') as f:
+                        lootboxes = json.load(f)
+                    crate_type = random.choice([
+                        "mythic", "legendary", "legendary", "epic", "epic", "epic",
+                        "epic", "rare", "rare", "rare", "rare", "rare", "rare",
+                        "rare", "uncommon", "uncommon", "uncommon", "uncommon",
+                        "uncommon", "uncommon", "uncommon", "uncommon", "uncommon",
+                        "common", "common", "common", "common", "common", "common",
+                        "common", "common", "common", "common"
+                    ])
+                    await ctx.send(
+                        f"Your boss saw that you were doing so well, he gave you a **{crate_type.capitalize()}** <:chest:898333946557894716> lootbox!! :tada:"
+                    )
+                    lootboxes[str(ctx.author.id)][crate_type] += 1
+                    with open('databases/lootboxes.json', 'w') as f:
+                        json.dump(lootboxes, f, indent=4)
+    
+                if promote_job > 6 and work_name != "God Of Money" and work_name != "Groogle Custom Computer Language Programmer":
+                    new_job_name = ""
+                    if work_name == "Gru Gadgets Maker":
+                        new_job_name = "Gru Gadgets Tester"
+                    elif work_name == "Gru Gadgets Tester":
+                        new_job_name = "Minion Refiner"
+                    elif work_name == "Minion Refiner":
+                        new_job_name = "Super Minion Refiner"
+                    elif work_name == "Super Minion Refiner":
+                        new_job_name = "Minion Gadget Manager"
+                    elif work_name == "Minion Gadget Manager":
+                        new_job_name = "Gru Ship Mechanic"
+                    elif work_name == "Gru Ship Mechanic":
+                        new_job_name = "Gru Ship Pilot"
+                    elif work_name == "Gru Ship Pilot":
+                        new_job_name = "Minion Costume Maker"
+                    elif work_name == "Minion Costume Maker":
+                        new_job_name = "Gru Assistant Hacker"
+                    elif work_name == "Gru Assistant Hacker":
+                        new_job_name = "Gru Hacker"
+                    elif work_name == "Gru Hacker":
+                        new_job_name = "Gru Senior Hacker"
+                    elif work_name == "Gru Senior Hacker":
+                        new_job_name = "Gru's Barber"
+                    elif work_name == "Gru's Barber":
+                        new_job_name = "Gru Gadget Programmer"
+                    elif work_name == "Gru Gadget Programmer":
+                        new_job_name = "Gru Code Compiler"
+                    elif work_name == "Gru Code Compiler":
+                        new_job_name = "Gru Super Programmer"
+                    elif work_name == "Gru Super Programmer":
+                        new_job_name = "Gru Super Code Compiler"
+                    elif work_name == "Gru Super Code Compiler":
+                        new_job_name = "Gru Enterprises™ Supervisor"
+                    elif work_name == "Gru Enterprises™ Supervisor":
+                        new_job_name = "Gru Enterprises™ Manager"
+                    elif work_name == "Gru Enterprises™ Manager":
+                        new_job_name = "Gru Enterprises™ CO"
+                    elif work_name == "Gru Enterprises™ CO":
+                        new_job_name = "Gru Enterprises™ CEO"
+                    elif work_name == "Gru Enterprises™ CEO":
+                        new_job_name = "Gru Enterprises™ Super CEO"
+                    elif work_name == "Gru Enterprises™ Super CEO":
+                        new_job_name = "Gru Enterprises™ Owner"
+                    elif work_name == "Gru Enterprises™ Owner":
+                        new_job_name = "Gru™"
+                    elif work_name == "Gru™":
+                        new_job_name = "Groogle Progammer"
+                    elif work_name == "Groogle Programmer":
+                        new_job_name = "Gru Movie Director"
+                    elif work_name == "Gru Movie Director":
+                        new_job_name = "Groogle Owner"
+                    elif work_name == "Groogle Owner":
+                        new_job_name = "Groogle Creator"
+                    elif work_name == "Groogle Creator":
+                        new_job_name = "Groogle Custom Computer Language Pogrammer"
+    
+                    new_job_pay = jobpays[new_job_name]
+                    if work_amt > jobpays[work_name]:
+                        new_job_pay += work_amt - jobpays[work_name]
+                    jobs[str(user.id)]["job"]["pay"] = new_job_pay
+                    jobs[str(user.id)]["job"]["name"] = new_job_name
+                    with open('databases/jobs.json', 'w') as f:
+                        json.dump(jobs, f, indent=4)
+                    return
+                if promote_pay == 8:
+                    pay_increase1 = str(random.randrange(1, 7))
+                    pay_increase = pay_increase1 + "000"
+                    await ctx.reply(
+                        f"Since you are doing really well in your work, your manager has decided to increase your pay by `{int(pay_increase):,} Minions™`!! :tada: :tada:"
+                    )
+                    jobs[str(user.id)]["job"]["pay"] = work_amt + int(pay_increase)
+                    with open('databases/jobs.json', 'w') as f:
+                        json.dump(jobs, f, indent=4)
+                return
+    
+            if msg.content.lower() == fact.lower():
+                return await ctx.send("I know you copy-pasted it!")
+            else:
+                work_em = discord.Embed(
+                    title="Terrible job!",
+                    description=
+                    f"You were given `{int(work_amt / 3):,} Minions™` for 1/3 of an hour of pay",
+                    color=discord.Color.random())
+                work_em.set_footer(text=f'Working as a {work_name.capitalize()}')
+                await ctx.reply(embed=work_em)
+                await update_bank(ctx.author, int(work_amt / 3))
+                return
 
-        if msg.content.lower() == fact.lower():
-            return await ctx.send("I know you copy-pasted it!")
-        else:
-            work_em = discord.Embed(
-                title="Terrible job!",
-                description=
-                f"You were given `{int(work_amt / 3)} Minions™` for 1/3 of an hour of pay",
-                color=discord.Color.random())
-            work_em.set_footer(text=f'Working as a {work_name.capitalize()}')
-            await ctx.reply(embed=work_em)
-            await update_bank(ctx.author, int(work_amt / 3))
-            return
 
-
-@client.command()
+@work.command()
 async def jobs(ctx):
     page1 = discord.Embed(title="Jobs in Gru Enterprisies™",
                           description="These are all the jobs available.",
@@ -848,6 +812,7 @@ async def jobs(ctx):
         description="These are all the jobs available. (Page 2)",
         color=discord.Color.random())
     pages = [page1, page2]
+
 
     page1.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
     page1.set_footer(text="Page 1/2")
@@ -898,44 +863,25 @@ async def jobs(ctx):
 
             for button in buttons:
                 await msg.remove_reaction(button, ctx.author)
+    work.reset_cooldown(ctx)
 
 
 resigned_users = []
 
 
-@client.command()
-async def get_job(ctx):
-    jobs = await get_job_data()
-    user = ctx.author
-    name = jobs[str(user.id)]["job"]["name"]
-    if str(user.id) in resigned_users:
-        await ctx.send(
-            "You have resigned recently so you can't get another job yet!")
-        return
-    if name == 'None' and str(user.id) not in resigned_users:
-        await ctx.reply(
-            "Welcome to Gru enterprises!! :tada: You are now a Gru Gadgets Maker and earn 9000 per hour!"
-        )
-        jobs[str(user.id)]["job"]["name"] = "Gru Gadgets Maker"
-        jobs[str(user.id)]["job"]["pay"] = 9000
-        with open('databases/jobs.json', 'w') as f:
-            json.dump(jobs, f, indent=4)
-        return
-    else:
-        await ctx.send(
-            "You already have a job! You can do `resign` to get out of your job(**BEWARE** resigning and then rejoining Gru enterprises will put you back at a entry level job and pay)"
-        )
 
 
-
-@client.command()
+@work.command()
 async def resign(ctx):
     jobs = await get_job_data()
     user = ctx.author
     name = jobs[str(user.id)]["job"]["name"]
+    with open('databases/prefixes.json','r') as f:
+        prefix = json.load(f)[str(ctx.guild.id)]
     if name == 'None':
         await ctx.send(
-            "You don't have a job! You can get one by doing 'get_job'!!")
+            f"You don't have a job! You can get one by doing '{prefix}work <job name>'!!")
+        work.reset_cooldown(ctx)
     else:
         await ctx.send(
             "You are now unemployed.You cannot reapply for a job for the next 2 hours"
@@ -945,6 +891,7 @@ async def resign(ctx):
         with open('databases/jobs.json', 'w') as f:
             json.dump(jobs, f, indent=4)
         resigned_users.append(str(user.id))
+        work.reset_cooldown(ctx)
         await asyncio.sleep(10800)
         resigned_users.remove(str(user.id))
 
@@ -958,9 +905,6 @@ async def purge(ctx, amount: int = 5):
     await p.delete()
 
 
-@client.command(aliases=["commands"])
-async def commands_amt(ctx):
-    await ctx.reply(f"I have {len(client.commands)} commands!")
 
 
 @client.command(aliases=['with'])
@@ -977,7 +921,7 @@ async def withdraw(ctx, amount=None):
         amount = bal[1]
     else:
         try:
-            amount = int(amount)
+            amount = convert_str_to_number(amount)
         except:
             return await ctx.send("That is an invalid amount!")
 
@@ -993,7 +937,7 @@ async def withdraw(ctx, amount=None):
     await update_bank(ctx.author, amount)
     await update_bank(ctx.author, -1 * amount, 'bank')
     await ctx.send(
-        f':white_check_mark: {ctx.author.mention} You withdrew `{amount} Minions™`'
+        f':white_check_mark: {ctx.author.mention} You withdrew `{int(amount):,} Minions™`'
     )
 
 
@@ -1009,7 +953,7 @@ async def deposit(ctx, amount=None):
         amount = bal[0]
     else:
         try:
-            amount = int(amount)
+            amount = convert_str_to_number(amount)
         except:
             return await ctx.send("That is an invalid amount!")
 
@@ -1021,11 +965,17 @@ async def deposit(ctx, amount=None):
         return
     if amount == 0:
         return await ctx.send("You do not have any Minions™ in your wallet!")
-
+    if bal[1] + amount > bal[2]:
+        depositable = bal[2] - bal[1]
+        await update_bank(ctx.author, -1 * (bal[0]-depositable))
+        await update_bank(ctx.author, depositable, 'bank')
+        return await ctx.send(
+        f':white_check_mark: {ctx.author.mention} You deposited `{int(depositable):,} Minions™`'
+    )
     await update_bank(ctx.author, -1 * amount)
     await update_bank(ctx.author, amount, 'bank')
     await ctx.send(
-        f':white_check_mark: {ctx.author.mention} You deposited `{amount} Minions™`'
+        f':white_check_mark: {ctx.author.mention} You deposited `{int(amount):,} Minions™`'
     )
 
 
@@ -1041,7 +991,7 @@ async def send(ctx, member: discord.Member, amount=None):
     if amount == 'all' or amount == 'max':
         amount = bal[0]
 
-    amount = int(amount)
+    amount = convert_str_to_number(amount)
 
     if amount > bal[0]:
         await ctx.send('You do not have sufficient balance')
@@ -1053,7 +1003,7 @@ async def send(ctx, member: discord.Member, amount=None):
     await update_bank(ctx.author, -1 * amount, 'bank')
     await update_bank(member, amount, 'bank')
     await ctx.send(
-        f':white_check_mark: {ctx.author.mention} You gave {member} {amount} coins'
+        f':white_check_mark: {ctx.author.mention} You gave {member} {amount} Minions™️'
     )
 
 
@@ -1061,11 +1011,16 @@ async def send(ctx, member: discord.Member, amount=None):
 @commands.cooldown(1, 60, commands.BucketType.user)
 async def rob(ctx, member: discord.Member):
     if member.bot:
+        rob.reset_cooldown(ctx)
         return await ctx.send(
             "You are not allowed to steal from bots, back off my kind")
     await open_account(ctx.author)
     await open_account(member)
     bal = await update_bank(member)
+    user_bal = await update_bank(ctx.author)
+    if user_bal[0] < 2000:
+        rob.reset_cooldown(ctx)
+        return await ctx.send("You need at least `2000 Minions™️` to rob someone.")
     if member.id == 717512097725939795:
         rob.reset_cooldown(ctx)
         return await ctx.send(
@@ -1085,14 +1040,14 @@ async def rob(ctx, member: discord.Member):
         await update_bank(ctx.author, earning)
         await update_bank(member, -1 * earning)
         await ctx.send(
-            f':white_check_mark:{ctx.author.mention} You robbed {member} and got {earning} coins'
+            f':white_check_mark:{ctx.author.mention} You robbed {member} and got {earning:,} Minions™️'
         )
     else:
         await ctx.send(
-            f':x:{ctx.author.mention} You failed to robb {member} and lost {earning} coins to them.'
+            f':x:{ctx.author.mention} You failed to rob {member} and lost 2000 Minions™️ to them.'
         )
-        await update_bank(member, earning)
-        await update_bank(ctx.author, -1 * earning)
+        await update_bank(member, 2000)
+        await update_bank(ctx.author, -2000)
 
 
 @client.command()
@@ -1104,7 +1059,7 @@ async def slots(ctx, amount=None):
 
     bal = await update_bank(ctx.author)
 
-    amount = int(amount)
+    amount = convert_str_to_number(amount)
 
     if amount > bal[0]:
         await ctx.send('You do not have sufficient balance')
@@ -1144,7 +1099,7 @@ async def shop(ctx):
         name = item["name"]
         price = item["price"]
         desc = item["description"]
-        page1.add_field(name=name,
+        page1.add_field(name=name.title(),
                             value=f"{int(price):,} Minions™ | {desc}")
     page1.set_footer(text="Page 1/3")
 
@@ -1167,7 +1122,7 @@ async def shop(ctx):
         for animal in _array:
             name = animal["name"]
             sell = animal["sell_price"]
-            page2.add_field(name=name, value=f"{int(sell):,} Minions™")
+            page2.add_field(name=name.title(), value=f"{int(sell):,} Minions™")
 
     page3 = discord.Embed(
         title="Animal Shop (Page 2)",
@@ -1183,7 +1138,7 @@ async def shop(ctx):
     for animal in animal_shop[1][-1:]:
         name = animal["name"]
         sell = animal["sell_price"]
-        page3.add_field(name=name, value=f"{int(sell):,} Minions™")
+        page3.add_field(name=name.title(), value=f"{int(sell):,} Minions™")
     page3.add_field(
         name="Aerial Animals",
         value="These are all the aerial animals you can get by hunting.",
@@ -1191,7 +1146,7 @@ async def shop(ctx):
     for animal in animal_shop[2]:
         name = animal["name"]
         sell = animal["sell_price"]
-        page3.add_field(name=name, value=f"{int(sell):,} Minions™")
+        page3.add_field(name=name.title(), value=f"{int(sell):,} Minions™")
 
     pages = [page1, page2, page3]
 
@@ -1243,7 +1198,9 @@ async def shop(ctx):
 async def buy(ctx, amount: Optional[int] = 1, *, item):
     users = await get_bank_data()
     item = item.lower()
-    if item == "2x booster":
+    if amount < 1:
+        return await ctx.send("You need to sell at least more than one item!")
+    if item == "2x booster" or '2x' in item:
         users = await get_bank_data()
         if users[str(ctx.author.id)]["booster"] < 2:
             if users[str(ctx.author.id)]["wallet"] >= 50000:
@@ -1262,7 +1219,21 @@ async def buy(ctx, amount: Optional[int] = 1, *, item):
             await ctx.send(
                 ":x: You already have a booster that's higher than this!")
             return
-    if item == "5x booster":
+    if item == "bank record" or 'bank' in item or 'record' in item:
+        users = await get_bank_data()
+        if users[str(ctx.author.id)]["wallet"] >= 250000*amount:
+            users[str(ctx.author.id)]["wallet"] -= 250000*amount
+            new = random.randint(20000,150000)*amount
+            users[str(ctx.author.id)]["max"] += new
+            await ctx.send(f"You give your record{'s' if amount != 1 else ''} to the teller, and he increases your bank space by `{new:,} Minions™️`!")
+            with open('databases/mainbank.json', 'w') as f:
+                json.dump(users, f,indent=4)
+            return
+        else:
+            await ctx.send("You can't afford this!")
+            return
+        return
+    if item == "5x booster" or '5x' in item:
         users = await get_bank_data()
         if users[str(ctx.author.id)]["booster"] < 5:
             if users[str(ctx.author.id)]["wallet"] >= 400000:
@@ -1281,7 +1252,7 @@ async def buy(ctx, amount: Optional[int] = 1, *, item):
             await ctx.send(
                 ":x: You already have a booster that's higher than this!")
             return
-    if item == "10x booster":
+    if item == "10x booster" or '10x' in item:
         users = await get_bank_data()
         if users[str(ctx.author.id)]["booster"] < 10:
             if users[str(ctx.author.id)]["wallet"] >= 3500000:
@@ -1306,37 +1277,14 @@ async def buy(ctx, amount: Optional[int] = 1, *, item):
 
     if not res[0]:
         if res[1] == 1:
-            await ctx.send("That Object isn't there!")
+            await ctx.send("That item isn't in the shop!")
             return
         if res[1] == 2:
-            if amount == 1:
-                await ctx.send(
-                    f"You don't have enough money in your wallet to buy {amount} {item}!"
+            await ctx.send(
+                    f"You don't have enough money in your wallet to buy `{amount}` {res[2].title()}!"
                 )
-            else:
-                await ctx.send(
-                    f"You don't have enough money in your wallet to buy {amount} {item}s!"
-                )
-            return
-
-    if item == 'pc':
-        item = item.upper()
-    else:
-        for items in mainshop:
-            if items["name"].lower() == item.lower():
-                item = items["name"]
-        for items in animal_shop:
-            for animal in items:
-                if animal["name"].lower() == item.lower():
-                    item = animal["name"]
-
-    if item.lower() == 'watch' and amount > 1:
-        item = item + "es"
-    if amount > 1 and item.lower() != 'watches':
-        item = item + "s"
-
     await ctx.send(
-        f":white_check_mark: You just bought {amount} {item} for `{res[2]:,} Minions™`!"
+        f":white_check_mark: You just bought `{amount}x` {res[3].title()} for `{res[2]:,} Minions™`!"
     )
 
 
@@ -1568,13 +1516,13 @@ async def buy_this(user, item_name, amount):
     name_ = None
     for item in mainshop:
         name = item["name"].lower()
-        if name == item_name:
+        if name == item_name or item_name in name:
             name_ = name
             price = item["price"]
             break
 
     if name_ == None:
-        return [False, 1]
+        return [False, 1, name_]
 
     cost = price * amount
     users = await get_bank_data()
@@ -1582,14 +1530,14 @@ async def buy_this(user, item_name, amount):
     bal = await update_bank(user)
 
     if bal[0] < cost:
-        return [False, 2]
+        return [False, 2, name_]
 
     try:
         index = 0
         t = None
         for thing in users[str(user.id)]["bag"]:
             n = thing["item"]
-            if n == item_name:
+            if n == name_:
                 old_amt = thing["amount"]
                 new_amt = old_amt + amount
                 users[str(user.id)]["bag"][index]["amount"] = new_amt
@@ -1597,10 +1545,10 @@ async def buy_this(user, item_name, amount):
                 break
             index += 1
         if t == None:
-            obj = {"item": item_name, "amount": amount}
+            obj = {"item": name_, "amount": amount}
             users[str(user.id)]["bag"].append(obj)
     except:
-        obj = {"item": item_name, "amount": amount}
+        obj = {"item": name_, "amount": amount}
         users[str(user.id)]["bag"] = [obj]
 
     with open("databases/mainbank.json", "w") as f:
@@ -1608,46 +1556,44 @@ async def buy_this(user, item_name, amount):
 
     await update_bank(user, cost * -1, "wallet")
 
-    return [True, "Worked", cost]
+    return [True, "Worked", cost,name_]
 
 
 @client.command()
-async def sell(ctx, amount: Optional[int] = 1, *, item):
+async def sell(ctx, amount: Optional[int] = 1, *, item=None):
     await open_account(ctx.author)
+    if amount < 1:
+        return await ctx.send("You need to sell at least more than one item!")
 
     res = await sell_this(ctx.author, item, amount)
-    if item == 'pc':
-        item = item.upper()
-    else:
-        for items in mainshop:
-            if items["name"].lower() == item.lower():
-                item = items["name"]
-        for items in animal_shop:
-            for animal in items:
-                if animal["name"].lower() == item.lower():
-                    item = animal["name"]
+    for items in mainshop:
+        if items["name"].lower() == item.lower():
+            item = items["name"]
+    is_animal = False
+    animal_obj = ...
+    for items in animal_shop:
+        for animal in items:
+            if animal["name"].lower() == item.lower() or item.lower() in animal['name'].lower():
+                is_animal = True
+                item = animal["name"]
+                animal_obj = animal
 
-    if item.lower(
-    ) == 'watch' or item.lower() == "dumbo octopus" and amount > 1:
-        item = item + "es"
-    if amount > 1 and item.lower() != 'watches' and item.lower(
-    ) != "dumbo octopus":
-        item = item + "s"
-
+    bal = await update_bank(ctx.author)
     if not res[0]:
         if res[1] == 1:
-            await ctx.send(":x: That Object isn't there!")
+            await ctx.send(":x: That item isn't in the shop!")
             return
         if res[1] == 2:
-            await ctx.send(f":x: You don't have {amount} {item} in your bag.")
+            await ctx.send(f":x: You don't have `{amount}x` {res[2].title()} in your bag.")
             return
         if res[1] == 3:
-            await ctx.send(f":x: You don't have {item} in your bag.")
+            await ctx.send(f":x: You don't have {res[2].title()} in your bag.")
             return
-
-    await ctx.send(
-        f":white_check_mark: You just sold {amount} {item} for `{int(res[2]):,} Minions™`!"
-    )
+    e = discord.Embed(title=f"{ctx.author.name}'s Sale",color=discord.Color.random())
+    e.description = f":white_check_mark: You just sold `{amount}x` {res[3].title()} for `{int(res[2]):,} Minions™`!"
+    if is_animal:
+        e.set_footer(text=f"You got {int(res[2]-animal_obj['sell_price']):,} more minions because you had a {bal[3]:,}x booster!")
+    await ctx.send(embed=e)
 
 
 async def sell_this(user, item_name, amount, price=None):
@@ -1655,39 +1601,43 @@ async def sell_this(user, item_name, amount, price=None):
     name_ = None
     for item in mainshop:
         name = item["name"].lower()
-        if name == item_name:
+        if name == item_name or item_name in name:
             name_ = name
             if price == None:
                 price = 0.7 * item["price"]
             break
+    is_animal = False
     for item in animal_shop:
         for animal in item:
             name = animal["name"].lower()
-            if name == item_name:
+            if name == item_name or item_name in name:
                 name_ = name
+                is_animal = True
                 if price == None:
                     price = animal["sell_price"]
                 break
 
     if name_ == None:
-        return [False, 1]
-
-    cost = price * amount
+        return [False, 1, name_]
+    cost = ...
 
     users = await get_bank_data()
 
     bal = await update_bank(user)
-
+    if is_animal:
+        cost = price * amount * bal[3]
+    else:
+        cost = price * amount
     try:
         index = 0
         t = None
         for thing in users[str(user.id)]["bag"]:
             n = thing["item"]
-            if n == item_name:
+            if n == name_:
                 old_amt = thing["amount"]
                 new_amt = old_amt - amount
                 if new_amt < 0:
-                    return [False, 2]
+                    return [False, 2, name_]
                 users[str(user.id)]["bag"][index]["amount"] = new_amt
                 if users[str(user.id)]["bag"][index]["amount"] == 0:
                     del users[str(user.id)]["bag"][index]
@@ -1695,16 +1645,16 @@ async def sell_this(user, item_name, amount, price=None):
                 break
             index += 1
         if t == None:
-            return [False, 3]
+            return [False, 3,name_]
     except:
-        return [False, 3]
+        return [False, 3,name_]
 
     with open("databases/mainbank.json", "w") as f:
         json.dump(users, f, indent=4)
 
     await update_bank(user, cost, "wallet")
 
-    return [True, "Worked", cost]
+    return [True, "Worked", cost, name_]
 
 
 async def open_account(user):
@@ -1712,13 +1662,13 @@ async def open_account(user):
     jobs = await get_job_data()
     lootbox_data = await get_lootbox_data()
 
-    if str(user.id) in users or user.bot:
-        return False
-    else:
+        
+    if not str(user.id) in users:
         users[str(user.id)] = {}
         users[str(user.id)]["wallet"] = random.randint(0, 3000)
         users[str(user.id)]["bank"] = 0
         users[str(user.id)]["booster"] = 1
+        users[str(user.id)]["max"] = 10
     if not str(user.id) in jobs:
         jobs[str(user.id)] = {}
         jobs[str(user.id)]["job"] = {}
@@ -1772,7 +1722,7 @@ async def update_bank(user, change=0, mode='wallet'):
 
     with open('databases/mainbank.json', 'w') as f:
         json.dump(users, f, indent=4)
-    bal = users[str(user.id)]['wallet'], users[str(user.id)]['bank']
+    bal = users[str(user.id)]['wallet'], users[str(user.id)]['bank'],users[str(user.id)]['max'],users[str(user.id)]['booster']
     return bal
 
 
@@ -1876,50 +1826,6 @@ async def poop(ctx):
     )
 
 
-@client.command(aliases=['viewbal', 'vb', 'vbal'])
-async def viewbalance(ctx, user: discord.Member):
-    id = str(user.id)
-    users = await get_bank_data()
-    jobs = await get_job_data()
-    if not str(user.id) in jobs:
-        jobs[str(user.id)] = {}
-        jobs[str(user.id)]["job"] = {}
-        jobs[str(user.id)]["job"]["name"] = 'None'
-        jobs[str(user.id)]["job"]["pay"] = 0
-        with open('databases/jobs.json', 'w') as f:
-            json.dump(jobs, f, indent=4)
-
-    if id not in users:
-        await ctx.send(":x: That user isn't registered")
-    else:
-        wallet_amt = users[str(id)]["wallet"]
-        bank_amt = users[str(id)]["bank"]
-        booster_amt = users[str(id)]["booster"]
-        job_name = jobs[str(user.id)]["job"]["name"]
-        job_pay = jobs[str(user.id)]["job"]["pay"]
-        em = discord.Embed(title=f"Showing balance of {user.display_name}",
-                           color=discord.Color.green())
-        if wallet_amt + bank_amt >= 1000000000000000:
-            em.add_field(name="Wallet Balance",
-                         value=f"{float(wallet_amt)} Minions™")
-            em.add_field(name='Bank Balance',
-                         value=f"{float(bank_amt)} Minions™")
-            em.add_field(name='Job', value=job_name)
-            em.add_field(name='Job salary',
-                         value=f"{float(job_pay)} Minions™ per hour")
-            if booster_amt != 1:
-                em.add_field(name='Booster', value=f'{float(booster_amt)}x')
-        else:
-            em.add_field(name="Wallet Balance",
-                         value=f"{int(wallet_amt)} Minions™")
-            em.add_field(name='Bank Balance',
-                         value=f"{int(bank_amt)} Minions™")
-            em.add_field(name='Job', value=job_name)
-            em.add_field(name='Job salary',
-                         value=f"{int(job_pay)} Minions™ per hour")
-            if booster_amt != 1:
-                em.add_field(name='Booster', value=f'{int(booster_amt)}x')
-        await ctx.send(embed=em)
 
 
 @client.command(aliases=['scn'])
@@ -2001,7 +1907,7 @@ async def membercount(ctx):
         pass
 
 
-@client.command(aliases=["lb"])
+@client.command(aliases=["lb","rich"])
 async def leaderboard(ctx, x: Optional[int] = 10, type_of="all"):
     if type_of.lower() != "all" and type_of.lower() != "server":
         return await ctx.send(
@@ -2033,7 +1939,7 @@ async def leaderboard(ctx, x: Optional[int] = 10, type_of="all"):
 
             name = member.name
             em.add_field(name=f"{index}. {name}",
-                         value=f"{int(leader_board[key])}",
+                         value=f"{int(leader_board[key]):,}",
                          inline=False)
             if index == x:
                 break
@@ -2090,11 +1996,23 @@ async def emojify(ctx, *, text):
 
     await ctx.send(' '.join(emojis))
 
-
+fake_cmds = ['balance', '_help']
 @client.event
 async def on_message(message):
     with open('databases/prefixes.json', 'r') as f:
         prefixes = json.load(f)
+    if message.guild != None:
+        ctx = await client.get_context(message)
+        if message.content.lower().startswith(prefixes[str(ctx.guild.id)]):
+            if ctx.valid and ctx.command:
+                if not str(ctx.command) in fake_cmds:
+                    with open('databases/mainbank.json','r') as f:
+                        bank = json.load(f)
+                    data = bank[str(ctx.author.id)]['max']
+                    data += random.randint(50,1000)
+                    bank[str(ctx.author.id)]['max'] = int(data)
+                    with open('databases/mainbank.json','w') as f:
+                        json.dump(bank, f,indent=4)
     try:
         prefix = prefixes[str(message.guild.id)]
         if ":loading:" in message.content and message.guild.id == 762829356812206090 and message.author.id != client.user.id and message.content[
@@ -2293,6 +2211,9 @@ async def reroll(ctx, message_id: int):
     with open('databases/giveaways.json') as f: 
         g = json.load(f)
     users = []
+    g[str(gaw_msg.id)]['ended'] = True
+    with open('databases/giveaways.json','w') as f: 
+        json.dump(g, f)
     for i in g[str(gaw_msg.id)]['users']:
         user = client.get_user(int(i))
         users.append(user)
@@ -2308,6 +2229,9 @@ async def reroll(ctx, message_id: int):
         await gaw_msg.edit(embed=embed)
         await ctx.send("No one won since no one entered!")
         return
+    btn = JoinGiveaway(str(gaw_msg.id))
+    for i in btn.children:
+        i.disabled = True
     prize = gaw_msg.embeds[0].description.partition("\nWinner: ")[0].split(
         'is giving away')[1].replace(f"\n{len(users)} entrant{'s' if len(users) >1 else ''}",'')[:-2]
     e = discord.Embed(description="None", color=discord.Color.random())
@@ -2319,10 +2243,9 @@ async def reroll(ctx, message_id: int):
         embed.description += f"\nWinner: {winner.mention}"
     else:
         em = embed.description.partition("\nWinner: ")[0]
-        print(em)
         embed.description = em
         embed.description += f"\nWinner: {winner.mention}"
-    await gaw_msg.edit(embed=embed)
+    await gaw_msg.edit(embed=embed,view=btn)
     await ctx.send(
         f"YAYYYYY!!!! {winner.mention} has won the giveaway for{prize}!!",
         embed=e)
@@ -2532,8 +2455,7 @@ async def usertoid_error(ctx, error):
 
 
 class JoinGiveaway(discord.ui.View):
-    def __init__(self,author, msg_id):
-        self.author = author
+    def __init__(self, msg_id):
         super().__init__(timeout=None)
         self.msg_id = msg_id
     @discord.ui.button(label="Join Giveaway!", style=discord.ButtonStyle.green,custom_id='giveaway:join')
@@ -2616,7 +2538,7 @@ async def check_giveaway_ended():
                 with open('databases/giveaways.json','w') as f: 
                     json.dump(g, f,indent=4)
                 continue
-            btn = JoinGiveaway(client.get_user(int(i['author'])),int(giveaway))
+            btn = JoinGiveaway(int(giveaway))
             await channel.send("Picking a random user!")
             await asyncio.sleep(1)
             embed.title = "GIVEAWAY ENDED"
@@ -2696,7 +2618,7 @@ async def gcreate(ctx, time=None, *, prize=None):
     
     with open('databases/giveaways.json','w') as f:
         json.dump(g, f, indent=4)
-    btn = JoinGiveaway(ctx.author, gaw_msg.id)
+    btn = JoinGiveaway(gaw_msg.id)
     
     await gaw_msg.edit(view=btn)
     
@@ -2749,6 +2671,9 @@ async def bankrob(ctx, user: discord.Member):
     await open_account(user)
     bal1 = await update_bank(user)
     bal = await update_bank(ctx.author)
+    if bal[0] < 5000:
+        bankrob.reset_cooldown(ctx)
+        return await ctx.send("You need at least `5000 Minions™️` to bankrob someone.")
     if user.id == 717512097725939795:
         bankrob.reset_cooldown(ctx)
         return await ctx.send(
@@ -2759,18 +2684,18 @@ async def bankrob(ctx, user: discord.Member):
         return
     else:
         earning = random.randrange(0, bal1[1])
-        fail_losing = random.randrange(0, bal[0])
+        fail_losing = random.randrange(0, int(bal[0]/2))
 
         type = random.randint(0, 1)
         if type == 0:
             await ctx.send(
-                f":x: You failed to rob {user} and paid them {fail_losing} Minions™!"
+                f":x: You failed to rob {user} and paid them {fail_losing:,} Minions™!"
             )
             await update_bank(user, fail_losing)
             await update_bank(ctx.author, fail_losing * -1)
         elif type == 1:
             await ctx.send(
-                f":white_check_mark: You successfully robbed {user} and got {earning} Minions™!"
+                f":white_check_mark: You successfully robbed {user} and got {earning:,} Minions™!"
             )
             await update_bank(ctx.author, earning)
             await update_bank(user, earning * -1)
@@ -2870,10 +2795,6 @@ async def crates(ctx, user: discord.Member = None):
         e.add_field(name="Epic", value=epic_amt)
         e.add_field(name="Legendary", value=legendary_amt)
         e.add_field(name="Mythic", value=mythic_amt)
-        sradmin = get(ctx.guild.roles, name="Sr.Admin")
-        admin = get(ctx.guild.roles, name="Admin")
-        mod = get(ctx.guild.roles, name="Moderator")
-        owner = get(ctx.guild.roles, name="Owner")
         if admin_amt >= 1 or ctx.author.id == 717512097725939795:
             e.add_field(name="Admin", value=admin_amt)
         await ctx.reply(embed=e)
@@ -2905,7 +2826,7 @@ async def crates(ctx, user: discord.Member = None):
 
 
 @client.command()
-async def crate_info(ctx):
+async def crateinfo(ctx):
     e = discord.Embed(
         title="Crate Info",
         description="These are the loot tables for all the crates.",
@@ -2964,7 +2885,7 @@ async def opencrate(ctx, type=None, amount=None):
             e.add_field(
                 name=f"{ctx.author.name}'s crate opening session!",
                 value=
-                f"You opened {amt} **Admin** {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash} Minions™`!!! :tada:"
+                f"You opened {amt} **Admin** {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
             )
             await update_bank(ctx.author, total_cash)
             await ctx.reply(embed=e)
@@ -2987,7 +2908,7 @@ async def opencrate(ctx, type=None, amount=None):
             e.add_field(
                 name=f"{ctx.author.name}'s crate opening session!",
                 value=
-                f"You opened {amt} **Mythic** {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash} Minions™`!!! :tada:"
+                f"You opened {amt} **Mythic** {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
             )
             await update_bank(ctx.author, total_cash)
             await ctx.reply(embed=e)
@@ -3010,7 +2931,7 @@ async def opencrate(ctx, type=None, amount=None):
             e.add_field(
                 name=f"{ctx.author.name}'s crate opening session!",
                 value=
-                f"You opened {amt} **Legendary** {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash} Minions™`!!! :tada:"
+                f"You opened {amt} **Legendary** {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
             )
             await update_bank(ctx.author, total_cash)
             await ctx.reply(embed=e)
@@ -3033,7 +2954,7 @@ async def opencrate(ctx, type=None, amount=None):
             e.add_field(
                 name=f"{ctx.author.name}'s crate opening session!",
                 value=
-                f"You opened {amt} **Epic** {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash} Minions™`!!! :tada:"
+                f"You opened {amt} **Epic** {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
             )
             await update_bank(ctx.author, total_cash)
             await ctx.reply(embed=e)
@@ -3056,7 +2977,7 @@ async def opencrate(ctx, type=None, amount=None):
             e.add_field(
                 name=f"{ctx.author.name}'s crate opening session!",
                 value=
-                f"You opened {amt} **Rare** {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash} Minions™`!!! :tada:"
+                f"You opened {amt} **Rare** {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
             )
             await update_bank(ctx.author, total_cash)
             await ctx.reply(embed=e)
@@ -3079,7 +3000,7 @@ async def opencrate(ctx, type=None, amount=None):
             e.add_field(
                 name=f"{ctx.author.name}'s crate opening session!",
                 value=
-                f"You opened {amt} **Uncommon** {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash} Minions™`!!! :tada:"
+                f"You opened {amt} **Uncommon** {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
             )
             await update_bank(ctx.author, total_cash)
             await ctx.reply(embed=e)
@@ -3103,7 +3024,7 @@ async def opencrate(ctx, type=None, amount=None):
             e.add_field(
                 name=f"{ctx.author.name}'s crate opening session!",
                 value=
-                f"You opened {amt} **Common** {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash} Minions™`!!! :tada:"
+                f"You opened {amt} **Common** {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
             )
             await update_bank(ctx.author, total_cash)
             await ctx.reply(embed=e)
@@ -3185,7 +3106,7 @@ async def opencrate(ctx, type=None, amount=None):
         e.add_field(
             name=f"{ctx.author.name}'s crate opening session!",
             value=
-            f"You opened {amount} **Admin** {'crate' if amount == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash} Minions™`!!! :tada:"
+            f"You opened {amount} **Admin** {'crate' if amount == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
         )
         await update_bank(ctx.author, total_cash)
         await ctx.reply(embed=e)
@@ -3208,7 +3129,7 @@ async def opencrate(ctx, type=None, amount=None):
         e.add_field(
             name=f"{ctx.author.name}'s crate opening session!",
             value=
-            f"You opened {amount} **Mythic** {'crate' if amount == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash} Minions™`!!! :tada:"
+            f"You opened {amount} **Mythic** {'crate' if amount == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
         )
         await update_bank(ctx.author, total_cash)
         await ctx.reply(embed=e)
@@ -3231,7 +3152,7 @@ async def opencrate(ctx, type=None, amount=None):
         e.add_field(
             name=f"{ctx.author.name}'s crate opening session!",
             value=
-            f"You opened {amount} **Legendary** {'crate' if amount == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash} Minions™`!!! :tada:"
+            f"You opened {amount} **Legendary** {'crate' if amount == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
         )
         await update_bank(ctx.author, total_cash)
         await ctx.reply(embed=e)
@@ -3254,7 +3175,7 @@ async def opencrate(ctx, type=None, amount=None):
         e.add_field(
             name=f"{ctx.author.name}'s crate opening session!",
             value=
-            f"You opened {amount} **Epic** {'crate' if amount == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash} Minions™`!!! :tada:"
+            f"You opened {amount} **Epic** {'crate' if amount == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
         )
         await update_bank(ctx.author, total_cash)
         await ctx.reply(embed=e)
@@ -3277,7 +3198,7 @@ async def opencrate(ctx, type=None, amount=None):
         e.add_field(
             name=f"{ctx.author.name}'s crate opening session!",
             value=
-            f"You opened {amount} **Rare** {'crate' if amount == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash} Minions™`!!! :tada:"
+            f"You opened {amount} **Rare** {'crate' if amount == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
         )
         await update_bank(ctx.author, total_cash)
         await ctx.reply(embed=e)
@@ -3300,7 +3221,7 @@ async def opencrate(ctx, type=None, amount=None):
         e.add_field(
             name=f"{ctx.author.name}'s crate opening session!",
             value=
-            f"You opened {amount} **Uncommon** {'crate' if amount == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash} Minions™`!!! :tada:"
+            f"You opened {amount} **Uncommon** {'crate' if amount == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
         )
         await update_bank(ctx.author, total_cash)
         await ctx.reply(embed=e)
@@ -3323,7 +3244,7 @@ async def opencrate(ctx, type=None, amount=None):
         e.add_field(
             name=f"{ctx.author.name}'s crate opening session!",
             value=
-            f"You opened {amount} **Common** {'crate' if amount == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash} Minions™`!!! :tada:"
+            f"You opened {amount} **Common** {'crate' if amount == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
         )
         await update_bank(ctx.author, total_cash)
         await ctx.reply(embed=e)
@@ -3982,5 +3903,5 @@ for filename in os.listdir("cogs"):
         client.load_extension(f'cogs.{filename[:-3]}')
 
 keep_alive()
-token = os.environ["DISCORD_BOT_TOKEN"]
+token = os.environ["discord_bot_token"]
 client.run(token)

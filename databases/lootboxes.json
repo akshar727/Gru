@@ -1,9 +1,9 @@
 {
     "717512097725939795": {
-        "common": 4,
+        "common": 3,
         "uncommon": 344,
         "rare": 838,
-        "epic": 20,
+        "epic": 22,
         "legendary": 8606,
         "mythic": 2502,
         "admin": 565664453956635
@@ -27,10 +27,10 @@
         "admin": 0
     },
     "859310142633803806": {
-        "common": 0,
-        "uncommon": 0,
+        "common": 1,
+        "uncommon": 1,
         "rare": 0,
-        "epic": 0,
+        "epic": 1,
         "legendary": 0,
         "mythic": 0,
         "admin": 0
@@ -45,9 +45,9 @@
         "admin": 0
     },
     "873224037080371260": {
-        "common": 2,
+        "common": 0,
         "uncommon": 0,
-        "rare": 2,
+        "rare": 0,
         "epic": 0,
         "legendary": 0,
         "mythic": 0,
@@ -135,12 +135,12 @@
         "admin": 0
     },
     "863076945180098600": {
-        "common": 0,
-        "uncommon": 0,
-        "rare": 0,
-        "epic": 0,
+        "common": 1,
+        "uncommon": 1,
+        "rare": 1,
+        "epic": 1,
         "legendary": 0,
-        "mythic": 0,
+        "mythic": 1,
         "admin": 0
     },
     "972282561642496060": {
@@ -200,6 +200,15 @@
     "938569864572964956": {
         "common": 0,
         "uncommon": 0,
+        "rare": 0,
+        "epic": 0,
+        "legendary": 0,
+        "mythic": 0,
+        "admin": 0
+    },
+    "739112359515390023": {
+        "common": 3,
+        "uncommon": 1,
         "rare": 0,
         "epic": 0,
         "legendary": 0,

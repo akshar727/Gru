@@ -7,13 +7,13 @@ import asyncio
 def get_economy_embed(prefix):
     economy_embed = discord.Embed(title="Help Commands",description='All the **Economy** commands in the bot. (Page 1)', color=0x00ff00)
     economy_embed.add_field(name=f'{prefix}bankrob <user>', value='''Allows you to rob a user's bank''', inline=False)
-    economy_embed.add_field(name=f'{prefix}get_job', value='Allows you to get a job a Gru enterprises™!', inline=False)
+    economy_embed.add_field(name=f'{prefix}work <job name>', value='Allows you to get a job a Gru enterprises™!', inline=False)
     economy_embed.add_field(name=f'{prefix}crates', value='Allows you to view all the crates you have.', inline=False)
     economy_embed.add_field(name=f'{prefix}open <type> <amount>', value='Allows you to open your crates!', inline=False)
-    economy_embed.add_field(name=f'{prefix}crate_info', value='Allows you to view the cash ranges of all the crates.', inline=False)
+    economy_embed.add_field(name=f'{prefix}crateinfo', value='Allows you to view the cash ranges of all the crates.', inline=False)
     economy_embed.add_field(name=f'{prefix}jobs', value='Shows a list of all jobs in Gru enterprises™!', inline=False)
     economy_embed.add_field(name=f'{prefix}work', value='''Allows you to work and make some money!''', inline=False)
-    economy_embed.add_field(name=f'{prefix}balance / {prefix}bal', value='To see your balance', inline=False)
+    economy_embed.add_field(name=f'{prefix}balance [user] / {prefix}bal [user]', value='Allows you to see the balance of you and others.', inline=False)
     economy_embed.set_footer(text="Arguments that are surrounded in [] are optional. Page 1/3")
 
     economy_embed_2 = discord.Embed(title="Help Commands",description='All the **Economy** commands in the bot. (Page 2)', color=0x00ff00)
@@ -30,13 +30,37 @@ def get_economy_embed(prefix):
     economy_embed_3 = discord.Embed(title="Help Commands",description='All the **Economy** commands in the bot. (Page 3)', color=0x00ff00)
     economy_embed_3.add_field(name=f'{prefix}sell [amount] <item>', value='Allows you to sell items you get.', inline=False)
     economy_embed_3.add_field(name=f'{prefix}inventory / {prefix}inv', value='Shows you inventory', inline=False)
-    economy_embed_3.add_field(name=f'{prefix}viewbal <user>',value='''Allows you to view someone else's balance''',inline=False)
     economy_embed_3.add_field(name=f'{prefix}leaderboard [amount] [type] / {prefix}lb [amount] <type>', value='''Allows you to see the richest people in the bot!The types are `all` to see al users in the leaderboard and `server` to see only users in this server.''', inline=False)
     economy_embed_3.add_field(name=f'{prefix}daily / {prefix}weekly', value='''Allows you to earn some Minions™️!''', inline=False)
     economy_embed_3.add_field(name=f'{prefix}hunt', value="Allows you to hunt for animals and sell them in the shop!", inline=False)
     economy_embed_3.add_field(name=f'{prefix}fish', value="Allows you to fish for animals and sell them in the shop!", inline=False)
+    economy_embed_3.add_field(name=f'{prefix}work resign', value="Allows you to resign from your current job!", inline=False)
     economy_embed_3.set_footer(text="Arguments that are surrounded in [] are optional. Page 3/3")
     ems = [economy_embed, economy_embed_2, economy_embed_3]
+    return ems
+
+
+def get_moderation_embeds(prefix):
+    page1 = discord.Embed(title="Help Commands", description='All the **Moderaation** commands in the bot. (Page 1)', color=0x00ff00)
+    page1.add_field(name='gcreate <amount of time> <prize>',value='Allows you to create a giveaway. Requires Manage Guild')
+    page1.add_field(name='reroll <giveaway message id>',value='Allows you reroll a giveaway. Can also be used to forcefully end a giveaway. Requires Manage Guild')
+    page1.add_field(name='config',value='Allows you to change server configurations. Requires Manage Guild')
+    page1.add_field(name='takerole <user> <role> ', value="Allows you to take a role away from someone. Requires Manage Roles.")
+    page1.add_field(name='reactrole <emoji> <role> <message> ', value="Allows you to create reactions roles. Requires Manage Roles.")
+    page1.add_field(name='scn / set_channel_name  <original channel name> <new channel name> ', value="Allows you to change a channel's name. Requires Manage Channels.")
+    page1.add_field(name='giverole <user> <role> ', value="Allows you to give a role to someone.**NOTE** You can only give roles up to your highest rank. Requires Manage Roles.")
+    page1.add_field(name='prefix <prefix> ', value="Allows you to change the prefix of the bot in this server(**Owner only**)")
+    page1.set_footer(text="Arguments that are surrounded in [] are optional. Page 1/2")
+    
+    page2 = discord.Embed(title="Help Commands", description='All the **Moderaation** commands in the bot. (Page 2)', color=0x00ff00)
+    page2.add_field(name='kick <user> <reason> ', value="Allows you to kick a user with a reason. Requires Kick Users.")
+    page2.add_field(name='ban <user> <reason> ', value="Allows you to ban a user with a reason. Requires Ban Users.")
+    page2.add_field(name='unban <user> ', value="Allows you to unban a user. Requires Ban Users.")
+    page2.add_field(name='mute <user> <time> ', value="Allows you to mute a user. Requires Manage Roles.")
+    page2.add_field(name='unmute <user> <time>', value="Allows you to unmute a user. Requires Manage Roles.")
+    page2.set_footer(text="Arguments that are surrounded in [] are optional. Page 2/2")
+
+    ems = [page1, page2]
     return ems
 
 
@@ -51,10 +75,10 @@ def get_music_embeds(prefix):
     page1.add_field(name=f"{prefix}volume <volume>", value="Changes the volume of the music.", inline=False)
     page1.add_field(name=f"{prefix}skip",value="Skips the current song to the next one in the queue.", inline=False)
     page1.set_footer(text="Arguments that are surrounded in [] are optional. Page 1/2")
-
+    
     page2 = discord.Embed(title="Help Commands", description='All the **Music** commands in the bot. (Page 2)', color=0x00ff00)
     page2.add_field(name=f"{prefix}queue / {prefix}q", value="Shows the queue for music.", inline=False)
-    page2.add_field(name=f"{prefix}np / {prefix}nowplaying",value="Shows th ecurrently playing song and details.", inline=False)
+    page2.add_field(name=f"{prefix}np / {prefix}nowplaying",value="Shows the currently playing song and details.", inline=False)
 
     pages = [page1, page2]
     return pages
@@ -119,6 +143,8 @@ class HelpOptions(discord.ui.Select):
     async def callback(self, interaction: discord.Interaction) -> None:
         type = self.values[0]
         prefix = self.prefixes[str(interaction.guild_id)]
+        if interaction.user != self.parent.author:
+            return await interaction.response.send_message("This is not your help menu.",ephemeral=True)
         if type == "Economy":
             self.parent.children[0].disabled = True
             self.parent.children[1].disabled = True
@@ -152,15 +178,29 @@ class HelpOptions(discord.ui.Select):
             self.current_embed = em[0]
             self.embeds = em
             await interaction.response.edit_message(embed=em[0],view = self.parent)
+        elif type == "Moderation":
+            self.parent.children[0].disabled = True
+            self.parent.children[1].disabled = True
+            self.parent.children[2].disabled = False
+            self.parent.children[3].disabled = False
+            em = get_moderation_embeds(prefix)
+            for i in em:
+                i.set_author(name=interaction.user.name, icon_url=interaction.user.display_avatar)
+            self.current_embed = em[0]
+            self.embeds = em
+            await interaction.response.edit_message(embed=em[0],view = self.parent)
 
 class CategoriesView(discord.ui.View):
-    def __init__(self):
+    def __init__(self, author):
         super().__init__(timeout=100)
+        self.author = author
         self.select = HelpOptions(self)
         self.add_item(self.select)
 
     @discord.ui.button(emoji="<:left_two:982623041228013570>",style=discord.ButtonStyle.green, disabled=True)
     async def begin(self, button: discord.ui.Button, interaction: discord.Interaction):
+        if interaction.user != self.author:
+            return await interaction.response.send_message("This is not your help menu.",ephemeral=True)
         em = self.select.embeds[0]
         self.select.current_embed = em
         button.disabled = True
@@ -170,6 +210,8 @@ class CategoriesView(discord.ui.View):
         await interaction.response.edit_message(embed=em,view=self)
     @discord.ui.button(emoji="<:left_one:982623094235615232>",style=discord.ButtonStyle.green, disabled=True)
     async def back(self, button: discord.ui.Button, interaction: discord.Interaction):
+        if interaction.user != self.author:
+            return await interaction.response.send_message("This is not your help menu.",ephemeral=True)
         em = self.select.embeds[self.select.embeds.index(self.select.current_embed)-1]
         self.select.current_embed = em
         if self.select.embeds[0] == em:
@@ -186,6 +228,8 @@ class CategoriesView(discord.ui.View):
         await interaction.response.edit_message(embed=em,view=self)
     @discord.ui.button(emoji="<:right_one:982622882469404683>",style=discord.ButtonStyle.green, disabled=True)
     async def forward(self, button: discord.ui.Button, interaction: discord.Interaction):
+        if interaction.user != self.author:
+            return await interaction.response.send_message("This is not your help menu.",ephemeral=True)
         em = self.select.embeds[self.select.embeds.index(self.select.current_embed)+1]
         self.select.current_embed = em
         if self.select.embeds[-1] == em:
@@ -200,6 +244,8 @@ class CategoriesView(discord.ui.View):
         await interaction.response.edit_message(embed=em,view=self)
     @discord.ui.button(emoji="<:right_two:982622978279899206>",style=discord.ButtonStyle.green, disabled=True)
     async def end(self, button: discord.ui.Button, interaction: discord.Interaction):
+        if interaction.user != self.author:
+            return await interaction.response.send_message("This is not your help menu.",ephemeral=True)
         em = self.select.embeds[-1]
         self.select.current_embed = em
         button.disabled = True
@@ -213,8 +259,9 @@ class CategoriesView(discord.ui.View):
                 x.disabled = True
             self.select.disabled = True
             await self.message.edit(view=self)
-        except:
-            pass
+        except Exception as e:
+            print(e)
+
 
 
 
@@ -233,28 +280,8 @@ class Info(commands.Cog):
         embedvar = discord.Embed(title="Help Commands", color=0x00ff00)
         embedvar.description = "Choose a category below!"
         embedvar.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
-        view = CategoriesView()
+        view = CategoriesView(ctx.author)
         view.message = await ctx.send(embed=embedvar,view=view)
 
-
-    @commands.command()
-    async def adminhelp(self, ctx):
-        ##FIXXXXXX
-        embedvar = discord.Embed(title="Admin Help Commands", description='All the commands in the bot that users with permissions can use.', color=0x00ff00)
-        embedvar.add_field(name='gcreate <amount of time> <prize>',value='Allows you to create a giveaway. Requires Manage Guild')
-        embedvar.add_field(name='reroll <giveaway message id>',value='Allows you reroll a giveaway. Can also be used to forcefully end a giveaway. Requires Manage Guild')
-        embedvar.add_field(name='config',value='Allows you to change server configurations. Requires Manage Guild')
-        embedvar.add_field(name='takerole <user> <role> ', value="Allows you to take a role away from someone. Requires Manage Roles.")
-        embedvar.add_field(name='reactrole <emoji> <role> <message> ', value="Allows you to create reactions roles. Requires Manage Roles.")
-        embedvar.add_field(name='scn / set_channel_name  <original channel name> <new channel name> ', value="Allows you to change a channel's name. Requires Manage Channels.")
-        embedvar.add_field(name='giverole <user> <role> ', value="Allows you to give a role to someone.**NOTE** You can only give roles up to your highest rank. Requires Manage Roles.")
-        embedvar.add_field(name='prefix <prefix> ', value="Allows you to change the prefix of the bot in this server(**Owner only**)")
-        embedvar.add_field(name='kick <user> <reason> ', value="Allows you to kick a user with a reason. Requires Kick Users.")
-        embedvar.add_field(name='ban <user> <reason> ', value="Allows you to ban a user with a reason. Requires Ban Users.")
-        embedvar.add_field(name='unban <user> ', value="Allows you to unban a user. Requires Ban Users.")
-        embedvar.add_field(name='mute <user> <time> ', value="Allows you to mute a user. Requires Manage Roles.")
-        embedvar.add_field(name='unmute <user> <time>', value="Allows you to unmute a user. Requires Manage Roles.")
-        embedvar.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
-        await ctx.send(embed=embedvar)
 def setup(client):
     client.add_cog(Info(client))

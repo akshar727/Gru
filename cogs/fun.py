@@ -91,6 +91,7 @@ class Fun(commands.Cog):
         await hack_msg.edit(f"Retrieving Login and more from discord/users/{user.name}... SUCCESS")
         await asyncio.sleep(1.5)
         await hack_msg.edit(f"discord/users/{user.name}... SUCCESS")
+        await asyncio.sleep(0.7)
         await hack_msg.edit("Bypassing keys...")
         await asyncio.sleep(0.9)
         await hack_msg.edit("Initializing lockdown and changing password...")

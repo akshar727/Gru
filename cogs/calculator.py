@@ -73,9 +73,10 @@ class Calculator_Buttons(discord.ui.View):
     async def exit(self, button: discord.ui.Button, interaction: discord.Interaction):
         if interaction.user.id == self.author.id:
             await self.calculator_message.edit("The calculator is closing...")
-            await asyncio.sleep(1)
-            await self.calculator_message.delete()
+            for i in self.children:
+                i.disabled = True
             self.calculator_users.remove(str(self.author.id))
+            await self.calculator_message.edit(view=self)
             self.stop()
 
     @discord.ui.button(label="4", style=discord.ButtonStyle.grey, row=1)
@@ -209,8 +210,8 @@ class Calculator_Buttons(discord.ui.View):
                 self.calculator_embed.description += button.label
             await self.calculator_message.edit(embed=self.calculator_embed)
 
-    @discord.ui.button(label="0000", style=discord.ButtonStyle.grey, row=3)
-    async def four_zero(self, button: discord.ui.Button, interaction: discord.Interaction):
+    @discord.ui.button(label="//", style=discord.ButtonStyle.grey, row=3)
+    async def floor_div(self, button: discord.ui.Button, interaction: discord.Interaction):
         if len(self.calculator_embed.description + button.label) >= 4096:
             return
         if interaction.user.id == self.author.id:
