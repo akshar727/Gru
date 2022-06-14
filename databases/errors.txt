@@ -1,7 +1,16 @@
 Traceback (most recent call last):
   File "/opt/virtualenvs/python3/lib/python3.8/site-packages/nextcord/ext/commands/core.py", line 168, in wrapped
     ret = await coro(*args, **kwargs)
-  File "main.py", line 1596, in sell
-    e.set_footer(text=f"You got {int(res[2]-animal_obj['price']):,} more minions because you had a {bal[3]:,}x booster!")
-KeyError: 'price'
+  File "main.py", line 937, in purge
+    await ctx.reply('Done!',delete_after=2)
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/nextcord/ext/commands/context.py", line 400, in reply
+    return await self.message.reply(content, **kwargs)
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/nextcord/message.py", line 1642, in reply
+    return await self.channel.send(content, reference=self, **kwargs)
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/nextcord/abc.py", line 1434, in send
+    data = await state.http.send_message(
+  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/nextcord/http.py", line 337, in request
+    raise HTTPException(response, data)
+nextcord.errors.HTTPException: 400 Bad Request (error code: 50035): Invalid Form Body
+In message_reference: Unknown message
 

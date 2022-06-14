@@ -22,7 +22,7 @@ class Encryption(commands.Cog):
                 prefixes = json.load(f)
             prefix = prefixes[str(ctx.guild.id)]
             em = discord.Embed(title="Encode Help",description=f"**{prefix}encode**\n\nAll encoding methods.\n\n**Commands**\n**{prefix}encode ascii85 <text>** - Encode in ASCII85\n**{prefix}encode base32 <text>** - Encode in base32\n**{prefix}encode base64 <text>** - Encode in base64\n**{prefix}encode base85 <text>** - Encode in base85\n**{prefix}encode hex <text>** - Encode in hex\n**{prefix}encode rot13 <text>** - Encode in rot13\n**{prefix}encode binary <text>** - Encode in binary",color=discord.Color.random()); em.set_footer(text=f"You can also upload .txt files to encode text also! You can view all the aliases of the encode/decode commands by doing '{prefix}encode aliases'.")
-            await ctx.send(embed=em)
+            await ctx.reply(embed=em)
 
     @commands.group()
     async def decode(self, ctx):
@@ -32,7 +32,7 @@ class Encryption(commands.Cog):
                 prefixes = json.load(f)
             prefix = prefixes[str(ctx.guild.id)]
             em = discord.Embed(title="Decode Help",description=f"**{prefix}decode**\n\nAll decoding methods.\n\n**Commands**\n**{prefix}decode ascii85 <text>** - Decode in ASCII85\n**{prefix}decode base32 <text>** - Decode in base32\n**{prefix}decode base64 <text>** - Decode in base64\n**{prefix}decode base85 <text>** - Decode in base85\n**{prefix}decode hex <text>** - Decode in hex\n**{prefix}decode rot13 <text>** - Decode in rot13\n**{prefix}decode binary <text>** - Decode in binary",color=discord.Color.random()); em.set_footer(text=f"You can also upload .txt files to decode text also! You can view all the aliases of the decode/encode commands by doing '{prefix}encode aliases'.")
-            await ctx.send(embed=em)
+            await ctx.reply(embed=em)
 
     @encode.command(name="aliases",aliases=["a"])
     async def coding_aliases(self, ctx):
@@ -44,7 +44,7 @@ class Encryption(commands.Cog):
         e.add_field(name="base85", value="Aliases:`b85`")
         e.add_field(name="ascii85", value="Aliases:`a85`")
         e.add_field(name="binary", value="Aliases:`bin`, `bi`")
-        await ctx.send(embed=e)
+        await ctx.reply(embed=e)
 
     async def detect_file(self, ctx):
         """ Detect if user uploaded a file to convert longer text """
@@ -74,14 +74,14 @@ class Encryption(commands.Cog):
                 data = BytesIO(input)
 
             try:
-                return await ctx.send(content=f"📑 **{convert}**", file=discord.File(data, filename=default.timetext("Encryption")))
+                return await ctx.reply(content=f"📑 **{convert}**", file=discord.File(data, filename=default.timetext("Encryption")))
             except discord.HTTPException:
-                return await ctx.send(f"The file I returned was over 8 MB, sorry {ctx.author.name}...")
+                return await ctx.reply(f"The file I returned was over 8 MB, sorry {ctx.author.name}...")
 
         try:
-            return await ctx.send(f"📑 **{convert}**```fix\n{input.decode('utf-8')}```")
+            return await ctx.reply(f"📑 **{convert}**```fix\n{input.decode('utf-8')}```")
         except AttributeError:
-            return await ctx.send(f"📑 **{convert}**```fix\n{input}```")
+            return await ctx.reply(f"📑 **{convert}**```fix\n{input}```")
 
     @encode.command(name="base32", aliases=["b32"])
     async def encode_base32(self, ctx, *, input: commands.clean_content = None):
@@ -90,7 +90,7 @@ class Encryption(commands.Cog):
             try:
                 input = await self.detect_file(ctx)
             except:
-                await ctx.send("Give me something to encode!")
+                await ctx.reply("Give me something to encode!")
                 return
 
         await self.encryptout(
@@ -104,12 +104,12 @@ class Encryption(commands.Cog):
             try:
                 input = await self.detect_file(ctx)
             except:
-                await ctx.send("Give me something to decode!")
+                await ctx.reply("Give me something to decode!")
                 return
         try:
             await self.encryptout(ctx, "base32 -> Text", base64.b32decode(input.encode("utf-8")))
         except Exception:
-            await ctx.send(f"**{ctx.author.name}**, Invalid base32...")
+            await ctx.reply(f"**{ctx.author.name}**, Invalid base32...")
 
     @encode.command(name="base64", aliases=["b64"])
     async def encode_base64(self, ctx, *, input: commands.clean_content = None):
@@ -118,7 +118,7 @@ class Encryption(commands.Cog):
             try:
                 input = await self.detect_file(ctx)
             except:
-                return await ctx.send("Give me something to encode!")
+                return await ctx.reply("Give me something to encode!")
         await self.encryptout(
             ctx, "Text -> base64", base64.urlsafe_b64encode(input.encode("utf-8"))
         )
@@ -130,11 +130,11 @@ class Encryption(commands.Cog):
             try:
                 input = await self.detect_file(ctx)
             except:
-                return await ctx.send("Give me something to decode!")
+                return await ctx.reply("Give me something to decode!")
         try:
             await self.encryptout(ctx, "base64 -> Text", base64.urlsafe_b64decode(input.encode("utf-8")))
         except Exception:
-            await ctx.send(f"**{ctx.author.name}**, Invalid base64...")
+            await ctx.reply(f"**{ctx.author.name}**, Invalid base64...")
 
     @encode.command(name="rot13", aliases=["r13"])
     async def encode_rot13(self, ctx, *, input: commands.clean_content = None):
@@ -143,7 +143,7 @@ class Encryption(commands.Cog):
             try:
                 input = await self.detect_file(ctx)
             except:
-                return await ctx.send("Give me something to encode!")
+                return await ctx.reply("Give me something to encode!")
         await self.encryptout(
             ctx, "Text -> rot13", codecs.decode(input, "rot_13")
         )
@@ -155,11 +155,11 @@ class Encryption(commands.Cog):
             try:
                 input = await self.detect_file(ctx)
             except:
-                return await ctx.send("Give me something to decode!")
+                return await ctx.reply("Give me something to decode!")
         try:
             await self.encryptout(ctx, "rot13 -> Text", codecs.decode(input, "rot_13"))
         except Exception:
-            await ctx.send(f"**{ctx.author.name}**, Invalid rot13...")
+            await ctx.reply(f"**{ctx.author.name}**, Invalid rot13...")
 
     @encode.command(name="hex")
     async def encode_hex(self, ctx, *, input: commands.clean_content = None):
@@ -168,7 +168,7 @@ class Encryption(commands.Cog):
             try:
                 input = await self.detect_file(ctx)
             except:
-                return await ctx.send("Give me something to encode!")
+                return await ctx.reply("Give me something to encode!")
         await self.encryptout(
             ctx, "Text -> hex", binascii.hexlify(input.encode("utf-8"))
         )
@@ -180,11 +180,11 @@ class Encryption(commands.Cog):
             try:
                 input = await self.detect_file(ctx)
             except:
-                return await ctx.send("Give me something to decode!")
+                return await ctx.reply("Give me something to decode!")
         try:
             await self.encryptout(ctx, "hex -> Text", binascii.unhexlify(input.encode("utf-8")))
         except Exception:
-            await ctx.send(f"**{ctx.author.name}**, Invalid hex...")
+            await ctx.reply(f"**{ctx.author.name}**, Invalid hex...")
 
     @encode.command(name="base85", aliases=["b85"])
     async def encode_base85(self, ctx, *, input: commands.clean_content = None):
@@ -193,7 +193,7 @@ class Encryption(commands.Cog):
             try:
                 input = await self.detect_file(ctx)
             except:
-                return await ctx.send("Give me something to encode!")
+                return await ctx.reply("Give me something to encode!")
         await self.encryptout(
             ctx, "Text -> base85", base64.b85encode(input.encode("utf-8"))
         )
@@ -205,11 +205,11 @@ class Encryption(commands.Cog):
             try:
                 input = await self.detect_file(ctx)
             except:
-                return await ctx.send("Give me something to decode!")
+                return await ctx.reply("Give me something to decode!")
         try:
             await self.encryptout(ctx, "base85 -> Text", base64.b85decode(input.encode("utf-8")))
         except Exception:
-            await ctx.send(f"**{ctx.author.name}**, Invalid base85...")
+            await ctx.reply(f"**{ctx.author.name}**, Invalid base85...")
 
     @encode.command(name="ascii85", aliases=["a85"])
     async def encode_ascii85(self, ctx, *, input: commands.clean_content = None):
@@ -218,7 +218,7 @@ class Encryption(commands.Cog):
             try:
                 input = await self.detect_file(ctx)
             except:
-                return await ctx.send("Give me something to encode!")
+                return await ctx.reply("Give me something to encode!")
 
         await self.encryptout(
             ctx, "Text -> ASCII85", base64.a85encode(input.encode("utf-8"))
@@ -231,11 +231,11 @@ class Encryption(commands.Cog):
             try:
                 input = await self.detect_file(ctx)
             except:
-                return await ctx.send("Give me something to decode!")
+                return await ctx.reply("Give me something to decode!")
         try:
             await self.encryptout(ctx, "ASCII85 -> Text", base64.a85decode(input.encode("utf-8")))
         except Exception:
-            await ctx.send(f"**{ctx.author.name}**, Invalid ASCII85...")
+            await ctx.reply(f"**{ctx.author.name}**, Invalid ASCII85...")
 
     @encode.command(name="binary",aliases=["bin","bi"])
     async def encode_binary(self, ctx, *, input: commands.clean_content = None):
@@ -243,7 +243,7 @@ class Encryption(commands.Cog):
             try:
                 input = await self.detect_file(ctx)
             except:
-                return await ctx.send("Give me something to encode!")
+                return await ctx.reply("Give me something to encode!")
 
         m = bin(int.from_bytes(input.encode(), 'big')).replace('b', '')
         await self.encryptout(ctx, "Text -> Binary", m.encode("utf-8"))
@@ -254,13 +254,13 @@ class Encryption(commands.Cog):
             try:
                 input = await self.detect_file(ctx)
             except:
-                return await ctx.send("Give me something to decode!")
+                return await ctx.reply("Give me something to decode!")
 
         try:
             n = int(input.replace(" ", ""), 2)  # text being a command arg
             out=n.to_bytes((n.bit_length() + 7) // 8, 'big').decode()
         except Exception:
-            return await ctx.send(f"**{ctx.author.name}**, Invalid binary...")
+            return await ctx.reply(f"**{ctx.author.name}**, Invalid binary...")
 
         await self.encryptout(ctx, "Binary -> Text", out.encode("utf-8"))
 
@@ -272,7 +272,7 @@ class Encryption(commands.Cog):
             r = await http.get(f"https://disease.sh/v3/covid-19/countries/{country.lower()}", res_method="json")
 
             if "message" in r:
-                return await ctx.send(f"The API returned an error:\n{r['message']}")
+                return await ctx.reply(f"The API returned an error:\n{r['message']}")
 
             json_data = [
                 ("Total Cases", r["cases"]), ("Total Deaths", r["deaths"]),
@@ -291,7 +291,7 @@ class Encryption(commands.Cog):
                     name=name, value=f"{value:,}" if isinstance(value, int) else value
                 )
 
-            await ctx.send(
+            await ctx.reply(
                 f"**COVID-19** statistics in :flag_{r['countryInfo']['iso2'].lower()}: "
                 f"**{country.capitalize()}** *({r['countryInfo']['iso3']})*",
                 embed=embed
@@ -302,10 +302,10 @@ class Encryption(commands.Cog):
         if f'{ctx.author.id}' == "717512097725939795":
 
             """ Invite me to your server """
-            await ctx.send(
+            await ctx.reply(
                 f"**{ctx.author.name}**, use this URL to invite me\n<https://discord.com/api/oauth2/authorize?client_id=874328552965820416&permissions=8&scope=bot>")
         else:
-            await ctx.send(
+            await ctx.reply(
                 'Currently, no one but the owner of this bot can invite me.')
 
 def setup(bot):

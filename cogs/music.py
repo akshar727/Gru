@@ -105,7 +105,7 @@ class Music(commands.Cog):
 
         next_song = vc.queue.get()
         await vc.play(next_song)
-        await ctx.send(f"Now playing: `{next_song.title}`")
+        await ctx.reply(f"Now playing: `{next_song.title}`")
 
     @commands.command()
     async def play(self, ctx: commands.Context, *,
@@ -114,15 +114,15 @@ class Music(commands.Cog):
             vc: wavelink.Player = await ctx.author.voice.channel.connect(
                 cls=wavelink.Player)
         elif not getattr(ctx.author.voice, "channel", None):
-            return await ctx.send("Please join a voice channel!")
+            return await ctx.reply("Please join a voice channel!")
         else:
             vc: wavelink.Player = ctx.voice_client
         if vc.queue.is_empty and not vc.is_playing():
             await vc.play(search)
-            await ctx.send(f"Now playing: `{search.title}`")
+            await ctx.reply(f"Now playing: `{search.title}`")
         else:
             await vc.queue.put_wait(search)
-            await ctx.send(f"Added `{search.title}` to the queue...")
+            await ctx.reply(f"Added `{search.title}` to the queue...")
         vc.ctx = ctx
         try:
             if vc.loop: return
@@ -146,54 +146,66 @@ class Music(commands.Cog):
             vc: wavelink.Player = await ctx.author.voice.channel.connect(
                 cls=wavelink.Player)
         elif not getattr(ctx.author.voice, "channel", None):
-            return await ctx.send("Please join a voice channel!")
+            return await ctx.reply("Please join a voice channel!")
         else:
             vc: wavelink.Player = ctx.voice_client
         if not vc.is_playing():
-            return await ctx.send("You're not playing any music!")
+            return await ctx.reply("You're not playing any music!")
         
         em = discord.Embed(title="Music Panel", description="Control the bot by clicking on the buttons below")
         view = ControlPanel(vc, ctx)
-        view.message = await ctx.send(embed=em, view=view)
+        view.message = await ctx.reply(embed=em, view=view)
 
     @commands.command()
     async def pause(self, ctx: commands.Context):
+        if not ctx.voice_client and getattr(ctx.author.voice, "channel", None):
+            vc: wavelink.Player = await ctx.author.voice.channel.connect(
+                cls=wavelink.Player)
+            return await ctx.reply("You're not playing any music!")
+        else:
+            vc: wavelink.Player = ctx.voice_client
         if not ctx.voice_client or not vc.is_playing():
-            return await ctx.send("You're not playing any music!")
+            return await ctx.reply("You're not playing any music!")
         elif not getattr(ctx.author.voice, "channel", None):
-            return await ctx.send("Please join a voice channel!")
+            return await ctx.reply("Please join a voice channel!")
         else:
             vc: wavelink.Player = ctx.voice_client
         await vc.pause()
-        await ctx.send("I paused the music :D")
+        await ctx.reply("I paused the music :D")
 
     @commands.command()
     async def resume(self, ctx: commands.Context):
+        if not ctx.voice_client and getattr(ctx.author.voice, "channel", None):
+            vc: wavelink.Player = await ctx.author.voice.channel.connect(
+                cls=wavelink.Player)
+            return await ctx.reply("You're not playing any music!")
+        else:
+            vc: wavelink.Player = ctx.voice_client
         if not ctx.voice_client or not vc.is_playing():
-            return await ctx.send("You're not playing any music!")
+            return await ctx.reply("You're not playing any music!")
         elif not getattr(ctx.author.voice, "channel", None):
-            return await ctx.send("Please join a voice channel!")
+            return await ctx.reply("Please join a voice channel!")
         else:
             vc: wavelink.Player = ctx.voice_client
         await vc.resume()
-        await ctx.send("The music is back on!!")
+        await ctx.reply("The music is back on!!")
 
     @commands.command(aliases=['dc', 'stop'])
     async def disconnect(self, ctx: commands.Context):
         if not ctx.voice_client:
-            return await ctx.send("You're not playing any music!")
+            return await ctx.reply("You're not playing any music!")
         elif not getattr(ctx.author.voice, "channel", None):
-            return await ctx.send("Please join a voice channel!")
+            return await ctx.reply("Please join a voice channel!")
         else:
             vc: wavelink.Player = ctx.voice_client
         await vc.disconnect()
-        await ctx.send("The music has been stopped.")
+        await ctx.reply("The music has been stopped.")
     @commands.command()
     async def loop(self, ctx: commands.Context):
         if not ctx.voice_client:
-            return await ctx.send("You're not playing any music!")
+            return await ctx.reply("You're not playing any music!")
         elif not getattr(ctx.author.voice, "channel", None):
-            return await ctx.send("Please join a voice channel!")
+            return await ctx.reply("Please join a voice channel!")
         else:
             vc: wavelink.Player = ctx.voice_client
 
@@ -204,21 +216,21 @@ class Music(commands.Cog):
 
 
         if vc.loop:
-            return await ctx.send("Looping is now enabled!")
+            return await ctx.reply("Looping is now enabled!")
         else:
-            return await ctx.send("Looping is now disabled!")
+            return await ctx.reply("Looping is now disabled!")
 
                 
             
     @commands.command(aliases=['q'])
     async def queue(self,ctx: commands.Context):
         if not ctx.voice_client:
-            return await ctx.send("You're not playing any music!")
+            return await ctx.reply("You're not playing any music!")
         elif not getattr(ctx.author.voice, "channel", None):
-            return await ctx.send("Please join a voice channel!")
+            return await ctx.reply("Please join a voice channel!")
         vc: wavelink.Player = ctx.voice_client
         if vc.queue.is_empty:
-            return await ctx.send("The queue is empty.")
+            return await ctx.reply("The queue is empty.")
         em = discord.Embed(title="Queue",color=discord.Color.random())
         queue = vc.queue.copy()
         song_count = 0
@@ -226,56 +238,56 @@ class Music(commands.Cog):
             song_count += 1
             em.add_field(name=f"Song #{song_count}",value=f"{song}")
 
-        return await ctx.send(embed=em)
+        return await ctx.reply(embed=em)
 
     @commands.command(aliases=['vol'])
     async def volume(self, ctx: commands.Context, volume: int):
         if not ctx.voice_client:
-            return await ctx.send("You're not playing any music!")
+            return await ctx.reply("You're not playing any music!")
         elif not getattr(ctx.author.voice, "channel", None):
-            return await ctx.send("Please join a voice channel!")
+            return await ctx.reply("Please join a voice channel!")
         else:
             vc: wavelink.Player = ctx.voice_client
 
         if not vc.is_playing():
-            return await ctx.send("I'm not playing any music!")
+            return await ctx.reply("I'm not playing any music!")
 
         if volume > 100:
-            return await ctx.send("Hold on, thats wayyyy to high.")
+            return await ctx.reply("Hold on, thats wayyyy to high.")
         elif volume < 0:
-            return await ctx.send("Just stop the music if you don't wanna hear anything.")
+            return await ctx.reply("Just stop the music if you don't wanna hear anything.")
 
-        await ctx.send(f"Set the volume to `{volume}%`!")
+        await ctx.reply(f"Set the volume to `{volume}%`!")
         await vc.set_volume(volume)
 
     @commands.command()
     async def skip(self, ctx: commands.Context):
         if not ctx.voice_client:
-            return await ctx.send("You're not playing any music!")
+            return await ctx.reply("You're not playing any music!")
         elif not getattr(ctx.author.voice, "channel", None):
-            return await ctx.send("Please join a voice channel!")
+            return await ctx.reply("Please join a voice channel!")
         else:
             vc: wavelink.Player = ctx.voice_client
         if not vc.is_playing():
-            return await ctx.send("I'm not playing any music!")
+            return await ctx.reply("I'm not playing any music!")
         try:
             await vc.stop()
         except Exception:
-            return await ctx.send("The queue is empty!")
+            return await ctx.reply("The queue is empty!")
     @commands.command(aliases=["np","playing","current"])
     async def nowplaying(self, ctx: commands.Context):
         if not ctx.voice_client:
-            return await ctx.send("You're not playing any music!")
+            return await ctx.reply("You're not playing any music!")
         elif not getattr(ctx.author.voice, "channel", None):
-            return await ctx.send("Please join a voice channel!")
+            return await ctx.reply("Please join a voice channel!")
         else:
             vc: wavelink.Player = ctx.voice_client
         if not vc.is_playing():
-            return await ctx.send("I'm not playing any music!")
+            return await ctx.reply("I'm not playing any music!")
         em = discord.Embed(title=f"Now Playing: {vc.track.title}",description=f"Artist: {vc.track.author}", color=discord.Color.random())
         em.add_field(name="Duration",value=f"`{str(timedelta(seconds=vc.track.length))}`")
         em.add_field(name="Song URL",value=f"[Click Here]({str(vc.track.uri)})")
-        return await ctx.send(embed=em)
+        return await ctx.reply(embed=em)
         
 
 def setup(bot):

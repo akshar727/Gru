@@ -26,7 +26,7 @@ class games(commands.Cog):
         embed1.add_field(name = 'White' , value= '<:white_crewmate:898322074068713532>' , inline=False)
         
         # sending the message
-        msg = await ctx.send(embed=embed1)
+        msg = await ctx.reply(embed=embed1)
         
         # emojis
         emojis = {
@@ -57,13 +57,13 @@ class games(commands.Cog):
             # reactor meltdown - defeat
             description = "Reactor Meltdown.{0} was the imposter...".format(imposter.capitalize())
             embed = get_embed("Defeat", description, discord.Color.red())
-            await ctx.send(embed=embed)
+            await ctx.reply(embed=embed)
         else:
             # victory
             if str(self.reacted) == emojis[imposter]:
                 description = "**{0}** was the imposter...".format(imposter.capitalize())
                 embed = get_embed("Victory", description, discord.Color.blue())
-                await ctx.send(embed=embed)
+                await ctx.reply(embed=embed)
 
             # defeat
             else:
@@ -71,7 +71,7 @@ class games(commands.Cog):
                     if value == str(self.reacted):
                         description = "**{0}** was not the imposter...".format(key.capitalize())
                         embed = get_embed("Defeat", description, discord.Color.red())
-                        await ctx.send(embed=embed)
+                        await ctx.reply(embed=embed)
                         break
 
 

@@ -332,7 +332,7 @@ class Calculator(commands.Cog):
     @commands.command()
     async def calc(self,ctx):
         if f'{ctx.author.id}' in self.calculator_users:
-            await ctx.send("You already have a calculator open! Close it to open another one!")
+            await ctx.reply("You already have a calculator open! Close it to open another one!")
             return
         self.calculator_users.append(f'{ctx.author.id}')
         try:
@@ -341,7 +341,7 @@ class Calculator(commands.Cog):
             pass
         e = discord.Embed(title=f"{ctx.author.name}'s calculator! | {ctx.author.id}", description="0",
                           color=discord.Color.random())
-        p = await ctx.send("Calculator loading...", embed=e)
+        p = await ctx.reply("Calculator loading...", embed=e)
         view = Calculator_Buttons(ctx.author, p, e,self.calculator_users)
         await asyncio.sleep(1)
         await p.edit(view=view)

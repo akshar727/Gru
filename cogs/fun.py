@@ -16,21 +16,21 @@ class Fun(commands.Cog):
     @commands.cooldown(1, 120, commands.BucketType.user)
     async def hack(self,ctx, user: discord.Member = None):
         if user is None:
-            await ctx.send("Please enter a user to hack!(Unless you want to hack air)")
+            await ctx.reply("Please enter a user to hack!(Unless you want to hack air)")
             self.hack.reset_cooldown(ctx)
             return
         if user == self.bot:
-            await ctx.send("I AM UNHACKABLE.")
+            await ctx.reply("I AM UNHACKABLE.")
             return self.hack.reset_cooldown(ctx)
         if user.bot:
-            await ctx.send("MY KIND ARE UNHACKABLE. STAY AWAY.")
+            await ctx.reply("MY KIND ARE UNHACKABLE. STAY AWAY.")
             return self.hack.reset_cooldown(ctx)
         with open('databases/countries.txt', 'r') as f:
             countries = f.read()
             countries_list = list(map(str, countries.split()))
             country = random.choice(countries_list)
     
-        hack_msg = await ctx.send(f"Hacking! Target: {user}...")
+        hack_msg = await ctx.reply(f"Hacking! Target: {user}...")
         await asyncio.sleep(1)
         await hack_msg.edit("Trying To Access Discord Files... [▓  ]")
         await asyncio.sleep(0.9)

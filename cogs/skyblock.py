@@ -36,7 +36,7 @@ def get_name(name):
     return str(name)
 
 
-key = "d06df1bd-fe83-41c3-b9e5-9cac81b092af"
+key = "bf0d0232-adfd-4a5d-99cc-b11dae7674c8"
 
 
 
@@ -49,10 +49,10 @@ class Skyblock(commands.Cog):
     @commands.command(aliases=["nw"])
     async def networth(self,ctx, name=None, profileb=None):
         if name == None:
-            return await ctx.send("Please enter a name!")
+            return await ctx.reply("Please enter a name!")
         if get_uuid(name) == None:
             return await ctx.reply(f"No user found with name {name}!")
-        loading = await ctx.send("<a:loading:898340114164490261>")
+        loading = await ctx.reply("<a:loading:898340114164490261>")
         true = get_name(name)
         data = requests.get(f"https://api.hypixel.net/skyblock/profiles?key={key}&uuid={get_uuid(name)}")
         data = data.json()

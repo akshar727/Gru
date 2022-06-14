@@ -30,11 +30,12 @@ def get_economy_embed(prefix):
     economy_embed_3 = discord.Embed(title="Help Commands",description='All the **Economy** commands in the bot. (Page 3)', color=0x00ff00)
     economy_embed_3.add_field(name=f'{prefix}sell [amount] <item>', value='Allows you to sell items you get.', inline=False)
     economy_embed_3.add_field(name=f'{prefix}inventory / {prefix}inv', value='Shows you inventory', inline=False)
-    economy_embed_3.add_field(name=f'{prefix}leaderboard [amount] [type] / {prefix}lb [amount] <type>', value='''Allows you to see the richest people in the bot!The types are `all` to see al users in the leaderboard and `server` to see only users in this server.''', inline=False)
+    economy_embed_3.add_field(name=f'{prefix}leaderboard [amount] / {prefix}lb [amount]', value='''Allows you to see the richest people in the bot!The types are `all` to see al users in the leaderboard and `server` to see only users in this server.''', inline=False)
     economy_embed_3.add_field(name=f'{prefix}daily / {prefix}weekly', value='''Allows you to earn some Minions™️!''', inline=False)
     economy_embed_3.add_field(name=f'{prefix}hunt', value="Allows you to hunt for animals and sell them in the shop!", inline=False)
     economy_embed_3.add_field(name=f'{prefix}fish', value="Allows you to fish for animals and sell them in the shop!", inline=False)
     economy_embed_3.add_field(name=f'{prefix}work resign', value="Allows you to resign from your current job!", inline=False)
+    economy_embed_3.add_field(name=f'{prefix}work list', value="Allows you to see all jobs!", inline=False)
     economy_embed_3.set_footer(text="Arguments that are surrounded in [] are optional. Page 3/3")
     ems = [economy_embed, economy_embed_2, economy_embed_3]
     return ems
@@ -122,6 +123,7 @@ def get_fun_embeds(prefix):
     page4.add_field(name=f'{prefix}members', value='''Allows you to see how many people are in the server!''', inline=False)
     page4.add_field(name=f'{prefix}covid <country> / {prefix}covid19 <country>', value='''Allows you to see the covid statistics of a country!''', inline=False)
     page4.add_field(name=f'{prefix}roles', value='''Allows you to see all roles in the server!''', inline=False)
+    page4.add_field(name=f'{prefix}lvllb', value='''Allows you to see all the top users with the highest levels in the server!''', inline=False)
     page4.set_footer(text="Arguments that are surrounded in [] are optional. Page 4/4")
 
     fun_pages = [page1, page2,page3, page4]
@@ -131,7 +133,7 @@ def get_fun_embeds(prefix):
 class HelpOptions(discord.ui.Select):
     def __init__(self, buttons):
         self.parent = buttons
-        self.items = [discord.SelectOption(label="Economy"),
+        self.items = [discord.SelectOption(label="Economy",default=True),
                 discord.SelectOption(label="Fun"),
                 discord.SelectOption(label="Moderation"),
                 discord.SelectOption(label="Music")]
@@ -144,8 +146,13 @@ class HelpOptions(discord.ui.Select):
         type = self.values[0]
         prefix = self.prefixes[str(interaction.guild_id)]
         if interaction.user != self.parent.author:
-            return await interaction.response.send_message("This is not your help menu.",ephemeral=True)
+            await interaction.response.edit_message(view = self.parent)
+            return await interaction.send("This is not your help menu.",ephemeral=True)
         if type == "Economy":
+            self.options[0].default = True
+            self.options[1].default = False
+            self.options[2].default = False
+            self.options[3].default = False
             self.parent.children[0].disabled = True
             self.parent.children[1].disabled = True
             self.parent.children[2].disabled = False
@@ -157,6 +164,10 @@ class HelpOptions(discord.ui.Select):
             self.embeds = em
             await interaction.response.edit_message(embed=em[0],view=self.parent)
         elif type == "Fun":
+            self.options[1].default = True
+            self.options[2].default = False
+            self.options[3].default = False
+            self.options[0].default = False
             self.parent.children[0].disabled = True
             self.parent.children[1].disabled = True
             self.parent.children[2].disabled = False
@@ -168,6 +179,10 @@ class HelpOptions(discord.ui.Select):
             self.embeds = em
             await interaction.response.edit_message(embed=em[0],view = self.parent)
         elif type == "Music":
+            self.options[3].default = True
+            self.options[0].default = False
+            self.options[1].default = False
+            self.options[2].default = False
             self.parent.children[0].disabled = True
             self.parent.children[1].disabled = True
             self.parent.children[2].disabled = False
@@ -179,6 +194,10 @@ class HelpOptions(discord.ui.Select):
             self.embeds = em
             await interaction.response.edit_message(embed=em[0],view = self.parent)
         elif type == "Moderation":
+            self.options[2].default = True
+            self.options[3].default = False
+            self.options[0].default = False
+            self.options[1].default = False
             self.parent.children[0].disabled = True
             self.parent.children[1].disabled = True
             self.parent.children[2].disabled = False
@@ -192,7 +211,7 @@ class HelpOptions(discord.ui.Select):
 
 class CategoriesView(discord.ui.View):
     def __init__(self, author):
-        super().__init__(timeout=100)
+        super().__init__(timeout=30)
         self.author = author
         self.select = HelpOptions(self)
         self.add_item(self.select)
@@ -226,7 +245,7 @@ class CategoriesView(discord.ui.View):
             self.children[1].disabled = False
             self.children[2].disabled = False
         await interaction.response.edit_message(embed=em,view=self)
-    @discord.ui.button(emoji="<:right_one:982622882469404683>",style=discord.ButtonStyle.green, disabled=True)
+    @discord.ui.button(emoji="<:right_one:982622882469404683>",style=discord.ButtonStyle.green, disabled=False)
     async def forward(self, button: discord.ui.Button, interaction: discord.Interaction):
         if interaction.user != self.author:
             return await interaction.response.send_message("This is not your help menu.",ephemeral=True)
@@ -242,7 +261,7 @@ class CategoriesView(discord.ui.View):
             self.children[0].disabled = False
             self.children[1].disabled = False
         await interaction.response.edit_message(embed=em,view=self)
-    @discord.ui.button(emoji="<:right_two:982622978279899206>",style=discord.ButtonStyle.green, disabled=True)
+    @discord.ui.button(emoji="<:right_two:982622978279899206>",style=discord.ButtonStyle.green, disabled=False)
     async def end(self, button: discord.ui.Button, interaction: discord.Interaction):
         if interaction.user != self.author:
             return await interaction.response.send_message("This is not your help menu.",ephemeral=True)
@@ -259,8 +278,8 @@ class CategoriesView(discord.ui.View):
                 x.disabled = True
             self.select.disabled = True
             await self.message.edit(view=self)
-        except Exception as e:
-            print(e)
+        except:
+            pass
 
 
 
@@ -268,6 +287,8 @@ class CategoriesView(discord.ui.View):
 class Info(commands.Cog):
     def __init__(self, client):
         self.client = client
+        with open('databases/prefixes.json', 'r') as f:
+            self.prefixes = json.load(f)
 
     @commands.Cog.listener()
 
@@ -276,12 +297,10 @@ class Info(commands.Cog):
         print("Bot is ready to use.")
 
     @commands.command(aliases=['help'])
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def _help(self, ctx):
-        embedvar = discord.Embed(title="Help Commands", color=0x00ff00)
-        embedvar.description = "Choose a category below!"
-        embedvar.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
         view = CategoriesView(ctx.author)
-        view.message = await ctx.send(embed=embedvar,view=view)
+        view.message = await ctx.reply(embed=get_economy_embed(self.prefixes[str(ctx.guild.id)])[0],view=view)
 
 def setup(client):
     client.add_cog(Info(client))
