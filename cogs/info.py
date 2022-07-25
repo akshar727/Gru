@@ -59,6 +59,7 @@ def get_moderation_embeds(prefix):
     page2.add_field(name='unban <user> ', value="Allows you to unban a user. Requires Ban Users.")
     page2.add_field(name='mute <user> <time> ', value="Allows you to mute a user. Requires Manage Roles.")
     page2.add_field(name='unmute <user> <time>', value="Allows you to unmute a user. Requires Manage Roles.")
+    page2.add_field(name='setup_tickets', value="Allows you to create a button for users to create tickets. Requires Manage Guild.")
     page2.set_footer(text="Arguments that are surrounded in [] are optional. Page 2/2")
 
     ems = [page1, page2]

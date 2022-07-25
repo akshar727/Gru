@@ -320,7 +320,10 @@ class Calculator_Buttons(discord.ui.View):
         for x in self.children:
             x.disabled = True
         self.calculator_users.remove(str(self.author.id))
-        await self.calculator_message.edit(view=self)
+        try:
+            await self.calculator_message.edit(view=self)
+        except:
+            pass
 
 
 
@@ -341,7 +344,7 @@ class Calculator(commands.Cog):
             pass
         e = discord.Embed(title=f"{ctx.author.name}'s calculator! | {ctx.author.id}", description="0",
                           color=discord.Color.random())
-        p = await ctx.reply("Calculator loading...", embed=e)
+        p = await ctx.send("Calculator loading...", embed=e)
         view = Calculator_Buttons(ctx.author, p, e,self.calculator_users)
         await asyncio.sleep(1)
         await p.edit(view=view)

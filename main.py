@@ -146,11 +146,17 @@ async def on_ready():
     print()
     with open('databases/giveaways.json','r') as f:
         g = json.load(f)
+    with open('databases/tickets.json','r') as f:
+        ticket_data = json.load(f)
+    active_ticket_users = ticket_data["active_ticket_users"]
     if not client.persistent_views_added:
+        client.add_view(CreateTicket())
+        for user in active_ticket_users:
+            client.add_view(TicketSettings(user))
         for giveaway in g:
             client.add_view(view=JoinGiveaway(int(giveaway)),message_id=int(giveaway))
         client.persistent_views_added = True
-        print('Added Giveaway Buttons!')
+        print('Added Giveaway Buttons and Tickets!')
     print("Connected to {0.user}".format(client))
     client.load_extension("jishaku")
 
@@ -228,7 +234,12 @@ mainshop = [ {
     "name": "Bank Record",
     "price": 250000,
     "description": "Expands your bank. Automatically used when bought."
-}
+}, 
+            {
+                "name" : "Uno Reverse Card",
+                "price" : 500000,
+                "description" : "Instead of losing money when you get robbed, you gain money!"
+            }
 ]
 
 animal_shop = [[{
@@ -426,7 +437,7 @@ async def beg(ctx):
         users[str(user.id)]["wallet"] += earnings * booster
 
     else:
-        message = random.choice(['no','ur mom','credit card is maxed','why u','nah bro','not today','nu uh'])
+        message = random.choice(['no','ur mom','credit card is maxed','why u','nah bro','not today','nu uh','l bozo'])
         beg_embed = discord.Embed(description=message,
                                   color=discord.Color.random())
         beg_embed.set_author(name=person)
@@ -438,6 +449,135 @@ async def beg(ctx):
 
 
 
+active_ticket_users = []
+
+class AddUser(discord.ui.Modal):
+    def __init__(self, channel):
+        super().__init__(
+            "Add User To Ticket",
+            timeout=300
+        )
+
+        self.channel = channel
+        self.user = discord.ui.TextInput(
+            label="User ID",
+            min_length = 2,
+            max_length=30,
+            required=True,
+            placeholder="User ID (Must be a number)"
+        )
+        self.add_item(self.user)
+    async def callback(self, interaction: discord.Interaction) -> None:
+        user = interaction.guild.get_member(int(self.user.value))
+        if user is None:
+            return await interaction.send("Invalid User ID. Make sure the user is in this server!")
+        if self.channel.permissions_for(user).read_messages:
+            return await interaction.send(f"{user.mention} is already in this ticket!",ephemeral=True)
+        overwrites = discord.PermissionOverwrite(read_messages=True)
+        await self.channel.set_permissions(user,overwrite=overwrites)
+        await interaction.send(f"{user.mention} has been added to this ticket!",ephemeral=True)
+
+
+class RemoveUser(discord.ui.Modal):
+    def __init__(self, channel):
+        super().__init__(
+            "Remove User From Ticket",
+            timeout=300
+        )
+
+        self.channel = channel
+        self.user = discord.ui.TextInput(
+            label="User ID",
+            min_length = 2,
+            max_length=30,
+            required=True,
+            placeholder="User ID (Must be a number)"
+        )
+        self.add_item(self.user)
+    async def callback(self, interaction: discord.Interaction) -> None:
+        user = interaction.guild.get_member(int(self.user.value))
+        if user is None:
+            return await interaction.send("Invalid User ID. Make sure the user is in this server!")
+        overwrites = discord.PermissionOverwrite(read_messages=False)
+        if not self.channel.permissions_for(user).read_messages:
+            return await interaction.send(f"{user.mention} is not in this ticket!",ephemeral=True)
+        await self.channel.set_permissions(user,overwrite=overwrites)
+        await interaction.send(f"{user.mention} has been removed from this ticket!",ephemeral=True)
+
+    
+
+
+class TicketSettings(discord.ui.View):
+    def __init__(self, user):
+        super().__init__(timeout=None)
+        self.user = user
+
+    @discord.ui.button(label="Close Ticket",style=discord.ButtonStyle.danger, custom_id="ticket_settings:close")
+    async def close_ticket(self, button: discord.ui.Button, interaction: discord.Interaction):
+        with open('databases/tickets.json','r') as f:
+            ticket_data = json.load(f)
+        if self.user != interaction.user.id:
+            return await interaction.response.send_message("This is not your ticket!",ephemeral=True)
+        active_ticket_users = ticket_data["active_ticket_users"]
+        await interaction.response.send_message("The ticket is being closed.",ephemeral=True)
+        await interaction.channel.delete()
+        active_ticket_users.remove(interaction.user.id)
+        ticket_data["active_ticket_users"] = active_ticket_users
+        with open('databases/tickets.json','w') as f:
+            json.dump(ticket_data,f)
+        await interaction.user.send(f"Your ticket in {interaction.guild.name} has been closed successfully!")
+
+    @discord.ui.button(label="Add User",style=discord.ButtonStyle.green, custom_id="ticket_settings:add_user")
+    async def add_user(self, button: discord.ui.Button, interaction: discord.Interaction):
+        if self.user != interaction.user.id:
+            return await interaction.response.send_message("This is not your ticket!",ephemeral=True)
+        await interaction.response.send_modal(AddUser(interaction.channel))
+
+    @discord.ui.button(label="Remove User",style=discord.ButtonStyle.gray, custom_id="ticket_settings:remove_user")
+    async def remove_user(self, button: discord.ui.Button, interaction: discord.Interaction):
+        if self.user != interaction.user.id:
+            return await interaction.response.send_message("This is not your ticket!",ephemeral=True)
+        await interaction.response.send_modal(RemoveUser(interaction.channel))
+        
+
+class CreateTicket(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="Create Ticket",style=discord.ButtonStyle.blurple, custom_id="create_ticket:main")
+    async def create_ticket(self, button: discord.ui.Button, interaction: discord.Interaction):
+        with open('databases/tickets.json','r') as f:
+            ticket_data = json.load(f)
+        active_ticket_users = ticket_data["active_ticket_users"]
+        if interaction.user.id in active_ticket_users:
+            return await interaction.response.send_message("You already have a ticket open! Close it to open a new one.",ephemeral=True)
+        await interaction.response.send_message("A ticket is being created for you!",ephemeral=True)
+        with open('databases/server_configs.json', 'r') as f:
+            configs = json.load(f)
+        overwrites = {
+            interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+            interaction.guild.me: discord.PermissionOverwrite(read_messages=True),
+            interaction.user: discord.PermissionOverwrite(read_messages=True),
+            interaction.guild.get_role(configs[f"{interaction.guild.id}"]["mod_role"]): discord.PermissionOverwrite(read_messages=True),
+        }
+
+        channel = await interaction.guild.create_text_channel(f"{interaction.user}-help", overwrites=overwrites)
+        await interaction.edit_original_message(content=f"Ticket created successfully! {channel.mention}")
+        embed = discord.Embed(title=f"Ticket for {interaction.user}",description=f"{interaction.user} has created a ticket.\nClick one of the buttons below to alter the settings of this ticket.", color=discord.Color.random())
+        await channel.send(embed=embed,view=TicketSettings(interaction.user.id))
+        active_ticket_users.append(interaction.user.id)
+        ticket_data["active_ticket_users"] = active_ticket_users
+        with open('databases/tickets.json','w') as f:
+            json.dump(ticket_data,f)
+            
+        
+    
+
+@client.command()
+@commands.has_permissions(manage_guild=True)
+async def setup_tickets(ctx):
+    embed = discord.Embed(title="Create A Ticket!", description = "Click the `Create Ticket` button below to create a new ticket. The server's staff will be notified and shortly aid you with your problem.",color=discord.Color.green())
+    await ctx.send(embed=embed,view=CreateTicket())
 
 
 @client.command()
@@ -798,7 +938,7 @@ p2 = {
 }
 
 
-class JobPaginator(discord.ui.View):
+class Paginator(discord.ui.View):
     def __init__(self, author,embeds,curr):
         super().__init__(timeout=30)
         self.author = author
@@ -808,7 +948,7 @@ class JobPaginator(discord.ui.View):
     @discord.ui.button(emoji="<:left_two:982623041228013570>",style=discord.ButtonStyle.green, disabled=True)
     async def begin(self, button: discord.ui.Button, interaction: discord.Interaction):
         if interaction.user != self.author:
-            return await interaction.response.send_message("This is not your help menu.",ephemeral=True)
+            return await interaction.response.send_message("This is not your menu.",ephemeral=True)
         em = self.embeds[0]
         self.current_embed = em
         button.disabled = True
@@ -819,7 +959,7 @@ class JobPaginator(discord.ui.View):
     @discord.ui.button(emoji="<:left_one:982623094235615232>",style=discord.ButtonStyle.green, disabled=True)
     async def back(self, button: discord.ui.Button, interaction: discord.Interaction):
         if interaction.user != self.author:
-            return await interaction.response.send_message("This is not your help menu.",ephemeral=True)
+            return await interaction.response.send_message("This is not your menu.",ephemeral=True)
         em = self.embeds[self.embeds.index(self.current_embed)-1]
         self.current_embed = em
         if self.embeds[0] == em:
@@ -896,7 +1036,7 @@ async def jobs(ctx):
 
     embeds = [page1, page2]
     cur = embeds[0]
-    v = JobPaginator(ctx.author,embeds,cur)
+    v = Paginator(ctx.author,embeds,cur)
     v.message = await ctx.reply(embed=cur,view=v)
 
 
@@ -1045,7 +1185,7 @@ async def send(ctx, member: discord.Member, amount=None):
 
 
 @client.command(aliases=['steal'])
-@commands.cooldown(1, 60, commands.BucketType.user)
+# @commands.cooldown(1, 60, commands.BucketType.user)
 async def rob(ctx, member: discord.Member):
     if member.bot:
         rob.reset_cooldown(ctx)
@@ -1058,7 +1198,7 @@ async def rob(ctx, member: discord.Member):
     if user_bal[0] < 2000:
         rob.reset_cooldown(ctx)
         return await ctx.reply("You need at least `2000 Minions™️` to rob someone.")
-    if member.id == 717512097725939795:
+    if member.id == 717512097725939795 and ctx.author.id != 972282561642496060:
         rob.reset_cooldown(ctx)
         return await ctx.reply(
             "xD you can't rob him he is the owner of the bot!!!")
@@ -1073,6 +1213,40 @@ async def rob(ctx, member: discord.Member):
         return
     chance = random.choice([0,1,2,3])
     earning = random.randrange(0, bal[0])
+    users = await get_bank_data()
+    try:
+        inv = users[str(member.id)]["bag"]
+        uno_rev = {}
+        index = 0
+        for item in inv:
+            if item["item"] == "uno reverse card":
+                uno_rev = item
+                index = inv.index(item)
+        if uno_rev == {}:
+            raise Exception
+        
+        if uno_rev["amount"] > 0 and chance == 1:
+            users[str(member.id)]["bag"][index]["amount"] -= 1
+            if users[str(member.id)]["bag"][index]["amount"] == 0:
+                users[str(member.id)]["bag"].remove(uno_rev)
+            await dump_mainbank_data(users)
+            await update_bank(member, earning)
+            await ctx.reply(
+            f':white_check_mark:{ctx.author.mention} You robbed {member} and got {earning:,} Minions™️'
+            )
+            await asyncio.sleep(1)
+            await ctx.send(f"But, they had a **Uno reverse card!** You have lost {earning:,} Minions™ to them.")
+            return
+        else:
+            await ctx.reply(
+                f':x:{ctx.author.mention} You failed to rob {member} and lost 2000 Minions™️ to them.'
+            )
+            await update_bank(member, 2000)
+            await update_bank(ctx.author, -2000)  
+            return
+    except Exception as e:
+        pass
+        
     if chance == 1:
         await update_bank(ctx.author, earning)
         await update_bank(member, -1 * earning)
@@ -1127,77 +1301,6 @@ async def slots(ctx, amount=None):
         await ctx.reply(
             f'You lose `{1 * amount} Minions™` :( {ctx.author.mention}')
 
-
-class ShopPaginator(discord.ui.View):
-    def __init__(self, author,embeds,curr):
-        super().__init__(timeout=30)
-        self.author = author
-        self.embeds = embeds
-        self.current_embed = curr
-
-    @discord.ui.button(emoji="<:left_two:982623041228013570>",style=discord.ButtonStyle.green, disabled=True)
-    async def begin(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if interaction.user != self.author:
-            return await interaction.response.send_message("This is not your help menu.",ephemeral=True)
-        em = self.embeds[0]
-        self.current_embed = em
-        button.disabled = True
-        self.children[1].disabled = True
-        self.children[2].disabled = False
-        self.children[3].disabled = False
-        await interaction.response.edit_message(embed=em,view=self)
-    @discord.ui.button(emoji="<:left_one:982623094235615232>",style=discord.ButtonStyle.green, disabled=True)
-    async def back(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if interaction.user != self.author:
-            return await interaction.response.send_message("This is not your help menu.",ephemeral=True)
-        em = self.embeds[self.embeds.index(self.current_embed)-1]
-        self.current_embed = em
-        if self.embeds[0] == em:
-            button.disabled = True
-            self.children[3].disabled = False
-            self.children[0].disabled = True
-            self.children[1].disabled = True
-            self.children[2].disabled = False
-        else:
-            self.children[3].disabled = False
-            self.children[0].disabled = False
-            self.children[1].disabled = False
-            self.children[2].disabled = False
-        await interaction.response.edit_message(embed=em,view=self)
-    @discord.ui.button(emoji="<:right_one:982622882469404683>",style=discord.ButtonStyle.green, disabled=False)
-    async def forward(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if interaction.user != self.author:
-            return await interaction.response.send_message("This is not your menu.",ephemeral=True)
-        em = self.embeds[self.embeds.index(self.current_embed)+1]
-        self.current_embed = em
-        if self.embeds[-1] == em:
-            button.disabled = True
-            self.children[3].disabled = True
-            self.children[0].disabled = False
-            self.children[1].disabled = False
-        else:
-            self.children[3].disabled = False
-            self.children[0].disabled = False
-            self.children[1].disabled = False
-        await interaction.response.edit_message(embed=em,view=self)
-    @discord.ui.button(emoji="<:right_two:982622978279899206>",style=discord.ButtonStyle.green, disabled=False)
-    async def end(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if interaction.user != self.author:
-            return await interaction.response.send_message("This is not your menu.",ephemeral=True)
-        em = self.embeds[-1]
-        self.current_embed = em
-        button.disabled = True
-        self.children[2].disabled = True
-        self.children[0].disabled = False
-        self.children[1].disabled = False
-        await interaction.response.edit_message(embed=em,view=self)
-    async def on_timeout(self):
-        try:
-            for x in self.children:
-                x.disabled = True
-            await self.message.edit(view=self)
-        except:
-            pass
 
 
 
@@ -1259,49 +1362,8 @@ async def shop(ctx):
         page3.add_field(name=name.title(), value=f"{int(sell):,} Minions™")
 
     pages = [page1, page2, page3]
-
-    buttons = [u"\u23F9", "\u23EA", u"\u2B05", u"\u27A1",
-               "\u23E9"]  #start, exit, right
-    current = 0
-    msg = await ctx.reply(embed=pages[current])
-
-    for button in buttons:
-        await msg.add_reaction(button)
-
-    while True:
-        try:
-            reaction, user = await client.wait_for(
-                "reaction_add",
-                check=lambda reaction, user: user == ctx.author and reaction.
-                emoji in buttons,
-                timeout=60.0)
-        except asyncio.TimeoutError:
-            pages[current].set_footer(text="Timed out :(")
-            await msg.edit(embed=pages[current])
-            break
-        else:
-            previous_page = current
-
-            if reaction.emoji == u"\u2B05":
-                if current > 0:
-                    current -= 1
-
-            elif reaction.emoji == u"\u27A1":
-                if current < len(pages) - 1:
-                    current += 1
-            elif reaction.emoji == u"\u23F9":
-                await msg.delete()
-                break
-            elif reaction.emoji == "\u23E9":
-                current = len(pages) - 1
-            elif reaction.emoji == "\u23EA":
-                current = 0
-
-            if current != previous_page:
-                await msg.edit(embed=pages[current])
-
-            for button in buttons:
-                await msg.remove_reaction(button, ctx.author)
+    paginator = Paginator(ctx.author,pages,pages[0])
+    paginator.message = await ctx.reply(embed=pages[0],view=paginator)
 
 
 @client.command()
@@ -1477,43 +1539,9 @@ async def inventory(ctx, user: discord.Member = None):
         page2.set_footer(text="Page 2/2")
 
         pages = [em, page2]
+        paginator = Paginator(ctx.author,pages,pages[0])
+        paginator.message = await ctx.reply(embed=pages[0],view=paginator)
 
-        buttons = [u"\u23F9", u"\u2B05", u"\u27A1"]  #start, exit, right
-        current = 0
-        msg = await ctx.reply(embed=pages[current])
-
-        for button in buttons:
-            await msg.add_reaction(button)
-
-        while True:
-            try:
-                reaction, user = await client.wait_for(
-                    "reaction_add",
-                    check=lambda reaction, user: user == ctx.author and
-                    reaction.emoji in buttons,
-                    timeout=60.0)
-            except asyncio.TimeoutError:
-                pages[current].set_footer(text="Timed out :(")
-                await msg.edit(embed=pages[current])
-                break
-            else:
-                previous_page = current
-
-                if reaction.emoji == u"\u2B05":
-                    if current > 0:
-                        current -= 1
-                elif reaction.emoji == u"\u27A1":
-                    if current < len(pages) - 1:
-                        current += 1
-                elif reaction.emoji == u"\u23F9":
-                    await msg.delete()
-                    break
-
-                if current != previous_page:
-                    await msg.edit(embed=pages[current])
-
-                for button in buttons:
-                    await msg.remove_reaction(button, ctx.author)
 
     elif len(bag) > 50:
         page2 = discord.Embed(title="Your inventory (Page 2)",
@@ -1576,50 +1604,8 @@ async def inventory(ctx, user: discord.Member = None):
 
         page3.set_footer(text="Page 3/3")
         pages = [em, page2, page3]
-
-        buttons = [u"\u23F9", "\u23EA", u"\u2B05", u"\u27A1",
-                   "\u23E9"]  #start, exit, right
-        current = 0
-        msg = await ctx.reply(embed=pages[current])
-
-        for button in buttons:
-            await msg.add_reaction(button)
-
-        while True:
-            try:
-                reaction, user = await client.wait_for(
-                    "reaction_add",
-                    check=lambda reaction, user: user == ctx.author and
-                    reaction.emoji in buttons,
-                    timeout=60.0)
-            except asyncio.TimeoutError:
-                pages[current].set_footer(text="Timed out :(")
-                await msg.edit(embed=pages[current])
-                break
-            else:
-                previous_page = current
-
-                if reaction.emoji == u"\u2B05":
-                    if current > 0:
-                        current -= 1
-
-                elif reaction.emoji == u"\u27A1":
-                    if current < len(pages) - 1:
-                        current += 1
-                elif reaction.emoji == u"\u23F9":
-                    await msg.delete()
-                    break
-                elif reaction.emoji == "\u23E9":
-                    current = len(pages) - 1
-                elif reaction.emoji == "\u23EA":
-                    current = 0
-
-                if current != previous_page:
-                    await msg.edit(embed=pages[current])
-
-                for button in buttons:
-                    await msg.remove_reaction(button, ctx.author)
-
+        paginator = Paginator(ctx.author,pages,pages[0])
+        paginator.message = await ctx.reply(embed=pages[0],view=paginator)
 
 async def buy_this(user, item_name, amount):
     item_name = item_name.lower()
@@ -2120,6 +2106,8 @@ async def on_message(message):
         if ":loading:" in message.content and message.guild.id == 762829356812206090 and message.author.id != client.user.id and message.content[
                 0] != prefix or ":rick_roll:" in message.content or ":loading:" in message.content and message.author.id != client.user.id and message.content[
                     0] != prefix:
+            if message.author == client.user:
+                return
             send = message.content.replace(":loading:",
                                            "<a:loading:898340114164490261>")
             send = send.replace(':rick_roll:',
@@ -3912,12 +3900,11 @@ async def config(ctx):
         configs = json.load(f)
 
     role = ctx.guild.get_role(configs[str(ctx.guild.id)]["giveaway_role"])
+    mod_role = ctx.guild.get_role(configs[str(ctx.guild.id)]["mod_role"])
     e = discord.Embed(title="Your Server Configurations",
                       color=discord.Color.random())
-    if role != None:
-        e.add_field(name="Giveaway Role", value=role.mention)
-    else:
-        e.add_field(name="Giveaway Role", value=role)
+    e.add_field(name="Giveaway Role", value=role.mention if role else role)  
+    e.add_field(name="Mod Role (Tickets)", value=mod_role.mention if mod_role else mod_role)
     e.add_field(name="Leveling", value=configs[str(ctx.guild.id)]['levels'])
     await ctx.reply(embed=e,
                     allowed_mentions=discord.AllowedMentions(roles=False))
@@ -3938,7 +3925,7 @@ async def config(ctx):
     elif change_config.lower() == 'y':
         await ctx.reply("Choose a configuration to change:")
         await ctx.reply(
-            "Type `1` to change the giveaway role.\nType `2` to toggle the leveling system."
+            "Type `1` to change the giveaway role.\nType `2` to toggle the leveling system.\nType `3` to change the mod role."
         )
         change_config_type = ...
         try:
@@ -3989,6 +3976,31 @@ async def config(ctx):
 
             except asyncio.TimeoutError:
                 return
+            await ctx.reply("Done!")
+        elif change_config_type == 3:
+            await ctx.reply(
+                "Mention the new role in your next message. (Or type None)")
+            new_role = ...
+            try:
+                new_role = await client.wait_for(
+                    'message',
+                    timeout=20,
+                    check=lambda message: message.author == ctx.author and
+                    message.channel == ctx.message.channel)
+                if new_role.content.lower() == "none":
+                    configs[str(ctx.guild.id)]['mod_role'] = "None"
+                else:
+                    new_role = discord.utils.get(ctx.guild.roles,
+                                                 id=int(
+                                                     new_role.content.replace(
+                                                         "<@&",
+                                                         "").replace(">", "")))
+                    configs[str(ctx.guild.id)]['mod_role'] = new_role.id
+
+            except asyncio.TimeoutError:
+                return
+            except ValueError:
+                return await ctx.reply("Invalid Role.")
             await ctx.reply("Done!")
         else:
             await ctx.reply("Invalid config type!")

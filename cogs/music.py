@@ -10,13 +10,18 @@ class ControlPanel(discord.ui.View):
         super().__init__(timeout=200)
         self.vc = vc
         self.ctx = ctx
+        self.skip_button = self.children[2]
+        self.skip_button.disabled = self.vc.queue.is_empty
     
     @discord.ui.button(label="Resume/Pause", style=discord.ButtonStyle.blurple)
     async def resume_and_pause(self, button: discord.ui.Button, interaction: discord.Interaction):
         if not interaction.user == self.ctx.author:
+            await interaction.message.edit(content=interaction.message.content, view=self)
             return await interaction.response.send_message("You can't do that. run the command yourself to use these buttons", ephemeral=True)
-        for child in self.children:
-            child.disabled = False
+        if self.vc.queue.is_empty:
+            self.skip_button.disabled=True
+        else:
+            self.skip_button.disabled=False
         if self.vc.is_paused():
             await self.vc.resume()
             await interaction.message.edit(content="Resumed", view=self)
@@ -27,11 +32,14 @@ class ControlPanel(discord.ui.View):
     @discord.ui.button(label="Queue", style=discord.ButtonStyle.blurple)
     async def queue(self, button: discord.ui.Button, interaction: discord.Interaction):
         if not interaction.user == self.ctx.author:
+            await interaction.message.edit(content=interaction.message.content, view=self)
             return await interaction.response.send_message("You can't do that. run the command yourself to use these buttons", ephemeral=True)
-        for child in self.children:
-            child.disabled = False
-        button.disabled = True
         if self.vc.queue.is_empty:
+            self.skip_button.disabled=True
+        else:
+            self.skip_button.disabled=False
+        if self.vc.queue.is_empty:
+            await interaction.message.edit(content=interaction.message.content, view=self)
             return await interaction.response.send_message("The queue is empty!", ephemeral=True)
     
         em = discord.Embed(title="Queue")
@@ -47,22 +55,27 @@ class ControlPanel(discord.ui.View):
     async def skip(self, button: discord.ui.Button, interaction: discord.Interaction):
         if not interaction.user == self.ctx.author:
             return await interaction.response.send_message("You can't do that. run the command yourself to use these buttons", ephemeral=True)
-        for child in self.children:
-            child.disabled = False
-        button.disabled = True
         if self.vc.queue.is_empty:
+            self.skip_button.disabled=True
+        else:
+            self.skip_button.disabled=False
+        if self.vc.queue.is_empty:
+            await interaction.message.edit(content=interaction.message.content, view=self)
             return await interaction.response.send_message("The queue is empty!", ephemeral=True)
 
         try:
             next_song = self.vc.queue.get()
             await self.vc.play(next_song)
             await interaction.message.edit(content=f"Now Playing `{next_song}`", view=self)
+            self.skip_button.disabled = self.vc.queue.is_empty
         except Exception:
+            await interaction.message.edit(content=interaction.message.content, view=self)
             return await interaction.response.send_message("The queue is empty!", ephemeral=True)
     
     @discord.ui.button(label="Disconnect", style=discord.ButtonStyle.red)
     async def disconnect(self, button: discord.ui.Button, interaction: discord.Interaction):
         if not interaction.user == self.ctx.author:
+            await interaction.message.edit(content=interaction.message.content, view=self)
             return await interaction.response.send_message("You can't do that. run the command yourself to use these buttons", ephemeral=True)
         for child in self.children:
             child.disabled = True
