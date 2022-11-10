@@ -9,11 +9,6 @@
         "levels": true,
         "mod_role": "None"
     },
-    "882059916771225612": {
-        "giveaway_role": 889189594086641674,
-        "levels": true,
-        "mod_role": "None"
-    },
     "937068082357207111": {
         "giveaway_role": "None",
         "levels": true,
@@ -33,5 +28,13 @@
         "giveaway_role": 977242532905910374,
         "levels": true,
         "mod_role": 977019959324577812
+    },
+    "972690051471401010": {
+        "giveaway_role": "None",
+        "levels": false
+    },
+    "882059916771225612": {
+        "giveaway_role": "None",
+        "levels": false
     }
 }

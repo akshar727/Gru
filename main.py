@@ -19,7 +19,6 @@ api_key = "AIzaSyAhNZnU6pStK8eYcm83IeQAR_OEdhjJURw"
 def get_prefix(client, message):
     with open("databases/prefixes.json", "r") as f:
         prefixes = json.load(f)
-
     return mixedCase(str(prefixes[str(message.guild.id)]))
 
 
@@ -85,7 +84,10 @@ async def on_guild_remove(guild):
         json.dump(prefixes, f, indent=4)
     with open('databases/levels.json', 'r') as f:
         levels = json.load(f)
-    del levels[str(guild.id)]
+    try:
+        del levels[str(guild.id)]
+    except:
+        pass
     with open('databases/levels.json', 'w') as f:
         json.dump(levels, f, indent=4)
     del configs[str(guild.id)]
@@ -2102,22 +2104,6 @@ async def on_message(message):
                     with open('databases/mainbank.json','w') as f:
                         json.dump(bank, f,indent=4)
     try:
-        prefix = prefixes[str(message.guild.id)]
-        if ":loading:" in message.content and message.guild.id == 762829356812206090 and message.author.id != client.user.id and message.content[
-                0] != prefix or ":rick_roll:" in message.content or ":loading:" in message.content and message.author.id != client.user.id and message.content[
-                    0] != prefix:
-            if message.author == client.user:
-                return
-            send = message.content.replace(":loading:",
-                                           "<a:loading:898340114164490261>")
-            send = send.replace(':rick_roll:',
-                                '<a:rick_roll:898749226123669575>')
-            await message.channel.send(f"{send}")
-            await message.channel.send(f"`Sent by: {message.author}`")
-            await message.delete()
-    except:
-        pass
-    try:
         ctx = await client.get_context(message)
         if message.mentions[
                 0] == client.user and message.content == '<@874328552965820416>':
@@ -2125,7 +2111,7 @@ async def on_message(message):
                 prefixes = json.load(f)
             pre = prefixes[str(message.guild.id)]
             await ctx.reply(f"My prefix for this server is `{pre}`")
-    except Exception as e:
+    except:
         pass
     try:
         if not message.author.bot:
@@ -2732,6 +2718,12 @@ async def ban(ctx, user: discord.Member = None, *, reason=None):
     if user == None:
         await ctx.reply("Please enter a user!")
         return
+
+    if ctx.me.top_role.position > ctx.author.top_role.position:
+        return await ctx.reply("I cannot ban this user aas they have a higher role than me!")
+    
+    if user.top_role.position > ctx.author.top_role.position:
+        return await ctx.reply("You cannot ban that user as they have a higher role than you!")
 
     await user.ban(reason=reason)
     await ctx.reply(f'Banned {user.name} for reason {reason}')
@@ -3527,7 +3519,7 @@ async def reactrole(ctx,
         await ctx.message.delete()
     except:
         pass
-    msg = await ctx.reply(embed=emb)
+    msg = await ctx.send(embed=emb)
     await msg.add_reaction(emoji)
 
     with open('databases/reactrole.json') as json_file:

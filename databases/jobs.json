@@ -19,7 +19,7 @@
         "job": {
             "name": "Super Minion Refiner",
             "pay": 22000,
-            "hours": 11,
+            "hours": 12,
             "fails": 0
         }
     },
@@ -160,6 +160,46 @@
         }
     },
     "957459101670072401": {
+        "job": {
+            "name": "None",
+            "pay": 0,
+            "hours": 0,
+            "fails": 0
+        }
+    },
+    "736982726057525351": {
+        "job": {
+            "name": "None",
+            "pay": 0,
+            "hours": 0,
+            "fails": 0
+        }
+    },
+    "891800285863882773": {
+        "job": {
+            "name": "None",
+            "pay": 0,
+            "hours": 0,
+            "fails": 0
+        }
+    },
+    "773326051984146473": {
+        "job": {
+            "name": "None",
+            "pay": 0,
+            "hours": 0,
+            "fails": 0
+        }
+    },
+    "930583410311856138": {
+        "job": {
+            "name": "None",
+            "pay": 0,
+            "hours": 0,
+            "fails": 0
+        }
+    },
+    "955803202782113802": {
         "job": {
             "name": "None",
             "pay": 0,

@@ -1,7 +1,0 @@
-Traceback (most recent call last):
-  File "/opt/virtualenvs/python3/lib/python3.8/site-packages/nextcord/ext/commands/core.py", line 168, in wrapped
-    ret = await coro(*args, **kwargs)
-  File "main.py", line 3871, in config
-    mod_role = ctx.guild.get_role(configs[str(ctx.guild.id)]["mod_role"])
-KeyError: 'mod_role'
-

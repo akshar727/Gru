@@ -46,5 +46,29 @@
         "role_id": 976814120592613466,
         "emoji": "\ud83d\udd3a",
         "message_id": 976814687087898684
+    },
+    {
+        "role_name": "Giveaway Ping",
+        "role_id": 1007821591826149386,
+        "emoji": "<:TomWhat:998662281007218810>",
+        "message_id": 1008018275290062938
+    },
+    {
+        "role_name": "Animation Ping",
+        "role_id": 1007821691554119711,
+        "emoji": "<:Sunk:999002692296904745>",
+        "message_id": 1008018404025827398
+    },
+    {
+        "role_name": "Yosh ping",
+        "role_id": 1008060561432527029,
+        "emoji": "<:ShadowCoder:998661820837548063>",
+        "message_id": 1008061031039369349
+    },
+    {
+        "role_name": "FNF Mod Ping",
+        "role_id": 1008095279024705606,
+        "emoji": "<:hey:1008096111430471770>",
+        "message_id": 1008096324501127268
     }
 ]

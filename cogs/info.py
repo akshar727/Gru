@@ -1,7 +1,7 @@
 import nextcord as discord
 from nextcord.ext import commands
 import json
-import asyncio
+import re
 
 
 def get_economy_embed(prefix):
@@ -30,7 +30,7 @@ def get_economy_embed(prefix):
     economy_embed_3 = discord.Embed(title="Help Commands",description='All the **Economy** commands in the bot. (Page 3)', color=0x00ff00)
     economy_embed_3.add_field(name=f'{prefix}sell [amount] <item>', value='Allows you to sell items you get.', inline=False)
     economy_embed_3.add_field(name=f'{prefix}inventory / {prefix}inv', value='Shows you inventory', inline=False)
-    economy_embed_3.add_field(name=f'{prefix}leaderboard [amount] / {prefix}lb [amount]', value='''Allows you to see the richest people in the bot!The types are `all` to see al users in the leaderboard and `server` to see only users in this server.''', inline=False)
+    economy_embed_3.add_field(name=f'{prefix}leaderboard [amount] / {prefix}lb [amount]', value='''Allows you to see the richest people in the bot!The types are `all` to see all users in the leaderboard and `server` to see only users in this server.''', inline=False)
     economy_embed_3.add_field(name=f'{prefix}daily / {prefix}weekly', value='''Allows you to earn some Minions™️!''', inline=False)
     economy_embed_3.add_field(name=f'{prefix}hunt', value="Allows you to hunt for animals and sell them in the shop!", inline=False)
     economy_embed_3.add_field(name=f'{prefix}fish', value="Allows you to fish for animals and sell them in the shop!", inline=False)
@@ -48,7 +48,7 @@ def get_moderation_embeds(prefix):
     page1.add_field(name='config',value='Allows you to change server configurations. Requires Manage Guild')
     page1.add_field(name='takerole <user> <role> ', value="Allows you to take a role away from someone. Requires Manage Roles.")
     page1.add_field(name='reactrole <emoji> <role> <message> ', value="Allows you to create reactions roles. Requires Manage Roles.")
-    page1.add_field(name='scn / set_channel_name  <original channel name> <new channel name> ', value="Allows you to change a channel's name. Requires Manage Channels.")
+    page1.add_field(name='scn / set_channel_name <original channel name> <new channel name> ', value="Allows you to change a channel's name. Requires Manage Channels.")
     page1.add_field(name='giverole <user> <role> ', value="Allows you to give a role to someone.**NOTE** You can only give roles up to your highest rank. Requires Manage Roles.")
     page1.add_field(name='prefix <prefix> ', value="Allows you to change the prefix of the bot in this server(**Owner only**)")
     page1.set_footer(text="Arguments that are surrounded in [] are optional. Page 1/2")
@@ -66,14 +66,17 @@ def get_moderation_embeds(prefix):
     return ems
 
 
+
+
+
 def get_music_embeds(prefix):
     page1 = discord.Embed(title="Help Commands", description='All the **Music** commands in the bot. (Page 1)', color=0x00ff00)
     page1.add_field(name=f"{prefix}play <query>",value="Allows you to play/add a song to the queue.", inline=False)
     page1.add_field(name=f"{prefix}pause",value="Pauses the music.", inline=False)
     page1.add_field(name=f"{prefix}resume",value="Resumes the music.", inline=False)
-    page1.add_field(name=f"{prefix}disconnect/ {prefix}dc", value="Disconnects the bot from the voice channel.", inline=False)
+    page1.add_field(name=f"{prefix}disconnect / {prefix}dc", value="Disconnects the bot from the voice channel.", inline=False)
     page1.add_field(name=f"{prefix}loop",value="Toggles looping.", inline=False)
-    page1.add_field(name=f"{prefix}panel",value="Opens an interactive panel to control the bot.", inline=False)
+    page1.add_field(name=f"{prefix}panel",value="Opens an interactive panel to control the music.", inline=False)
     page1.add_field(name=f"{prefix}volume <volume>", value="Changes the volume of the music.", inline=False)
     page1.add_field(name=f"{prefix}skip",value="Skips the current song to the next one in the queue.", inline=False)
     page1.set_footer(text="Arguments that are surrounded in [] are optional. Page 1/2")
@@ -114,7 +117,7 @@ def get_fun_embeds(prefix):
     page3.add_field(name=f'{prefix}joke', value="Gives you a joke!",inline=False)
     page3.add_field(name=f'{prefix}genderify <name> / {prefix}gender <name>', value="I guess your gender by your name!", inline=False)
     page3.add_field(name=f'{prefix}imposter', value="You have to find the imposter before the reactor has a meltdown!", inline=False)
-    page3.add_field(name=f'{prefix}sqrt <number/expression>', value="Gives you the square root of a number or expression!", inline=False)
+    page3.add_field(name=f'{prefix}sqrt <number or expression>', value="Gives you the square root of a number or expression!", inline=False)
     page3.add_field(name=f'{prefix}spam', value="Type as many characters as you can in 30 seconds!", inline=False)
     page3.add_field(name=f'{prefix}gay <user>', value="Makes a gay overlay!", inline=False)
     page3.add_field(name=f'{prefix}stats', value='''Allows you to see the bot's stats!''', inline=False)
@@ -129,7 +132,17 @@ def get_fun_embeds(prefix):
 
     fun_pages = [page1, page2,page3, page4]
     return fun_pages
-            
+
+
+def replaceTextBetween(originalText, delimeterA, delimterB, replacementText):
+    try:
+        leadingText = originalText.split(delimeterA)[0]
+        trailingText = originalText.split(delimterB)[1]
+    except:
+        return originalText
+
+    return leadingText + replacementText + trailingText
+
 
 class HelpOptions(discord.ui.Select):
     def __init__(self, buttons):
@@ -299,9 +312,39 @@ class Info(commands.Cog):
 
     @commands.command(aliases=['help'])
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def _help(self, ctx):
+    async def _help(self, ctx, query=None):
+        prefix = self.prefixes[str(ctx.guild.id)]
+        if query != None:
+            selected = None
+            all_pages= get_economy_embed(prefix) + get_moderation_embeds(prefix) + get_music_embeds(prefix) + get_fun_embeds(prefix)
+            for page in all_pages:
+                for field in page.fields:
+                    original_text = field.name
+                    original_text = original_text.replace(f"{prefix}","")
+                    original_text = re.sub(' <[^>]+>', '', original_text)
+                    original_text = re.sub(' \[[^\]]+]', '', original_text)
+                    original_text = original_text.split(" / ")
+                    space = False
+                    for i in original_text:
+                        if " " in i and i[len(i)-1] != " ":
+                            space = True
+                            break
+                        elif i[len(i)-1] == " ":
+                            original_text[original_text.index(i)] = i.replace(" ","").lower()
+                            i = i.replace(" ","")
+                    if space:
+                        continue
+                    if query.lower() in original_text:
+                        selected = field
+            if selected == None:
+                self._help.reset_cooldown(ctx)
+                return await ctx.send("Could not find a command with that query!")
+            e = discord.Embed(title=f"The '{query.lower()}' command", color=discord.Color.random())
+            e.add_field(name=f"Usage: ", value=f"{selected.name}", inline=False)
+            e.add_field(name="Description: ",value=selected.value,inline=False)
+            return await ctx.reply(embed=e)
         view = CategoriesView(ctx.author)
-        view.message = await ctx.reply(embed=get_economy_embed(self.prefixes[str(ctx.guild.id)])[0],view=view)
+        view.message = await ctx.reply(f"You can type {prefix}help (any command) to view that command's info!",embed=get_economy_embed(self.prefixes[str(ctx.guild.id)])[0],view=view)
 
 def setup(client):
     client.add_cog(Info(client))
