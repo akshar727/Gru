@@ -42,7 +42,7 @@ def get_economy_embed(prefix):
 
 
 def get_moderation_embeds(prefix):
-    page1 = discord.Embed(title="Help Commands", description='All the **Moderaation** commands in the bot. (Page 1)', color=0x00ff00)
+    page1 = discord.Embed(title="Help Commands", description='All the **Moderation** commands in the bot. (Page 1)', color=0x00ff00)
     page1.add_field(name='gcreate <amount of time> <prize>',value='Allows you to create a giveaway. Requires Manage Guild')
     page1.add_field(name='reroll <giveaway message id>',value='Allows you reroll a giveaway. Can also be used to forcefully end a giveaway. Requires Manage Guild')
     page1.add_field(name='config',value='Allows you to change server configurations. Requires Manage Guild')
@@ -53,7 +53,7 @@ def get_moderation_embeds(prefix):
     page1.add_field(name='prefix <prefix> ', value="Allows you to change the prefix of the bot in this server(**Owner only**)")
     page1.set_footer(text="Arguments that are surrounded in [] are optional. Page 1/2")
     
-    page2 = discord.Embed(title="Help Commands", description='All the **Moderaation** commands in the bot. (Page 2)', color=0x00ff00)
+    page2 = discord.Embed(title="Help Commands", description='All the **Moderation** commands in the bot. (Page 2)', color=0x00ff00)
     page2.add_field(name='kick <user> <reason> ', value="Allows you to kick a user with a reason. Requires Kick Users.")
     page2.add_field(name='ban <user> <reason> ', value="Allows you to ban a user with a reason. Requires Ban Users.")
     page2.add_field(name='unban <user> ', value="Allows you to unban a user. Requires Ban Users.")
@@ -154,15 +154,21 @@ class HelpOptions(discord.ui.Select):
         super().__init__(placeholder="Choose a category.",min_values=1,max_values=1,options=self.items)
         with open('databases/prefixes.json', 'r') as f:
             self.prefixes = json.load(f)
+        em = get_economy_embed(self.prefixes[str(self.parent.guild.id)])
+        for i in em:
+            i.set_author(name=self.parent.author.name, icon_url=self.parent.author.display_avatar)
+        self.current_embed = em[0]
+        self.embeds = em
         
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        type = self.values[0]
+        print("callback")
+        _type = self.values[0]
         prefix = self.prefixes[str(interaction.guild_id)]
         if interaction.user != self.parent.author:
             await interaction.response.edit_message(view = self.parent)
             return await interaction.send("This is not your help menu.",ephemeral=True)
-        if type == "Economy":
+        if _type == "Economy":
             self.options[0].default = True
             self.options[1].default = False
             self.options[2].default = False
@@ -177,7 +183,7 @@ class HelpOptions(discord.ui.Select):
             self.current_embed = em[0]
             self.embeds = em
             await interaction.response.edit_message(embed=em[0],view=self.parent)
-        elif type == "Fun":
+        elif _type == "Fun":
             self.options[1].default = True
             self.options[2].default = False
             self.options[3].default = False
@@ -192,7 +198,7 @@ class HelpOptions(discord.ui.Select):
             self.current_embed = em[0]
             self.embeds = em
             await interaction.response.edit_message(embed=em[0],view = self.parent)
-        elif type == "Music":
+        elif _type == "Music":
             self.options[3].default = True
             self.options[0].default = False
             self.options[1].default = False
@@ -207,7 +213,7 @@ class HelpOptions(discord.ui.Select):
             self.current_embed = em[0]
             self.embeds = em
             await interaction.response.edit_message(embed=em[0],view = self.parent)
-        elif type == "Moderation":
+        elif _type == "Moderation":
             self.options[2].default = True
             self.options[3].default = False
             self.options[0].default = False
@@ -224,9 +230,10 @@ class HelpOptions(discord.ui.Select):
             await interaction.response.edit_message(embed=em[0],view = self.parent)
 
 class CategoriesView(discord.ui.View):
-    def __init__(self, author):
+    def __init__(self, author, guild):
         super().__init__(timeout=30)
         self.author = author
+        self.guild = guild
         self.select = HelpOptions(self)
         self.add_item(self.select)
 
@@ -343,7 +350,7 @@ class Info(commands.Cog):
             e.add_field(name=f"Usage: ", value=f"{selected.name}", inline=False)
             e.add_field(name="Description: ",value=selected.value,inline=False)
             return await ctx.reply(embed=e)
-        view = CategoriesView(ctx.author)
+        view = CategoriesView(ctx.author,ctx.guild)
         view.message = await ctx.reply(f"You can type {prefix}help (any command) to view that command's info!",embed=get_economy_embed(self.prefixes[str(ctx.guild.id)])[0],view=view)
 
 def setup(client):

@@ -86,7 +86,7 @@ class Skyblock(commands.Cog):
 
 
         ac = requests.post(
-            "https://skyhelper-api.glitch.me/v2/networth?key=Satsang727!",
+            "https://skyhelper-api.glitch.me/v2/networth?key=Satsang727",
             json={"profileData": sa,"bankBalance":profile["banking"]["balance"]})
 
         global st, iv, ec, ar, war, pt, tl

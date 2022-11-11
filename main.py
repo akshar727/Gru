@@ -1,9 +1,20 @@
-import re,itertools,math,aiohttp,nextcord as discord,asyncio,datetime, os,json, random, psutil, traceback
-from backports.zoneinfo import ZoneInfo
+import re
+import itertools
+import math
+import aiohttp
+import nextcord as discord
+import asyncio
+import datetime
+import os
+import json
+import random
+import psutil
+import traceback
+from zoneinfo import ZoneInfo
 from nextcord.ext import commands, tasks
 from nextcord.utils import get
 from typing import Optional
-from webserver import keep_alive
+from dotenv import load_dotenv
 from PIL import Image
 from io import BytesIO
 from googleapiclient.discovery import build
@@ -13,13 +24,31 @@ from cogs.utils import http
 from easy_pil import Editor, Font, Canvas, load_image_async
 import humanfriendly
 
-api_key = "AIzaSyAhNZnU6pStK8eYcm83IeQAR_OEdhjJURw"
+load_dotenv()
+
+api_key = os.getenv("google_api_key")
 
 
 def get_prefix(client, message):
     with open("databases/prefixes.json", "r") as f:
         prefixes = json.load(f)
-    return mixedCase(str(prefixes[str(message.guild.id)]))
+    try:
+        return mixedCase(str(prefixes[str(message.guild.id)]))
+    except:
+        with open("databases/prefixes.json", "r") as f:
+            prefixes = json.load(f)
+        with open("databases/server_configs.json", 'r') as f:
+            configs = json.load(f)
+
+        configs[str(message.guild.id)] = {}
+        configs[str(message.guild.id)]["giveaway_role"] = "None"
+        configs[str(message.guild.id)]["levels"] = False
+        prefixes[str(message.guild.id)] = 'gru '
+
+        with open('databases/prefixes.json', 'w') as f:
+            json.dump(prefixes, f, indent=4)
+        with open("databases/server_configs.json", 'w') as f:
+            json.dump(configs, f, indent=4)
 
 
 def mixedCase(*args):
@@ -160,7 +189,6 @@ async def on_ready():
         client.persistent_views_added = True
         print('Added Giveaway Buttons and Tickets!')
     print("Connected to {0.user}".format(client))
-    client.load_extension("jishaku")
 
 
 @tasks.loop(seconds=4)
@@ -2091,6 +2119,8 @@ fake_cmds = ['balance', '_help']
 async def on_message(message):
     with open('databases/prefixes.json', 'r') as f:
         prefixes = json.load(f)
+    ctx = await client.get_context(message)
+    await open_account(ctx.author)
     if message.guild != None:
         ctx = await client.get_context(message)
         if message.content.lower().startswith(prefixes[str(ctx.guild.id)]):
@@ -3691,19 +3721,21 @@ async def eadd(ctx, url: str = None, *, name=None):
 def calculator(exp):
     o = exp.replace('x', '*')
     o = o.replace('÷', '/')
+    result= 0
     try:
         result = str(eval(o))
     except:
         result = "An error occurred"
+    return result
 
 @client.command()
-async def sqrt(ctx, expression):
+async def sqrt(ctx,* ,expression):
     try:
         return await ctx.reply(
             f"The square root \u221A of the expression/number {expression} is\n{math.sqrt(float(calculator(expression)))}"
         )
-    except:
-        return await ctx.reply("An error occurred :( .")
+    except Exception as e:
+        return await ctx.reply(f"An error occurred :( . ({e})")
 
 
 @client.command()
@@ -4012,6 +4044,5 @@ for filename in os.listdir("cogs"):
     if filename.endswith('.py'):
         client.load_extension(f'cogs.{filename[:-3]}')
 
-keep_alive()
-token = os.environ["discord_bot_token"]
+token = os.getenv("discord_bot_token")
 client.run(token)
