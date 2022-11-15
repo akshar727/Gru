@@ -3,6 +3,5 @@ __pycache__/
 .DS_Store
 .env
 .vscode
-cogs/skyblock.py
 databases/
 venv/
