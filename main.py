@@ -1215,7 +1215,7 @@ async def send(ctx, member: discord.Member, amount=None):
 
 
 @client.command(aliases=['steal'])
-# @commands.cooldown(1, 60, commands.BucketType.user)
+@commands.cooldown(1, 60, commands.BucketType.user)
 async def rob(ctx, member: discord.Member):
     if member.bot:
         rob.reset_cooldown(ctx)
