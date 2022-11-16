@@ -20,7 +20,7 @@ httplib2==0.21.0
 humanfriendly==10.0
 idna==3.4
 import-expression==1.1.4
-jishaku==2.5.1
+jishaku==2.3.0
 line-profiler==3.5.1
 multidict==6.0.2
 nextcord==2.2.0

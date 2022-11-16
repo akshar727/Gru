@@ -1,11 +1,69 @@
 
-from nextcord.ext import commands
-import nextcord as discord
 import asyncio
-import random
 import base64
-import string
 import json
+import random
+import string
+
+import nextcord as discord
+from nextcord.ext import commands
+
+
+def get_hacking_text(user) -> dict:
+    return {
+        "Trying To Access Discord Files... [▓  ]": 0.9,
+        "Trying To Access Discord Files... [▓▓  ]": 0.9,
+        "Trying To Access Discord Files... [▓▓▓ ]": 0.9,
+        "Trying To Access Discord Files... [▓▓▓▓ ]": 0.9,
+        "Trying To Access Discord Files... [▓▓▓▓▓]": 0.9,
+        "Successfully Accessed Discord Files! [▓▓▓▓▓]": 0.9,
+        "Trying to Access Discord Files... SUCCESS": 1,
+        "Trying To Access Discord/users... [▓  ]" : 1.5,
+        "Trying To Access Discord/users... [▓▓  ]": 1.5,
+        "Trying To Access Discord/users... [▓▓▓ ]" : 1.5,
+        "Trying To Access Discord/users... [▓▓▓▓ ]" : 1.5,
+        "Trying To Access Discord/users... [▓▓▓▓▓]": 1.5,
+        "Successfully Got Access to Discord/users! [▓▓▓▓▓]" : 1.5,
+        "Trying to Access Discord/users... SUCCESS" : 1,
+        f"Trying To Access Discord/users/{user.id}... [▓  ]" : 1.5,
+        f"Trying To Access Discord/users/{user.id}... [▓▓  ]" : 1.5,
+        f"Trying To Access Discord/users/{user.id}... [▓▓▓ ]" : 1.5,
+        f"Trying To Access Discord/users/{user.id}... [▓▓▓▓ ]" : 1.5,
+        f"Trying To Access Discord/users/{user.id}... [▓▓▓▓▓]" : 1.5,
+        f"Successfully Got Access to Discord/users/{user.id}! [▓▓▓▓▓]" : 1.5,
+        f"Trying to Access Discord/users/{user.id}... SUCCESS" : 1,
+        f"Retrieving Login and more from discord/users/{user.name}... [▓  ]" : 1.5,
+        f"Retrieving Login and more from discord/users/{user.name}... [▓▓  ]" : 1.5,
+        f"Retrieving Login and more from discord/users/{user.name}... [▓▓▓ ]" : 1.5,
+        f"Retrieving Login and more from discord/users/{user.name}... [▓▓▓▓ ]" : 1.5,
+        f"Retrieving Login and more from discord/users/{user.name}... [▓▓▓▓▓]" : 1.5,
+        f"Successfully Got Access to discord/users/{user.name}! [▓▓▓▓▓]" : 1.5,
+        f"Retrieving Login and more from discord/users/{user.name}... SUCCESS" : 1.5,
+        f"Opening discord/users/{user.name}... SUCCESS" : 0.7,
+        "Bypassing keys..." : 0.9,
+        "Initializing lockdown and changing password..." : 4
+        
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+    }
+
+async def run_hack(message,user):
+    for text,time in get_hacking_text(user).items():
+        await message.edit(text)
+        await asyncio.sleep(time)
 
 class Fun(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -32,70 +90,7 @@ class Fun(commands.Cog):
     
         hack_msg = await ctx.reply(f"Hacking! Target: {user}...")
         await asyncio.sleep(1)
-        await hack_msg.edit("Trying To Access Discord Files... [▓  ]")
-        await asyncio.sleep(0.9)
-        await hack_msg.edit("Trying To Access Discord Files... [▓▓  ]")
-        await asyncio.sleep(0.9)
-        await hack_msg.edit("Trying To Access Discord Files... [▓▓▓ ]")
-        await asyncio.sleep(0.9)
-        await hack_msg.edit("Trying To Access Discord Files... [▓▓▓▓ ]")
-        await asyncio.sleep(0.9)
-        await hack_msg.edit("Trying To Access Discord Files... [▓▓▓▓▓]")
-        await asyncio.sleep(0.9)
-        await hack_msg.edit("Successfully Accessed Discord Files! [▓▓▓▓▓]")
-        await asyncio.sleep(0.9)
-        await hack_msg.edit("Trying to Access Discord Files... SUCCESS")
-        await asyncio.sleep(1)
-        await hack_msg.edit("Trying To Access Discord/users... [▓  ]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit("Trying To Access Discord/users... [▓▓  ]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit("Trying To Access Discord/users... [▓▓▓ ]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit("Trying To Access Discord/users... [▓▓▓▓ ]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit("Trying To Access Discord/users... [▓▓▓▓▓]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit("Successfully Got Access to Discord/users! [▓▓▓▓▓]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit("Trying to Access Discord/users... SUCCESS")
-        await asyncio.sleep(1)
-        await hack_msg.edit(f"Trying To Access Discord/users/{user.id}... [▓  ]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit(f"Trying To Access Discord/users/{user.id}... [▓▓  ]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit(f"Trying To Access Discord/users/{user.id}... [▓▓▓ ]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit(f"Trying To Access Discord/users/{user.id}... [▓▓▓▓ ]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit(f"Trying To Access Discord/users/{user.id}... [▓▓▓▓▓]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit(f"Successfully Got Access to Discord/users/{user.id}! [▓▓▓▓▓]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit(f"Trying to Access Discord/users/{user.id}... SUCCESS")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit("Trying to Access Discord/users... SUCCESS")
-        await asyncio.sleep(1)
-        await hack_msg.edit(f"Retrieving Login and more from discord/users/{user.name}... [▓  ]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit(f"Retrieving Login and more from discord/users/{user.name}... [▓▓  ]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit(f"Retrieving Login and more from discord/users/{user.name}... [▓▓▓ ]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit(f"Retrieving Login and more from discord/users/{user.name}... [▓▓▓▓ ]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit(f"Retrieving Login and more from discord/users/{user.name}... [▓▓▓▓▓]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit(f"Successfully Got Access to discord/users/{user.name}! [▓▓▓▓▓]")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit(f"Retrieving Login and more from discord/users/{user.name}... SUCCESS")
-        await asyncio.sleep(1.5)
-        await hack_msg.edit(f"discord/users/{user.name}... SUCCESS")
-        await asyncio.sleep(0.7)
-        await hack_msg.edit("Bypassing keys...")
-        await asyncio.sleep(0.9)
-        await hack_msg.edit("Initializing lockdown and changing password...")
-        await asyncio.sleep(4)
+        await run_hack(hack_msg,user)
         second_part = str(user.created_at.timestamp() - 129384000)
         second_part_bytes = second_part.encode("ascii")
         base64_bytes_second_part = base64.b64encode(second_part_bytes)

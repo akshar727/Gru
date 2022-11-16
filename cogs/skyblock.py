@@ -1,5 +1,5 @@
 import os
-import requests
+from .utils import http
 import nextcord as discord
 from nextcord.ext import commands
 from datetime import date
@@ -24,22 +24,21 @@ def shorten_num(num):
         return fin
 
 
-def get_uuid(name):
+async def get_uuid(name):
     try:
-        resp = requests.get(
-            f"https://api.mojang.com/users/profiles/minecraft/{name}")
-        uuid = resp.json()["id"]
+        resp = await http.get(
+            f"https://api.mojang.com/users/profiles/minecraft/{name}",res_method="json")
+        uuid = resp["id"]
 
         return str(uuid)
-
-    except:
+    except KeyError:
         return None
 
 
-def get_name(name):
-    resp = requests.get(
-        f"https://api.mojang.com/users/profiles/minecraft/{name}")
-    name = resp.json()["name"]
+async def get_name(name):
+    resp = await http.get(
+        f"https://api.mojang.com/users/profiles/minecraft/{name}",res_method="json")
+    name = resp["name"]
     return str(name)
 
 
@@ -55,10 +54,7 @@ class Skyblock(commands.Cog):
             return await interaction.response.send_message(content=f"No user found with name {name}!")
         await interaction.response.send_message("<a:loading:898340114164490261>")
         true = get_name(name)
-        data = requests.get(
-            f"https://api.hypixel.net/skyblock/profiles?key={key}&uuid={get_uuid(name)}"
-        )
-        data = data.json()
+        data = await http.get(f"https://api.hypixel.net/skyblock/profiles?key={key}&uuid={get_uuid(name)}",res_method="json")
         if data['success'] == False:
             return await interaction.edit_original_message(
                 content="The Hypixel API key is invalid. Please Contact Elon Musk#7655 to let them know to change it."
@@ -86,16 +82,14 @@ class Skyblock(commands.Cog):
         banking = ...
         try:
             banking = profi["banking"]["balance"]
-        except:
+        except KeyError:
             banking = None
-
-        ac = requests.post(
-            os.getenv("skyhelper_api_url"),
-            json={"profileData": sa,"bankBalance":banking})
+        ac = await http.post(os.getenv("skyhelper_api_url"),json={"profileData": sa,"bankBalance":banking},res_method="json")
+        
 
         try:
             dat = ac.json()['data']
-        except:
+        except KeyError:
             return await interaction.edit_original_message(content="The api is loading, please try again shortly!")
         categories = dat['types']
         storage = categories['storage']['items'][0:5]

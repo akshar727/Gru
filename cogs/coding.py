@@ -3,10 +3,14 @@ import binascii
 import codecs
 import nextcord as discord
 from io import BytesIO
+import os
 from nextcord.ext import commands
 from nextcord.ext.commands.errors import BadArgument
 from .utils import http, default
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 
@@ -303,7 +307,7 @@ class Encryption(commands.Cog):
 
             """ Invite me to your server """
             await ctx.reply(
-                f"**{ctx.author.name}**, use this URL to invite me\n<https://discord.com/api/oauth2/authorize?client_id=874328552965820416&permissions=8&scope=bot>")
+                f"**{ctx.author.name}**, use this URL to invite me\n<{os.getenv('discord_inv_link')}>")
         else:
             await ctx.reply(
                 'Currently, no one but the owner of this bot can invite me.')
