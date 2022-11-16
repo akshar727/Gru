@@ -116,7 +116,6 @@ def get_fun_embeds(prefix):
     page3.add_field(name=f'{prefix}trigger <user> / {prefix}trigger <user>', value="Makes a user really triggered...",inline=False)
     page3.add_field(name=f'{prefix}joke', value="Gives you a joke!",inline=False)
     page3.add_field(name=f'{prefix}genderify <name> / {prefix}gender <name>', value="I guess your gender by your name!", inline=False)
-    page3.add_field(name=f'{prefix}imposter', value="You have to find the imposter before the reactor has a meltdown!", inline=False)
     page3.add_field(name=f'{prefix}sqrt <number or expression>', value="Gives you the square root of a number or expression!", inline=False)
     page3.add_field(name=f'{prefix}spam', value="Type as many characters as you can in 30 seconds!", inline=False)
     page3.add_field(name=f'{prefix}gay <user>', value="Makes a gay overlay!", inline=False)

@@ -3,6 +3,20 @@ import nextcord as discord
 import asyncio
 
 
+
+async def calculator_button(self, button, interaction):
+    if len(self.calculator_embed.description + button.label) >= 4096:
+            return
+    if interaction.user.id == self.author.id:
+        if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
+            self.calculator_embed.description = button.label
+            self.is_placeholder = False
+        else:
+            self.calculator_embed.description += button.label
+        await self.calculator_message.edit(embed=self.calculator_embed)
+
+
+
 def calculator(exp):
     o = exp.replace('x', '*')
     o = o.replace('÷', '/')
@@ -23,51 +37,19 @@ class Calculator_Buttons(discord.ui.View):
 
     @discord.ui.button(label="1", style=discord.ButtonStyle.grey)
     async def one(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="2", style=discord.ButtonStyle.grey)
     async def two(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="3", style=discord.ButtonStyle.grey)
     async def three(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="x", style=discord.ButtonStyle.blurple)
     async def mult(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="Exit", style=discord.ButtonStyle.danger)
     async def exit(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -81,51 +63,19 @@ class Calculator_Buttons(discord.ui.View):
 
     @discord.ui.button(label="4", style=discord.ButtonStyle.grey, row=1)
     async def four(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="5", style=discord.ButtonStyle.grey, row=1)
     async def five(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="6", style=discord.ButtonStyle.grey, row=1)
     async def six(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="÷", style=discord.ButtonStyle.blurple, row=1)
     async def div(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="←", style=discord.ButtonStyle.danger, row=1)
     async def backbutton(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -145,51 +95,19 @@ class Calculator_Buttons(discord.ui.View):
 
     @discord.ui.button(label="7", style=discord.ButtonStyle.grey, row=2)
     async def seven(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="8", style=discord.ButtonStyle.grey, row=2)
     async def eight(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="9", style=discord.ButtonStyle.grey, row=2)
     async def nine(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="+", style=discord.ButtonStyle.blurple, row=2)
     async def plus(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="Clear", style=discord.ButtonStyle.danger, row=2)
     async def clear(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -200,111 +118,39 @@ class Calculator_Buttons(discord.ui.View):
 
     @discord.ui.button(label="000", style=discord.ButtonStyle.grey, row=3)
     async def three_zero(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="//", style=discord.ButtonStyle.grey, row=3)
     async def floor_div(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="(", style=discord.ButtonStyle.grey, row=3)
     async def left_paren(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="**", style=discord.ButtonStyle.blurple, row=3)
     async def power(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label=")", style=discord.ButtonStyle.grey, row=3)
     async def right_paren(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="00", style=discord.ButtonStyle.grey, row=4)
     async def two_zero(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="0", style=discord.ButtonStyle.grey, row=4)
     async def one_zero(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label=".", style=discord.ButtonStyle.grey, row=4)
     async def point(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="-", style=discord.ButtonStyle.blurple, row=4)
     async def minus(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if len(self.calculator_embed.description + button.label) >= 4096:
-            return
-        if interaction.user.id == self.author.id:
-            if self.calculator_embed.description == "0" and self.is_placeholder or self.calculator_embed.description == "An error occurred" or self.calculator_embed.description == "Too big of a number":
-                self.calculator_embed.description = button.label
-                self.is_placeholder = False
-            else:
-                self.calculator_embed.description += button.label
-            await self.calculator_message.edit(embed=self.calculator_embed)
+        await calculator_button(self,button,interaction)
 
     @discord.ui.button(label="=", style=discord.ButtonStyle.green, row=4)
     async def equals(self, button: discord.ui.Button, interaction: discord.Interaction):
