@@ -20,13 +20,12 @@ from io import BytesIO
 from googleapiclient.discovery import build
 import urllib.parse, urllib.request
 from num2words import num2words
-from cogs.utils import http
+from cogs.utils import http, config
 from easy_pil import Editor, Font, Canvas, load_image_async
 import humanfriendly
+import itertools
 
-load_dotenv()
-
-api_key = os.getenv("google_api_key")
+api_key = config.getenv("google_api_key")
 
 
 def get_prefix(client, message):
@@ -52,18 +51,12 @@ def get_prefix(client, message):
 
 
 def mixedCase(*args):
-  """
-  Gets all the mixed case combinations of a string
+    total = []
+    for string in args:
+        a = map(''.join, itertools.product(*((c.upper(), c.lower()) for c in       string)))
+        for x in list(a): total.append(x)
 
-  This function is for in-case sensitive prefixes
-  """
-  total = []
-  import itertools
-  for string in args:
-    a = map(''.join, itertools.product(*((c.upper(), c.lower()) for c in       string)))
-    for x in list(a): total.append(x)
-
-  return list(total)
+    return list(total)
 
 
 class GruBot(commands.Bot):
@@ -236,79 +229,84 @@ async def on_member_join(member):
 ####################################################################
 # Main code starts :)
 
-mainshop = [ {
-    "name": "Fishing Rod",
-    "price": 25000,
-    "description": "Allows you to fish and catch sea animals!"
-}, {
-    "name":
-    "Hunting Sniper",
-    "price":
-    27000,
-    "description":
-    "Allows you to hunt and catch land and aerial animals!"
-}, {
-    "name": "2x booster",
-    "price": 50000,
-    "description": "Get a 2x money booster **__Permanent__**"
-}, {
-    "name": "5x booster",
-    "price": 400000,
-    "description": "Get a 5x money booster **__Permanent__**"
-}, {
-    "name": "10x booster",
-    "price": 3500000,
-    "description": "Get a 10x money booster **__Permanent__**"
-},
-   {
-    "name": "Bank Record",
-    "price": 250000,
-    "description": "Expands your bank. Automatically used when bought."
-}, 
-            {
-                "name" : "Uno Reverse Card",
-                "price" : 500000,
-                "description" : "Instead of losing money when you get robbed, you gain money!"
-            }
+mainshop = [
+
+    {
+        "name": "Fishing Rod",
+        "price": 25000,
+        "description": "Allows you to fish and catch sea animals!"
+    },
+    {
+        "name":"Hunting Sniper",
+        "price":27000,
+        "description":"Allows you to hunt and catch land and aerial animals!"
+    },
+    {
+        "name": "2x booster",
+        "price": 50000,
+        "description": "Get a 2x money booster **__Permanent__**"
+    },
+    {
+        "name": "5x booster",
+        "price": 400000,
+        "description": "Get a 5x money booster **__Permanent__**"
+    },
+    {
+        "name": "10x booster",
+        "price": 3500000,
+        "description": "Get a 10x money booster **__Permanent__**"
+    },
+    {
+        "name": "Bank Record",
+        "price": 250000,
+        "description": "Expands your bank. Automatically used when bought."
+    },
+    {
+        "name" : "Uno Reverse Card",
+        "price" : 500000,
+        "description" : "Instead of losing money when you get robbed, you gain money!"
+    }
 ]
 
-animal_shop = [[{
-    "name": "Wolf",
-    "sell_price": 2000
-}, {
-    "name": "Mountain Lion",
-    "sell_price": 3200
-}, {
-    "name": "Chicken",
-    "sell_price": 3500
-}, {
-    "name": "Rabbit",
-    "sell_price": 3700
-}, {
-    "name": "Deer",
-    "sell_price": 4200
-}, {
-    "name": "Moose",
-    "sell_price": 4900
-}, {
-    "name": "Angry Bird",
-    "sell_price": 8500
-}, {
-    "name": "Minion",
-    "sell_price": 15000
-}, {
-    "name": "Bengal Tiger",
-    "sell_price": 32000
-}, {
-    "name": "Evil Minion",
-    "sell_price": 50000
-}, {
-    "name": "White Tiger",
-    "sell_price": 65000
-}, {
-    "name": "Unicorn",
-    "sell_price": 85000
-}],
+animal_shop = [
+    [
+        {
+            "name": "Wolf",
+            "sell_price": 2000
+        }, {
+            "name": "Mountain Lion",
+            "sell_price": 3200
+        }, {
+            "name": "Chicken",
+            "sell_price": 3500
+        }, {
+            "name": "Rabbit",
+            "sell_price": 3700
+        }, {
+            "name": "Deer",
+            "sell_price": 4200
+        }, {
+            "name": "Moose",
+            "sell_price": 4900
+        }, {
+            "name": "Angry Bird",
+            "sell_price": 8500
+        }, {
+            "name": "Minion",
+            "sell_price": 15000
+        }, {
+            "name": "Bengal Tiger",
+            "sell_price": 32000
+        }, {
+            "name": "Evil Minion",
+            "sell_price": 50000
+        }, {
+            "name": "White Tiger",
+            "sell_price": 65000
+        }, {
+            "name": "Unicorn",
+            "sell_price": 85000
+        }],
                [{
                    "name": "Duck",
                    "sell_price": 6000
@@ -423,7 +421,8 @@ async def balance(ctx, user: discord.Member = None):
                        color=discord.Color.green())
     em.add_field(name="Wallet Balance",
                      value=f"{int(wallet_amt):,} Minions™",inline=False)
-    em.add_field(name='Bank Balance', value=f"{int(bank_amt):,} **/** {int(max):,} Minions™ `({round(float(int(bank_amt)/int(max))*100,2)}% full)`",inline=False)
+    em.add_field(name='Bank Balance', value=f"{int(bank_amt):,} **/** {int(max):,} Minions™ `({round(float(int(bank_amt)/int(max))*100,2)}% full)`"
+    ,inline=False)
     em.add_field(name='Job', value=job_name,inline=False)
     em.add_field(name='Job salary',
                      value=f"{int(job_pay):,} Minions™ per hour",inline=False)
@@ -534,7 +533,7 @@ class RemoveUser(discord.ui.Modal):
         await self.channel.set_permissions(user,overwrite=overwrites)
         await interaction.send(f"{user.mention} has been removed from this ticket!",ephemeral=True)
 
-    
+
 
 
 class TicketSettings(discord.ui.View):
@@ -560,15 +559,17 @@ class TicketSettings(discord.ui.View):
     @discord.ui.button(label="Add User",style=discord.ButtonStyle.green, custom_id="ticket_settings:add_user")
     async def add_user(self, button: discord.ui.Button, interaction: discord.Interaction):
         if self.user != interaction.user.id:
-            return await interaction.response.send_message("This is not your ticket!",ephemeral=True)
+            return await interaction.response.send_message("This is not your ticket!"
+            ,ephemeral=True)
         await interaction.response.send_modal(AddUser(interaction.channel))
 
     @discord.ui.button(label="Remove User",style=discord.ButtonStyle.gray, custom_id="ticket_settings:remove_user")
     async def remove_user(self, button: discord.ui.Button, interaction: discord.Interaction):
         if self.user != interaction.user.id:
-            return await interaction.response.send_message("This is not your ticket!",ephemeral=True)
+            return await interaction.response.send_message("This is not your ticket!"
+            ,ephemeral=True)
         await interaction.response.send_modal(RemoveUser(interaction.channel))
-        
+
 
 class CreateTicket(discord.ui.View):
     def __init__(self):
@@ -599,9 +600,7 @@ class CreateTicket(discord.ui.View):
         ticket_data["active_ticket_users"] = active_ticket_users
         with open('databases/tickets.json','w') as f:
             json.dump(ticket_data,f)
-            
-        
-    
+
 
 @client.command()
 @commands.has_permissions(manage_guild=True)
@@ -813,7 +812,7 @@ async def work(ctx,*,name: str=None):
                     return await ctx.reply(f"You are now a **{item}**. Your salary is now {_work['pay']:,} Minions™. Be careful not to fail too many times, or you will get fired!")
                 work.reset_cooldown(ctx)
                 return await ctx.reply("You have not unlocked this job yet, work more to unlock it!")
-                
+              
         for item in p2:
             if name.lower() in str(item.lower()):
                 if work_name != "None":
@@ -1254,7 +1253,7 @@ async def rob(ctx, member: discord.Member):
                 index = inv.index(item)
         if uno_rev == {}:
             raise Exception
-        
+      
         if uno_rev["amount"] > 0 and chance == 1:
             users[str(member.id)]["bag"][index]["amount"] -= 1
             if users[str(member.id)]["bag"][index]["amount"] == 0:
@@ -2614,8 +2613,7 @@ class JoinGiveaway(discord.ui.View):
             embed.description += f"\n{len(g[str(self.msg_id)]['users'])} entrant{'s' if len(g[str(self.msg_id)]['users']) != 1 else ''}"
             await msg.edit(embed=embed)
             return await interaction.response.send_message("You have left the giveaway!",ephemeral=True)
-        return await interaction.response.send_message("You have not entered the giveaway!",ephemeral=True)
-        
+        return await interaction.response.send_message("You have not entered the giveaway!",ephemeral=True)     
 
 @tasks.loop(seconds=1)
 async def check_giveaway_ended():
@@ -2723,11 +2721,10 @@ async def gcreate(ctx, time=None, *, prize=None):
     with open('databases/giveaways.json') as f: 
         g = json.load(f)
     g[str(gaw_msg.id)] = {'author':str(ctx.author.id),'users':[], 'channel':str(ctx.channel.id), 'end':time_stamp.timestamp(),'ended':False}
-    
     with open('databases/giveaways.json','w') as f:
         json.dump(g, f, indent=4)
     btn = JoinGiveaway(gaw_msg.id)
-    
+
     await gaw_msg.edit(view=btn)
     
 
@@ -4044,5 +4041,5 @@ for filename in os.listdir("cogs"):
     if filename.endswith('.py'):
         client.load_extension(f'cogs.{filename[:-3]}')
 
-token = os.getenv("discord_bot_token")
+token = config.getenv("discord_bot_token")
 client.run(token)

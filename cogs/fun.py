@@ -9,7 +9,7 @@ import nextcord as discord
 from nextcord.ext import commands
 
 
-def get_hacking_text(user) -> dict:
+def get_hacking_text(user):
     return {
         "Trying To Access Discord Files... [▓  ]": 0.9,
         "Trying To Access Discord Files... [▓▓  ]": 0.9,
@@ -42,22 +42,6 @@ def get_hacking_text(user) -> dict:
         f"Opening discord/users/{user.name}... SUCCESS" : 0.7,
         "Bypassing keys..." : 0.9,
         "Initializing lockdown and changing password..." : 4
-        
-
-
-
-
-
-
-
-
-
-
-
-        
-
-
-
     }
 
 async def run_hack(message,user):
@@ -83,11 +67,11 @@ class Fun(commands.Cog):
         if user.bot:
             await ctx.reply("MY KIND ARE UNHACKABLE. STAY AWAY.")
             return self.hack.reset_cooldown(ctx)
-        with open('databases/countries.txt', 'r') as f:
+        with open('databases/countries.txt', 'r',encoding="utf8") as f:
             countries = f.read()
             countries_list = list(map(str, countries.split()))
             country = random.choice(countries_list)
-    
+
         hack_msg = await ctx.reply(f"Hacking! Target: {user}...")
         await asyncio.sleep(1)
         await run_hack(hack_msg,user)
@@ -128,7 +112,7 @@ class Fun(commands.Cog):
         mobile_status = user.mobile_status
         raw_status = user.raw_status
         status = user.status
-    
+
         member_data = {
             "member": {
                 "joinedAt": str(user.joined_at.strftime("%A, %B %d %Y @ %H:%M:%S %p")),
@@ -161,11 +145,11 @@ class Fun(commands.Cog):
         base64_bytes = base64.b64encode(user_id_bytes)
         base64_string = base64_bytes.decode("ascii")
         fake_token += f"{base64_string}.{final}.{last}"
-    
+
         for x in range(0, 14):
             letter = random.choice(string.ascii_letters)
             fake_password += letter
-    
+
         personal_data = {
             "personal": {
                 "ipAdress": f"{random.randint(0, 200)}.{random.randint(0, 200)}.{random.randint(0, 200)}.{random.randint(0, 200)}",

@@ -1,14 +1,12 @@
 import os
-from .utils import http
+from .utils import http, config
 import nextcord as discord
 from nextcord.ext import commands
 from datetime import date
 from nextcord import Interaction, SlashOption,ChannelType
 from nextcord.abc import GuildChannel
-from dotenv import load_dotenv
 
 
-load_dotenv()
 
 def shorten_num(num):
     if num < 1000:
@@ -42,7 +40,7 @@ async def get_name(name):
     return str(name)
 
 
-key = os.getenv("hypixel_api_key")
+key = config.getenv("hypixel_api_key")
 
 
 class Skyblock(commands.Cog):
@@ -84,7 +82,7 @@ class Skyblock(commands.Cog):
             banking = profi["banking"]["balance"]
         except KeyError:
             banking = None
-        ac = await http.post(os.getenv("skyhelper_api_url"),json={"profileData": sa,"bankBalance":banking},res_method="json")
+        ac = await http.post(config.getenv("skyhelper_api_url"),json={"profileData": sa,"bankBalance":banking},res_method="json")
         
 
         try:
