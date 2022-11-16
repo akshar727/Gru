@@ -2,6 +2,7 @@
 __pycache__/
 .DS_Store
 .env
-.vscode
 databases/
+.vscode
 venv/
+decoded_databases/

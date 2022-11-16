@@ -168,6 +168,7 @@ async def on_ready():
     uptimeCounter.start()
     check_giveaway_ended.start()
     print()
+    config.encrypt_data()
     with open('databases/giveaways.json','r') as f:
         g = json.load(f)
     with open('databases/tickets.json','r') as f:
