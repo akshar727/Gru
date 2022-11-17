@@ -182,6 +182,7 @@ class Events(commands.Cog):
                     level_start = level
                     level_end = int(xp**(1/4))
                     if level_start < level_end:
+                        print("lvl up")
                         await message.channel.send('Congratulations! {} has leveled up to **Level {}** and has a total of **{} xp**! :tada: :tada:'.format(author.mention, level_end, round(xp))) 
                         await cursor.execute("UPDATE levels SET level = ? WHERE user = ? AND guild = ?",(level_end,author.id,guild.id,))
                 await self.bot.db.commit()
