@@ -1,9 +1,8 @@
 from nextcord.ext import commands, tasks
 import nextcord as discord
 import json
-from gru_bot import GruBot
 import random
-from cogs.utils import config
+# from cogs.utils import `config`
 import aiosqlite
 
 fake_cmds = ['balance', '_help']
@@ -71,6 +70,7 @@ class Events(commands.Cog):
         setattr(self.bot,"db", await aiosqlite.connect("main.db"))
         async with self.bot.db.cursor() as cursor:
             await cursor.execute("CREATE TABLE IF NOT EXISTS levels (level INTEGER, xp INTEGER, user INTEGER, guild INTEGER)")
+            await cursor.execute("CREATE TABLE IF NOT EXISTS prefixes (prefix TEXT guild ID")
         print("Connected to {0.user}".format(self.bot))
 
 
@@ -153,38 +153,6 @@ class Events(commands.Cog):
                 await ctx.reply(f"My prefix for this server is `{pre}`")
         except:
             pass
-        if not message.author.bot:
-            with open('databases/server_configs.json', 'r') as f:
-                configs = json.load(f)
-            if configs[str(message.guild.id)]['levels'] == True:
-                author = message.author
-                guild = message.guild
-                async with self.bot.db.cursor() as cursor:
-                    await cursor.execute("SELECT xp FROM levels WHERE user = ? AND guild = ?",(author.id,guild.id,))
-                    xp = await cursor.fetchone()
-                    await cursor.execute("SELECT level FROM levels WHERE user = ? AND guild = ?",(author.id,guild.id,))
-                    level = await cursor.fetchone()
-
-                    if not xp or not level:
-                        await cursor.execute("INSERT INTO levels (level, xp, user, guild) VALUES (?, ?, ?, ?)",(1,0,author.id,guild.id))
-                        await self.bot.db.commit()
-                    try:
-                        xp = xp[0]
-                        level = level[0]
-                    except TypeError:
-                        xp = 0
-                        level = 0
-                    
-                    xp += level * 1.3
-                    await cursor.execute("UPDATE levels SET xp = ? WHERE user = ? AND guild = ?", (xp,author.id,guild.id,))
-
-
-                    level_start = level
-                    level_end = int(xp**(1/4))
-                    if level_start < level_end:
-                        await message.channel.send('Congratulations! {} has leveled up to **Level {}** and has a total of **{} xp**! :tada: :tada:'.format(author.mention, level_end, round(xp))) 
-                        await cursor.execute("UPDATE levels SET level = ? WHERE user = ? AND guild = ?",(level_end,author.id,guild.id,))
-                await self.bot.db.commit()
 
         await self.bot.process_commands(message)
 
@@ -206,35 +174,6 @@ class Events(commands.Cog):
                 json.dump(reaction_roles, f, indent=4)
 
 
-
-
-# async def update_data(users, user, server):
-#     await config.open_account(user)
-#     if not str(server.id) in users:
-#         users[str(server.id)] = {}
-#         if not str(user.id) in users[str(server.id)]:
-#             users[str(server.id)][str(user.id)] = {}
-#             users[str(server.id)][str(user.id)]['experience'] = 0
-#             users[str(server.id)][str(user.id)]['level'] = 1
-#     elif not str(user.id) in users[str(server.id)]:
-#         users[str(server.id)][str(user.id)] = {}
-#         users[str(server.id)][str(user.id)]['experience'] = 0
-#         users[str(server.id)][str(user.id)]['level'] = 1
-
-#     with open('databases/levels.json', 'w') as f:
-#         json.dump(users, f, indent=4)
-
-
-# async def add_experience(users, user, exp, server):
-#     users[str(user.guild.id)][str(user.id)]['experience'] += exp
-#     with open('databases/levels.json', 'w') as f:
-#         json.dump(users, f, indent=4)
-
-
-# async def level_up(users, user, channel, server):
-#     experience = users[str(user.guild.id)][str(user.id)]['experience']
-#     lvl_start = users[str(user.guild.id)][str(user.id)]['level']
-#     lvl_end = int(experience**(1 / 4))
 #         with open('databases/lootboxes.json', 'r') as f:
 #             lootboxes = json.load(f)
 #         if lvl_end - lvl_start > 1:
