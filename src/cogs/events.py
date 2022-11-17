@@ -44,7 +44,6 @@ td = 0
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        # set_client(bot)
 
 
 
@@ -70,7 +69,8 @@ class Events(commands.Cog):
         setattr(self.bot,"db", await aiosqlite.connect("main.db"))
         async with self.bot.db.cursor() as cursor:
             await cursor.execute("CREATE TABLE IF NOT EXISTS levels (level INTEGER, xp INTEGER, user INTEGER, guild INTEGER)")
-            await cursor.execute("CREATE TABLE IF NOT EXISTS prefixes (prefix TEXT guild ID")
+            await cursor.execute("CREATE TABLE IF NOT EXISTS prefixes (prefix TEXT, guild ID)")
+            await cursor.execute("CREATE TABLE IF NOT EXISTS jobs (name TEXT, pay INTEGER, hours INTEGER, user INTEGER)")
         print("Connected to {0.user}".format(self.bot))
 
 

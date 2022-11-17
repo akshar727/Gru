@@ -290,8 +290,10 @@ async def balance(ctx, user: discord.Member = None):
     wallet_amt = users[str(user.id)]["wallet"]
     bank_amt = users[str(user.id)]["bank"]
     booster_amt = users[str(user.id)]["booster"]
-    job_name = jobs[str(user.id)]["job"]["name"]
-    job_pay = jobs[str(user.id)]["job"]["pay"]
+    async with client.db.cursor() as cursor:
+        await cursor.execute("SELECT name FROM jobs WHERE user = ?", (user.id,))
+        job_name = await cursor.fetchone()
+        await cursor.execute("SELECT pay FROM jobs WHERE user = ?", (user.id,))
     max = users[str(user.id)]['max']
 
     em = discord.Embed(title=f"{user.display_name}'s Balance",
