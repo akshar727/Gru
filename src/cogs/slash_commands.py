@@ -40,19 +40,19 @@ async def get_name(name):
     return str(name)
 
 
-key = config.getenv("hypixel_api_key")
+key = config.getenv("HYPIXEL_API_KEY")
 
 
-class Skyblock(commands.Cog):
+class SlashCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
     @discord.slash_command(name="networth",description="Gets the networth of a player in Hypixel Skyblock")
     async def networth(self, interaction: Interaction, name: str = discord.SlashOption(description="The player's username",required=True), profile: str = discord.SlashOption(description="Which profile to get data from.",required=False)):
-        if get_uuid(name) == None:
+        if await get_uuid(name) == None:
             return await interaction.response.send_message(content=f"No user found with name {name}!")
         await interaction.response.send_message("<a:loading:898340114164490261>")
-        true = get_name(name)
-        data = await http.get(f"https://api.hypixel.net/skyblock/profiles?key={key}&uuid={get_uuid(name)}",res_method="json")
+        true = await get_name(name)
+        data = await http.get(f"https://api.hypixel.net/skyblock/profiles?key={key}&uuid={await get_uuid(name)}",res_method="json")
         if data['success'] == False:
             return await interaction.edit_original_message(
                 content="The Hypixel API key is invalid. Please Contact Elon Musk#7655 to let them know to change it."
@@ -76,17 +76,17 @@ class Skyblock(commands.Cog):
                     profi = profilea
                     break
 
-        sa = profi["members"][get_uuid(name)]
+        sa = profi["members"][await get_uuid(name)]
         banking = ...
         try:
             banking = profi["banking"]["balance"]
         except KeyError:
             banking = None
-        ac = await http.post(config.getenv("skyhelper_api_url"),json={"profileData": sa,"bankBalance":banking},res_method="json")
+        ac = await http.post(config.getenv("SKYHELPER_API_URL"),json={"profileData": sa,"bankBalance":banking},res_method="json")
         
 
         try:
-            dat = ac.json()['data']
+            dat = ac['data']
         except KeyError:
             return await interaction.edit_original_message(content="The api is loading, please try again shortly!")
         categories = dat['types']
@@ -285,4 +285,4 @@ class Skyblock(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(Skyblock(bot))
+    bot.add_cog(SlashCommands(bot))
