@@ -40,12 +40,14 @@ async def get_prefix(client, message):
             # configs[str(message.guild.id)] = {}
             # configs[str(message.guild.id)]["giveaway_role"] = "None"
             # configs[str(message.guild.id)]["levels"] = False
-            async with client.db.cursor() as cursor:
+            try:
                 await cursor.execute("INSERT INTO prefixes (prefix, guild) VALUES (?, ?)",(config.getenv("BOT_PREFIX"),message.guild.id,))
                 await cursor.execute("SELECT prefix FROM prefixes WHERE guild = ?", (message.guild.id,))
                 data = await cursor.fetchone()
-                return mixedCase(data)
-            await client.db.commit()
+                if data:
+                    return mixedCase(data)
+            except Exception:
+                return config.getenv("BOT_TOKEN")
 
             # with open("databases/server_configs.json", 'w') as f:
             #     json.dump(configs, f, indent=4)
