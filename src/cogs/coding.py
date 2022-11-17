@@ -5,7 +5,7 @@ import nextcord as discord
 from io import BytesIO
 from nextcord.ext import commands
 from nextcord.ext.commands.errors import BadArgument
-from .utils import http, default, config
+from .utils import http, config
 import json
 
 
@@ -74,7 +74,7 @@ class Encryption(commands.Cog):
                 data = BytesIO(input)
 
             try:
-                return await ctx.reply(content=f"📑 **{convert}**", file=discord.File(data, filename=default.timetext("Encryption")))
+                return await ctx.reply(content=f"📑 **{convert}**", file=discord.File(data, filename=config.timetext("Encryption")))
             except discord.HTTPException:
                 return await ctx.reply(f"The file I returned was over 8 MB, sorry {ctx.author.name}...")
 

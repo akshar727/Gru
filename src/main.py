@@ -9,7 +9,6 @@ import os
 import json
 import random
 import psutil
-import traceback
 from zoneinfo import ZoneInfo
 from nextcord.ext import commands, tasks
 from nextcord.utils import get
@@ -24,8 +23,9 @@ from cogs.utils import http, config
 from easy_pil import Editor, Font, Canvas, load_image_async
 import humanfriendly
 import itertools
+from gru_bot import GruBot
 
-api_key = config.getenv("google_api_key")
+api_key = config.getenv("GOOGLE_API_KEY")
 
 
 def get_prefix(client, message):
@@ -42,7 +42,7 @@ def get_prefix(client, message):
         configs[str(message.guild.id)] = {}
         configs[str(message.guild.id)]["giveaway_role"] = "None"
         configs[str(message.guild.id)]["levels"] = False
-        prefixes[str(message.guild.id)] = 'gru '
+        prefixes[str(message.guild.id)] = config.getenv("BOT_PREFIX")
 
         with open('databases/prefixes.json', 'w') as f:
             json.dump(prefixes, f, indent=4)
@@ -53,21 +53,12 @@ def get_prefix(client, message):
 def mixedCase(*args):
     total = []
     for string in args:
-        a = map(''.join, itertools.product(*((c.upper(), c.lower()) for c in       string)))
+        a = map(''.join, itertools.product(*((c.upper(), c.lower()) for c in string)))
         for x in list(a): total.append(x)
 
     return list(total)
 
 
-class GruBot(commands.Bot):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.persistent_views_added = False
-    async def is_owner(self, user: discord.User):
-        if user.id == 717512097725939795:
-            return True
-        else:
-            return False
 
 
 
@@ -161,69 +152,6 @@ def convert_str_to_number(x):
 
 
 
-
-@client.event
-async def on_ready():
-    change_status.start()
-    uptimeCounter.start()
-    check_giveaway_ended.start()
-    print()
-    config.encrypt_data()
-    with open('databases/giveaways.json','r') as f:
-        g = json.load(f)
-    with open('databases/tickets.json','r') as f:
-        ticket_data = json.load(f)
-    active_ticket_users = ticket_data["active_ticket_users"]
-    if not client.persistent_views_added:
-        client.add_view(CreateTicket())
-        for user in active_ticket_users:
-            client.add_view(TicketSettings(user))
-        for giveaway in g:
-            client.add_view(view=JoinGiveaway(int(giveaway)),message_id=int(giveaway))
-        client.persistent_views_added = True
-        print('Added Giveaway Buttons and Tickets!')
-    print("Connected to {0.user}".format(client))
-
-
-@tasks.loop(seconds=4)
-async def change_status():
-    await client.change_presence(activity=discord.Game("Try: @Gru | gru help"))
-
-
-ts = 0
-tm = 0
-th = 0
-td = 0
-
-
-@tasks.loop(seconds=2.0)
-async def uptimeCounter():
-    global ts, tm, th, td
-    ts += 2
-    if ts == 60:
-        ts = 0
-        tm += 1
-        if tm == 60:
-            tm = 0
-            th += 1
-            if th == 24:
-                th = 0
-                td += 1
-
-
-@uptimeCounter.before_loop
-async def beforeUptimeCounter():
-    await client.wait_until_ready()
-
-
-@client.event
-async def on_member_join(member):
-    if not member.bot:
-        try:
-            await member.send(
-                f'''Hi {member.name}, welcome to {member.guild.name}!''')
-        except:
-            print(f"Cannot send messages to {member}")
 
 
 ####################################################################
@@ -407,8 +335,8 @@ async def stats(ctx):
 async def balance(ctx, user: discord.Member = None):
     if user is None:
         user = ctx.author
-    await open_account(ctx.author)
-    await open_account(user)
+    await config.open_account(ctx.author)
+    await config.open_account(user)
     users = await get_bank_data()
     jobs = await get_job_data()
     wallet_amt = users[str(user.id)]["wallet"]
@@ -435,7 +363,7 @@ async def balance(ctx, user: discord.Member = None):
 @client.command()
 @commands.cooldown(1, 30, commands.BucketType.user)
 async def beg(ctx):
-    await open_account(ctx.author)
+    await config.open_account(ctx.author)
     user = ctx.author
     users = await get_bank_data()
 
@@ -634,131 +562,6 @@ async def weekly(ctx):
         "You just recieved `500,000 Minions™` and 5 `Legendary` crates!")
 
 
-@client.event
-async def on_command_error(ctx, error):
-    modlog = client.get_channel(881208942104047649)
-    if isinstance(error, commands.CommandInvokeError):
-        error = error.original
-        with open("databases/errors.txt", 'a') as f:
-            traceback.print_exception(type(error),
-                                      error,
-                                      error.__traceback__,
-                                      file=f)
-            f.write("\n")
-    if isinstance(error, commands.CommandNotFound):
-        with open('databases/prefixes.json', 'r') as f:
-            prefixes = json.load(f)
-        if ctx.author in working_users:
-            return working_users.pop(working_users.index(ctx.author))
-        prefix = prefixes[str(ctx.guild.id)]
-        await ctx.reply(
-            f"Unknown command. Try {prefix}help for a list of commands")
-        return
-    elif isinstance(error, commands.CommandOnCooldown):
-        tim = datetime.datetime.now() + datetime.timedelta(seconds=error.retry_after)
-        _str = f"<t:{int(tim.timestamp())}:R>"
-        if error.retry_after <= 60:
-            em = discord.Embed(
-                title=f"Slow it down bro!",
-                description="**Still on cooldown**, please try again in {:.2f}s, or {}"
-                .format(error.retry_after, _str),
-                color=discord.Color.green())
-            await ctx.reply(ctx.author.mention, embed=em)
-        elif error.retry_after <= 3600:
-            mins = int(error.retry_after // 60)
-            secs = int(error.retry_after - (mins * 60))
-            em = discord.Embed(
-                title=f"Slow it down bro!",
-                description="**Still on cooldown**, please try again in {}m {}s, or {}"
-                .format(mins, secs, _str),
-                color=discord.Color.green())
-            await ctx.reply(ctx.author.mention, embed=em)
-        elif error.retry_after <= 86400:
-            time = error.retry_after
-            hrs = int(time// 3600)
-            time -= hrs * 3600
-            mins =  int(time // 60)
-            time -= mins * 60
-            secs = int(time)
-            em = discord.Embed(
-                title=f"Slow it down bro!",
-                description="**Still on cooldown**, please try again in {}h {}m {}s, or {}"
-                .format(hrs, mins, secs, _str),
-                color=discord.Color.green())
-            await ctx.reply(ctx.author.mention, embed=em)
-        else:
-            time = error.retry_after
-            days = int(time // 86400)
-            time -= days * 86400
-            hrs = int(time// 3600)
-            time -= hrs * 3600
-            mins =  int(time // 60)
-            time -= mins * 60
-            secs = int(time)
-            em = discord.Embed(
-                title=f"Slow it down bro!",
-                description="**Still on cooldown**, please try again in {}d {}h {}m {}s, or {}"
-                .format(days,hrs, mins, secs, _str),
-                color=discord.Color.green())
-            em.set_footer(text=f"That is at {_str}!")
-            await ctx.reply(ctx.author.mention, embed=em)
-        return
-    elif isinstance(error, commands.RoleNotFound):
-        await ctx.reply(":x: Role not found.")
-        return
-    elif isinstance(error, commands.MemberNotFound):
-        await ctx.reply(":x: No member found with that name.")
-        return
-    elif isinstance(error, commands.NotOwner):
-        await ctx.reply(
-            ":x: You are not allowed to do this! Only the owner of the bot can do this. Please contact Elon Musk#7655 if you think this is a mistake."
-        )
-        return
-    elif isinstance(error, commands.MissingRequiredArgument):
-        with open('databases/prefixes.json', 'r') as f:
-            prefixes = json.load(f)
-        prefix = prefixes[str(ctx.guild.id)]
-        await ctx.reply(
-            f":x: Missing arguments! check {prefix}help if you need to know about how to use the command."
-        )
-        try:
-            client.get_command(ctx.invoked_with).reset_cooldown(ctx)
-        except:
-            pass
-        return
-    elif isinstance(error, commands.MissingPermissions):
-        missing = [
-            perm.replace("_", " ").replace("guild", "server").title()
-            for perm in error.missing_permissions
-        ]
-        if len(missing) > 2:
-            fmt = "{}, and {}".format("**, **".join(missing[:-1]), missing[-1])
-        else:
-            fmt = " and ".join(missing)
-        return await ctx.reply(
-            f"You do not have permission to do this! You require the **{fmt}** permissions to do this."
-        )
-    elif isinstance(error, discord.Forbidden):
-        return await ctx.reply(f"I do not have permission to do this!")
-    elif isinstance(error, commands.CommandError):
-        await modlog.send(f"Error found: {error}\n")
-        with open("databases/errors.txt", 'a') as f:
-            traceback.print_exception(type(error),
-                                      error,
-                                      error.__traceback__,
-                                      file=f)
-            f.write("\n")
-        with open('databases/prefixes.json', 'r') as f:
-            prefixes = json.load(f)
-        try:
-            client.get_command(ctx.invoked_with).reset_cooldown(ctx)
-        except:
-            pass
-        prefix = prefixes[str(ctx.guild.id)]
-        return await ctx.reply(
-            f"An error has occurred with the command! :(.Please check `{prefix}help` to make sure you are using the command correctly."
-        )
-
 
 facts = [
     "Gru likes his cup more than anything", "Gru will never get a wife",
@@ -769,7 +572,7 @@ facts = [
 
 
 fired_users = []
-working_users = []
+
 
 @client.group(invoke_without_command=True)
 @commands.cooldown(1, 3600, commands.BucketType.user)
@@ -777,11 +580,11 @@ async def work(ctx,*,name: str=None):
     with open('databases/prefixes.json') as f:
         prefixes = json.load(f)
     prefix = prefixes[str(ctx.guild.id)]
-    await open_account(ctx.author)
+    await config.open_account(ctx.author)
     jobs = await get_job_data()
     if ctx.author in fired_users:
         work.reset_cooldown(ctx)
-        return await ctx.reply("You have been fired recently, you have to wait 6 hours from your firing time, to be able to work.")
+        return await ctx.reply("You have been fired recently, you have to wait 4 hours from your firing time, to be able to work.")
     user = ctx.author
     work_amt = jobs[str(user.id)]["job"]["pay"]
     work_name = jobs[str(user.id)]["job"]["name"]
@@ -839,7 +642,7 @@ async def work(ctx,*,name: str=None):
         return m.channel == ctx.channel and m.author == ctx.author
 
     typeofwork = "memory"
-    working_users.append(ctx.author)
+    config.working_users.append(ctx.author)
     if typeofwork == 'memory':
         await ctx.reply(
             f'''**Working as a {work_name}** - Memory Game - A fact about Gru Things™ will come up on the screen! then it will disappear after a few seconds. Your job is to rewrite the fact!'''
@@ -1111,7 +914,7 @@ async def purge(ctx, amount: int = 5):
 
 @client.command(aliases=['with'])
 async def withdraw(ctx, amount=None):
-    await open_account(ctx.author)
+    await config.open_account(ctx.author)
     if amount == None:
         await ctx.reply("Please enter an amount!")
         return
@@ -1148,7 +951,7 @@ async def withdraw(ctx, amount=None):
 
 @client.command(aliases=['dep'])
 async def deposit(ctx, amount=None):
-    await open_account(ctx.author)
+    await config.open_account(ctx.author)
     if amount == None:
         await ctx.reply("Please enter an amount!")
         return
@@ -1188,8 +991,8 @@ async def deposit(ctx, amount=None):
 
 @client.command()
 async def send(ctx, member: discord.Member, amount=None):
-    await open_account(ctx.author)
-    await open_account(member)
+    await config.open_account(ctx.author)
+    await config.open_account(member)
     if amount == None:
         await ctx.reply("Please enter an amount!")
         return
@@ -1221,8 +1024,8 @@ async def rob(ctx, member: discord.Member):
         rob.reset_cooldown(ctx)
         return await ctx.reply(
             "You are not allowed to steal from bots, back off my kind")
-    await open_account(ctx.author)
-    await open_account(member)
+    await config.open_account(ctx.author)
+    await config.open_account(member)
     bal = await update_bank(member)
     user_bal = await update_bank(ctx.author)
     if user_bal[0] < 2000:
@@ -1293,7 +1096,7 @@ async def rob(ctx, member: discord.Member):
 
 @client.command()
 async def slots(ctx, amount=None):
-    await open_account(ctx.author)
+    await config.open_account(ctx.author)
     if amount == None:
         await ctx.reply("Please enter an amount!")
         return
@@ -1473,7 +1276,7 @@ async def buy(ctx, amount: Optional[int] = 1, *, item):
             await ctx.reply(
                 ":x: You already have a booster that's higher than this!")
             return
-    await open_account(ctx.author)
+    await config.open_account(ctx.author)
 
     res = await buy_this(ctx.author, item, amount)
 
@@ -1495,9 +1298,9 @@ async def buy(ctx, amount: Optional[int] = 1, *, item):
 async def inventory(ctx, user: discord.Member = None):
     if user == None:
         user = ctx.author
-        await open_account(ctx.author)
+        await config.open_account(ctx.author)
     else:
-        await open_account(user)
+        await config.open_account(user)
 
     users = await get_bank_data()
 
@@ -1687,7 +1490,7 @@ async def buy_this(user, item_name, amount):
 
 @client.command()
 async def sell(ctx, amount: Optional[int] = 1, *, item=None):
-    await open_account(ctx.author)
+    await config.open_account(ctx.author)
     if amount < 1:
         return await ctx.reply("You need to sell at least more than one item!")
     if item.lower() == 'all' or item.lower() == 'max':
@@ -1788,43 +1591,7 @@ async def sell_this(user, item_name, amount, price=None):
     return [True, "Worked", cost, name_]
 
 
-async def open_account(user):
-    users = await get_bank_data()
-    jobs = await get_job_data()
-    lootbox_data = await get_lootbox_data()
 
-        
-    if not str(user.id) in users:
-        users[str(user.id)] = {}
-        users[str(user.id)]["wallet"] = random.randint(0, 3000)
-        users[str(user.id)]["bank"] = 0
-        users[str(user.id)]["booster"] = 1
-        users[str(user.id)]["max"] = 10
-    if not str(user.id) in jobs:
-        jobs[str(user.id)] = {}
-        jobs[str(user.id)]["job"] = {}
-        jobs[str(user.id)]["job"]["name"] = 'None'
-        jobs[str(user.id)]["job"]["pay"] = 0
-        jobs[str(user.id)]["job"]["hours"] = 0
-        jobs[str(user.id)]['job']['fails'] = 0
-    if not str(user.id) in lootbox_data:
-        lootbox_data[str(user.id)] = {}
-        lootbox_data[str(user.id)]["common"] = 0
-        lootbox_data[str(user.id)]["uncommon"] = 0
-        lootbox_data[str(user.id)]["rare"] = 0
-        lootbox_data[str(user.id)]["epic"] = 0
-        lootbox_data[str(user.id)]["legendary"] = 0
-        lootbox_data[str(user.id)]["mythic"] = 0
-        lootbox_data[str(user.id)]["admin"] = 0
-
-    with open('databases/mainbank.json', 'w') as f:
-        json.dump(users, f, indent=4)
-    with open('databases/jobs.json', 'w') as f:
-        json.dump(jobs, f, indent=4)
-    with open('databases/lootboxes.json', 'w') as f:
-        json.dump(lootbox_data, f, indent=4)
-
-    return True
 
 
 async def get_bank_data():
@@ -1865,7 +1632,7 @@ async def registeruser(ctx, user: discord.Member):
     id = str(user.id)
     users = await get_bank_data()
     if id not in users:
-        await open_account(user)
+        await config.open_account(user)
         await ctx.reply(":white_check_mark: They are now registered")
     else:
         await ctx.reply(":x: They already have an account")
@@ -2113,131 +1880,6 @@ async def emojify(ctx, *, text):
             emojis.append(s)
 
     await ctx.reply(' '.join(emojis))
-
-fake_cmds = ['balance', '_help']
-@client.event
-async def on_message(message):
-    with open('databases/prefixes.json', 'r') as f:
-        prefixes = json.load(f)
-    ctx = await client.get_context(message)
-    await open_account(ctx.author)
-    if message.guild != None:
-        ctx = await client.get_context(message)
-        if message.content.lower().startswith(prefixes[str(ctx.guild.id)]):
-            if ctx.valid and ctx.command:
-                if not str(ctx.command) in fake_cmds:
-                    with open('databases/mainbank.json','r') as f:
-                        bank = json.load(f)
-                    data = bank[str(ctx.author.id)]['max']
-                    data += random.randint(50,1000)
-                    bank[str(ctx.author.id)]['max'] = int(data)
-                    with open('databases/mainbank.json','w') as f:
-                        json.dump(bank, f,indent=4)
-    try:
-        ctx = await client.get_context(message)
-        if message.mentions[
-                0] == client.user and message.content == '<@874328552965820416>':
-            with open("databases/prefixes.json", "r") as f:
-                prefixes = json.load(f)
-            pre = prefixes[str(message.guild.id)]
-            await ctx.reply(f"My prefix for this server is `{pre}`")
-    except:
-        pass
-    try:
-        if not message.author.bot:
-            with open('databases/server_configs.json', 'r') as f:
-                configs = json.load(f)
-            with open('databases/levels.json', 'r') as f:
-                levels = json.load(f)
-                if configs[str(message.guild.id)]['levels'] == True:
-                    await update_data(levels, message.author, message.guild)
-                    await add_experience(
-                        levels, message.author,
-                        levels[str(message.guild.id)][str(
-                            message.author.id)]['level'] * 1.3, message.guild)
-                    await level_up(levels, message.author, message.channel,
-                                   message.guild)
-
-        await client.process_commands(message)
-    except:
-        return
-
-
-async def update_data(users, user, server):
-    await open_account(user)
-    if not str(server.id) in users:
-        users[str(server.id)] = {}
-        if not str(user.id) in users[str(server.id)]:
-            users[str(server.id)][str(user.id)] = {}
-            users[str(server.id)][str(user.id)]['experience'] = 0
-            users[str(server.id)][str(user.id)]['level'] = 1
-    elif not str(user.id) in users[str(server.id)]:
-        users[str(server.id)][str(user.id)] = {}
-        users[str(server.id)][str(user.id)]['experience'] = 0
-        users[str(server.id)][str(user.id)]['level'] = 1
-
-    with open('databases/levels.json', 'w') as f:
-        json.dump(users, f, indent=4)
-
-
-async def add_experience(users, user, exp, server):
-    users[str(user.guild.id)][str(user.id)]['experience'] += exp
-    with open('databases/levels.json', 'w') as f:
-        json.dump(users, f, indent=4)
-
-
-async def level_up(users, user, channel, server):
-    experience = users[str(user.guild.id)][str(user.id)]['experience']
-    lvl_start = users[str(user.guild.id)][str(user.id)]['level']
-    lvl_end = int(experience**(1 / 4))
-    if lvl_start < lvl_end:
-        await channel.send(
-            'Congratulations! {} has leveled up to **Level {}** and has a total of **{} xp**! :tada: :tada:'
-            .format(user.mention, lvl_end, round(experience)))
-        with open('databases/lootboxes.json', 'r') as f:
-            lootboxes = json.load(f)
-        if lvl_end - lvl_start > 1:
-            await channel.send("Wow, you got a lot of lootboxes!")
-            crates = []
-            for i in range(0, lvl_end - lvl_start):
-                crate_type = random.choice([
-                    "mythic", "legendary", "legendary", "epic", "epic", "epic",
-                    "epic", "rare", "rare", "rare", "rare", "rare", "rare",
-                    "rare", "uncommon", "uncommon", "uncommon", "uncommon",
-                    "uncommon", "uncommon", "uncommon", "uncommon", "uncommon",
-                    "common", "common", "common", "common", "common", "common",
-                    "common", "common", "common", "common"
-                ])
-                lootboxes[str(user.id)][crate_type] += 1
-                crates.append(crate_type)
-            m_amt = len([i for i, x in enumerate(crates) if x == "mythic"])
-            l_amt = len([i for i, x in enumerate(crates) if x == "legendary"])
-            e_amt = len([i for i, x in enumerate(crates) if x == "epic"])
-            r_amt = len([i for i, x in enumerate(crates) if x == "rare"])
-            u_amt = len([i for i, x in enumerate(crates) if x == "uncommon"])
-            c_amt = len([i for i, x in enumerate(crates) if x == "common"])
-            await channel.send(
-                f"You found:\n {m_amt} Mythic box{'es' if m_amt > 1 or m_amt == 0 else ''}\n {l_amt} Legendary box{'es' if l_amt > 1 or l_amt == 0 else ''}\n {e_amt} Epic box{'es' if e_amt > 1 or e_amt == 0 else ''}\n {r_amt} Rare box{'es' if r_amt > 1 or r_amt == 0 else ''}\n {u_amt} Uncommon box{'es' if u_amt > 1 or u_amt == 0 else ''} and\n {c_amt} Common box{'es' if c_amt > 1 or c_amt == 0 else ''} :tada: :tada: <:chest:898333946557894716> <:chest:898333946557894716> <:chest:898333946557894716>"
-            )
-
-        else:
-            crate_type = random.choice([
-                "mythic", "legendary", "legendary", "epic", "epic", "epic",
-                "epic", "rare", "rare", "rare", "rare", "rare", "rare", "rare",
-                "uncommon", "uncommon", "uncommon", "uncommon", "uncommon",
-                "uncommon", "uncommon", "uncommon", "uncommon", "common",
-                "common", "common", "common", "common", "common", "common",
-                "common", "common", "common"
-            ])
-            await channel.send(
-                f"You earned a **{crate_type.capitalize()}** <:chest:898333946557894716> lootbox!! :tada:"
-            )
-            lootboxes[str(user.id)][crate_type] += 1
-        with open('databases/lootboxes.json', 'w') as f:
-            json.dump(lootboxes, f, indent=4)
-        users[str(user.guild.id)][str(user.id)]['level'] = lvl_end
-        with open('databases/levels.json', 'w') as f:
-            json.dump(users, f, indent=4)
 
 
 def level_by_xp(xp):
@@ -2779,8 +2421,8 @@ async def bankrob(ctx, user: discord.Member):
         bankrob.reset_cooldown(ctx)
         return await ctx.reply(
             "You are not allowed to steal from bots, back off my kind")
-    await open_account(ctx.author)
-    await open_account(user)
+    await config.open_account(ctx.author)
+    await config.open_account(user)
     bal1 = await update_bank(user)
     bal = await update_bank(ctx.author)
     if bal[0] < 5000:
@@ -2888,7 +2530,7 @@ async def update(ctx, user: discord.Member):
 
 @client.command()
 async def crates(ctx, user: discord.Member = None):
-    await open_account(ctx.author)
+    await config.open_account(ctx.author)
     lootbox_data = await get_lootbox_data()
     if user is None:
         common_amt = lootbox_data[str(ctx.author.id)]["common"]
@@ -3478,44 +3120,6 @@ async def joke(ctx):
 
 
 
-@client.event
-async def on_raw_reaction_add(payload):
-    if payload.member.bot:
-        pass
-
-    else:
-        with open('databases/reactrole.json', 'r') as react_file:
-            data = json.load(react_file)
-            for x in data:
-                if x['emoji'] == payload.emoji.name or x[
-                        'emoji'] == f"<:{payload.emoji.name}:{payload.emoji.id}>" or x[
-                            'emoji'] == f"<a:{payload.emoji.name}:{payload.emoji.id}>":
-                    role = discord.utils.get(client.get_guild(
-                        payload.guild_id).roles,
-                                             id=x['role_id'])
-                    if role:
-                        await payload.member.add_roles(role)
-                    else:
-                        del x
-
-
-@client.event
-async def on_raw_reaction_remove(payload):
-    with open('databases/reactrole.json', 'r') as react_file:
-        data = json.load(react_file)
-        for x in data:
-            if x['emoji'] == payload.emoji.name or x[
-                    'emoji'] == f"<:{payload.emoji.name}:{payload.emoji.id}>" or x[
-                        'emoji'] == f"<a:{payload.emoji.name}:{payload.emoji.id}>":
-                role = discord.utils.get(client.get_guild(
-                    payload.guild_id).roles,
-                                         id=x['role_id'])
-                if role:
-                    await client.get_guild(payload.guild_id
-                                           ).get_member(payload.user_id
-                                                        ).remove_roles(role)
-                else:
-                    del x
 
 
 @client.command()
@@ -3564,24 +3168,6 @@ async def reactrole(ctx,
 
     with open('databases/reactrole.json', 'w') as f:
         json.dump(data, f, indent=4)
-
-
-@client.event
-async def on_raw_message_delete(payload):
-    with open('databases/reactrole.json', 'r') as f:
-        reaction_roles = json.load(f)
-    msgs = [
-        reaction_role_id["message_id"] for reaction_role_id in reaction_roles
-    ]
-    if payload.message_id not in msgs:
-        return
-    else:
-        for i in range(len(reaction_roles)):
-            if reaction_roles[i]["message_id"] == payload.message_id:
-                del reaction_roles[i]
-                break
-        with open('databases/reactrole.json', 'w') as f:
-            json.dump(reaction_roles, f, indent=4)
 
 
 async def dump_mainbank_data(data):
@@ -3902,22 +3488,22 @@ async def credits(ctx):
         title="Credits",
         description="These are all the things that made this bot!",
         color=discord.Color.random())
-    atharv = await client.fetch_user(859310142633803806)
-    akshar = await client.fetch_user(717512097725939795)
+    p1 = await client.fetch_user(859310142633803806)
+    creator = await client.fetch_user(int(config.getenv("BOT_OWNER_ID")))
     e.add_field(name='The Creator Of Basically Everything In This Bot',
-                value=akshar,
+                value=creator,
                 inline=False)
     e.add_field(name="Creature ideas for when hunting or fishing",
-                value=atharv,
+                value=p1,
                 inline=False)
     e.add_field(name="Starter Code",
                 value="https://github.com/AyushSehrawat/Economy-Bot")
     await ctx.reply(embed=e)
 
 
-@client.command(aliases=['conf'])
+@client.command(aliases=['conf','config'])
 @commands.has_permissions(manage_guild=True)
-async def config(ctx):
+async def config_cmd(ctx):
     with open('databases/server_configs.json', 'r') as f:
         configs = json.load(f)
 
@@ -4042,5 +3628,5 @@ for filename in os.listdir("cogs"):
     if filename.endswith('.py'):
         client.load_extension(f'cogs.{filename[:-3]}')
 
-token = config.getenv("discord_bot_token")
+token = config.getenv("BOT_TOKEN")
 client.run(token)
