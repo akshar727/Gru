@@ -1,9 +1,8 @@
 from nextcord.ext import commands, tasks
 import nextcord as discord
 import json
-from gru_bot import GruBot
 import random
-from cogs.utils import config
+# from cogs.utils import `config`
 import aiosqlite
 
 fake_cmds = ['balance', '_help']
@@ -45,7 +44,6 @@ td = 0
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        # set_client(bot)
 
 
 
@@ -71,6 +69,8 @@ class Events(commands.Cog):
         setattr(self.bot,"db", await aiosqlite.connect("main.db"))
         async with self.bot.db.cursor() as cursor:
             await cursor.execute("CREATE TABLE IF NOT EXISTS levels (level INTEGER, xp INTEGER, user INTEGER, guild INTEGER)")
+            await cursor.execute("CREATE TABLE IF NOT EXISTS prefixes (prefix TEXT, guild ID)")
+            await cursor.execute("CREATE TABLE IF NOT EXISTS jobs (name TEXT, pay INTEGER, hours INTEGER, user INTEGER)")
         print("Connected to {0.user}".format(self.bot))
 
 
@@ -207,35 +207,6 @@ class Events(commands.Cog):
                 json.dump(reaction_roles, f, indent=4)
 
 
-
-
-# async def update_data(users, user, server):
-#     await config.open_account(user)
-#     if not str(server.id) in users:
-#         users[str(server.id)] = {}
-#         if not str(user.id) in users[str(server.id)]:
-#             users[str(server.id)][str(user.id)] = {}
-#             users[str(server.id)][str(user.id)]['experience'] = 0
-#             users[str(server.id)][str(user.id)]['level'] = 1
-#     elif not str(user.id) in users[str(server.id)]:
-#         users[str(server.id)][str(user.id)] = {}
-#         users[str(server.id)][str(user.id)]['experience'] = 0
-#         users[str(server.id)][str(user.id)]['level'] = 1
-
-#     with open('databases/levels.json', 'w') as f:
-#         json.dump(users, f, indent=4)
-
-
-# async def add_experience(users, user, exp, server):
-#     users[str(user.guild.id)][str(user.id)]['experience'] += exp
-#     with open('databases/levels.json', 'w') as f:
-#         json.dump(users, f, indent=4)
-
-
-# async def level_up(users, user, channel, server):
-#     experience = users[str(user.guild.id)][str(user.id)]['experience']
-#     lvl_start = users[str(user.guild.id)][str(user.id)]['level']
-#     lvl_end = int(experience**(1 / 4))
 #         with open('databases/lootboxes.json', 'r') as f:
 #             lootboxes = json.load(f)
 #         if lvl_end - lvl_start > 1:

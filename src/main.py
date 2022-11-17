@@ -20,7 +20,6 @@ from googleapiclient.discovery import build
 import urllib.parse, urllib.request
 from num2words import num2words
 from cogs.utils import http, config
-from easy_pil import Editor, Font, Canvas, load_image_async
 import humanfriendly
 import itertools
 from gru_bot import GruBot
@@ -28,26 +27,30 @@ from gru_bot import GruBot
 api_key = config.getenv("GOOGLE_API_KEY")
 
 
-def get_prefix(client, message):
-    with open("databases/prefixes.json", "r") as f:
-        prefixes = json.load(f)
-    try:
-        return mixedCase(str(prefixes[str(message.guild.id)]))
-    except:
-        with open("databases/prefixes.json", "r") as f:
-            prefixes = json.load(f)
-        with open("databases/server_configs.json", 'r') as f:
-            configs = json.load(f)
+async def get_prefix(client, message):
+    async with client.db.cursor() as cursor:
+        await cursor.execute("SELECT prefix FROM prefixes WHERE guild = ?",(message.guild.id,))
+        data = await cursor.fetchone()
+        if data:
+            return mixedCase(data)
+        else:
+            # with open("databases/server_configs.json", 'r') as f:
+            #     configs = json.load(f)
 
-        configs[str(message.guild.id)] = {}
-        configs[str(message.guild.id)]["giveaway_role"] = "None"
-        configs[str(message.guild.id)]["levels"] = False
-        prefixes[str(message.guild.id)] = config.getenv("BOT_PREFIX")
+            # configs[str(message.guild.id)] = {}
+            # configs[str(message.guild.id)]["giveaway_role"] = "None"
+            # configs[str(message.guild.id)]["levels"] = False
+            try:
+                await cursor.execute("INSERT INTO prefixes (prefix, guild) VALUES (?, ?)",(config.getenv("BOT_PREFIX"),message.guild.id,))
+                await cursor.execute("SELECT prefix FROM prefixes WHERE guild = ?", (message.guild.id,))
+                data = await cursor.fetchone()
+                if data:
+                    return mixedCase(data)
+            except Exception:
+                return config.getenv("BOT_TOKEN")
 
-        with open('databases/prefixes.json', 'w') as f:
-            json.dump(prefixes, f, indent=4)
-        with open("databases/server_configs.json", 'w') as f:
-            json.dump(configs, f, indent=4)
+            # with open("databases/server_configs.json", 'w') as f:
+            #     json.dump(configs, f, indent=4)
 
 
 def mixedCase(*args):
@@ -68,44 +71,6 @@ client = GruBot(command_prefix=get_prefix,
 client.remove_command("help")
 
 
-@client.event
-async def on_guild_join(guild):
-    with open("databases/prefixes.json", "r") as f:
-        prefixes = json.load(f)
-    with open("databases/server_configs.json", 'r') as f:
-        configs = json.load(f)
-
-    configs[str(guild.id)] = {}
-    configs[str(guild.id)]["giveaway_role"] = "None"
-    configs[str(guild.id)]["levels"] = False
-    prefixes[str(guild.id)] = 'gru '
-
-    with open('databases/prefixes.json', 'w') as f:
-        json.dump(prefixes, f, indent=4)
-    with open("databases/server_configs.json", 'w') as f:
-        json.dump(configs, f, indent=4)
-
-
-@client.event
-async def on_guild_remove(guild):
-    with open("databases/prefixes.json", "r") as f:
-        prefixes = json.load(f)
-    with open("databases/server_configs.json", 'r') as f:
-        configs = json.load(f)
-    del prefixes[str(guild.id)]
-    with open('databases/prefixes.json', 'w') as f:
-        json.dump(prefixes, f, indent=4)
-    with open('databases/levels.json', 'r') as f:
-        levels = json.load(f)
-    try:
-        del levels[str(guild.id)]
-    except:
-        pass
-    with open('databases/levels.json', 'w') as f:
-        json.dump(levels, f, indent=4)
-    del configs[str(guild.id)]
-    with open("databases/server_configs.json", 'w') as f:
-        json.dump(configs, f, indent=4)
 
 
 @client.command()
@@ -120,24 +85,7 @@ async def avatar(ctx, member: discord.Member = None):
         await ctx.reply("HEEEY THAT'S ME. I'M FAMOUS POOOOGGGGGG")
 
 
-@client.command()
-async def prefix(ctx, prefix=None):
-    if ctx.author.id != ctx.guild.owner_id:
-        return await ctx.reply(
-            "Sorry, but only the owner of this server can change the prefix!")
-    if prefix == None:
-        await ctx.reply("Please enter the new prefix.")
-        return
 
-    with open('databases/prefixes.json', 'r') as f:
-        prefixes = json.load(f)
-
-    prefixes[str(ctx.guild.id)] = f"{prefix.strip()} "
-
-    with open('databases/prefixes.json', 'w') as f:
-        json.dump(prefixes, f, indent=4)
-
-    await ctx.reply(f"The prefix was changed to `{prefix}`")
 
 
 def convert_str_to_number(x):
@@ -342,8 +290,10 @@ async def balance(ctx, user: discord.Member = None):
     wallet_amt = users[str(user.id)]["wallet"]
     bank_amt = users[str(user.id)]["bank"]
     booster_amt = users[str(user.id)]["booster"]
-    job_name = jobs[str(user.id)]["job"]["name"]
-    job_pay = jobs[str(user.id)]["job"]["pay"]
+    async with client.db.cursor() as cursor:
+        await cursor.execute("SELECT name FROM jobs WHERE user = ?", (user.id,))
+        job_name = await cursor.fetchone()
+        await cursor.execute("SELECT pay FROM jobs WHERE user = ?", (user.id,))
     max = users[str(user.id)]['max']
 
     em = discord.Embed(title=f"{user.display_name}'s Balance",
@@ -1882,19 +1832,7 @@ async def emojify(ctx, *, text):
     await ctx.reply(' '.join(emojis))
 
 
-def level_by_xp(xp):
-    return xp**(1 / 4)
 
-
-def xp_by_level(level):
-    return level ^ 4
-
-
-def custom_poppins(text):
-    if len(text) < 30:
-        return Font.poppins(size=40)
-    if len(text) > 30:
-        return Font.poppins(size=30)
 
 
 
@@ -2004,103 +1942,6 @@ async def troll(user, time, type):
     ...
 
 
-async def get_lvl_card(lvl, exp, author):
-    _exp = ...
-    total = ...
-    exponent = 4
-    next_lvl = lvl + 1
-    next_lvl_xp = next_lvl**exponent
-    current_xp = exp - (lvl)**exponent
-    next_lvl_xp -= lvl**4
-    total = next_lvl_xp
-    _exp = current_xp
-    if _exp < 0: _exp = 0
-    per = round(float(_exp / total) * 100)
-    border_radius = 20
-    userData = {
-        'name': f"{author.name}#{author.discriminator}",
-        'lvl': lvl,
-        'xp': int(_exp),
-        'next_lvl_xp': total,
-        'percent': per
-    }
-    background = Editor(Canvas((900, 300), color="#141414"))
-    profile_pic = await load_image_async(str(author.display_avatar.url))
-    profile = Editor(profile_pic).resize((150, 150)).circle_image()
-    poppins = custom_poppins(userData['name'])
-    poppins_small = Font.poppins(size=30)
-    bar_color = "#ff0000"
-    if userData['percent'] > 90:
-        bar_color = "#0afc05"
-    elif userData['percent'] > 80:
-        bar_color = "#06d902"
-    elif userData['percent'] > 75:
-        bar_color = "#05b802"
-    elif userData['percent'] > 50:
-        bar_color = "#f4f73b"
-    elif userData['percent'] > 25:
-        bar_color = "#ffbe3b"
-    card_right_shape = [(600, 0), (750, 300), (900, 300), (900, 0)]
-    background.polygon(card_right_shape, color="#545352")
-    background.paste(profile, (30, 30))
-    background.rectangle((30, 220),
-                         width=650,
-                         height=40,
-                         color="#ffffff",
-                         radius=border_radius)
-    if per > 3:
-        background.bar((30, 220),
-                       max_width=650,
-                       height=40,
-                       percentage=userData['percent'],
-                       color=bar_color,
-                       radius=border_radius)
-    background.text((200, 40), userData['name'], font=poppins, color="#ffffff")
-    background.rectangle((200, 100), width=350, height=2, fill="#ffffff")
-    background.text(
-        (200, 130),
-        f"Level: {userData['lvl']} | XP: {userData['xp']}/{userData['next_lvl_xp']}",
-        font=poppins_small,
-        color="#ffffff")
-
-    file = discord.File(fp=background.image_bytes, filename="levelcard.png")
-    return file
-
-
-@client.command(aliases=['rank', 'lvl'])
-async def level(ctx, member: discord.Member = None):
-    with open('databases/server_configs.json', 'r') as f:
-        configs = json.load(f)
-    if not configs[str(ctx.guild.id)]['levels']:
-        return await ctx.reply("Levels are disabled in this server.")
-    if not member:
-
-        user = ctx.message.author
-        with open('databases/levels.json', 'r') as f:
-            users = json.load(f)
-
-            lvl = users[str(ctx.guild.id)][str(user.id)]['level']
-            exp = users[str(ctx.guild.id)][str(user.id)]['experience']
-        return await ctx.reply(file=await get_lvl_card(lvl, exp, ctx.author))
-
-    else:
-        with open('databases/levels.json', 'r') as f:
-            users = json.load(f)
-        if member.bot:
-            await ctx.reply("Bots aren't in the database!")
-            return
-
-        if not str(member.id) in users[str(member.guild.id)]:
-            users[str(member.guild.id)][str(member.id)] = {}
-            users[str(member.guild.id)][str(member.id)]['experience'] = 0
-            users[str(member.guild.id)][str(member.id)]['level'] = 1
-            with open('databases/levels.json', 'w') as f:
-                json.dump(users, f, indent=4)
-
-        lvl = users[str(ctx.guild.id)][str(member.id)]['level']
-        exp = users[str(ctx.guild.id)][str(member.id)]['experience']
-
-        return await ctx.reply(file=await get_lvl_card(lvl, exp, member))
 
 
 @client.command()
