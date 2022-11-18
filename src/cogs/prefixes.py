@@ -1,5 +1,5 @@
 from nextcord.ext import commands
-from utils import config
+from .utils import config
 
 
 class Prefixes(commands.Cog):

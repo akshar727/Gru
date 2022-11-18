@@ -20,11 +20,9 @@ class Exceptions(commands.Cog):
                                         file=f)
                 f.write("\n")
         if isinstance(error, commands.CommandNotFound):
-            with open('databases/prefixes.json', 'r') as f:
-                prefixes = json.load(f)
             if ctx.author in config.working_users:
                 return config.working_users.pop(config.working_users.index(ctx.author))
-            prefix = prefixes[str(ctx.guild.id)]
+            prefix = await config.get_prefix(self.bot,ctx.guild.id)
             await ctx.reply(
                 f"Unknown command. Try {prefix}help for a list of commands")
             return
@@ -89,10 +87,7 @@ class Exceptions(commands.Cog):
             )
             return
         elif isinstance(error, commands.MissingRequiredArgument):
-            # with open('databases/prefixes.json', 'r') as f:
-            #     prefixes = json.load(f)
-            # prefix = prefixes[str(ctx.guild.id)]
-            prefix = "gru "
+            prefix = await config.get_prefix(self.bot,ctx.guild.id)
             await ctx.reply(
                 f":x: Missing arguments! check {prefix}help if you need to know about how to use the command."
             )
@@ -123,14 +118,11 @@ class Exceptions(commands.Cog):
                                         error.__traceback__,
                                         file=f)
                 f.write("\n")
-            # with open('databases/prefixes.json', 'r') as f:
-            #     prefixes = json.load(f)
             try:
                 self.bot.get_command(ctx.invoked_with).reset_cooldown(ctx)
             except:
                 pass
-            # prefix = prefixes[str(ctx.guild.id)]
-            prefix = "gru "
+            prefix = await config.get_prefix(self.bot,ctx.guild.id)
             return await ctx.reply(
                 f"An error has occurred with the command! :(.Please check `{prefix}help` to make sure you are using the command correctly. This error has been reported."
             )

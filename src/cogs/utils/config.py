@@ -3,6 +3,7 @@ import dotenv
 import time
 import json
 import random
+import aiosqlite
 
 dotenv.load_dotenv()
 working_users= []
@@ -16,9 +17,18 @@ def timetext(name):
     """ Timestamp, but in text form """
     return f"{name}_{int(time.time())}.txt"
 
+
+async def get_prefix(bot,guild_id):
+    async with bot.db.cursor() as cursor:
+        await cursor.execute("SELECT prefix FROM prefixes WHERE guild = ?", (guild_id,))
+        prefix = await cursor.fetchone()
+        if prefix:
+            return prefix[0]
+        else:
+            return getenv("BOT_PREFIX")
+
 async def open_account(user):
     users = await get_bank_data()
-    jobs = await get_job_data()
     lootbox_data = await get_lootbox_data()
 
         
@@ -28,13 +38,16 @@ async def open_account(user):
         users[str(user.id)]["bank"] = 0
         users[str(user.id)]["booster"] = 1
         users[str(user.id)]["max"] = 10
-    if not str(user.id) in jobs:
-        jobs[str(user.id)] = {}
-        jobs[str(user.id)]["job"] = {}
-        jobs[str(user.id)]["job"]["name"] = 'None'
-        jobs[str(user.id)]["job"]["pay"] = 0
-        jobs[str(user.id)]["job"]["hours"] = 0
-        jobs[str(user.id)]['job']['fails'] = 0
+    async with aiosqlite.connect("main.db").cursor() as cursor:
+        await cursor.execute("INSERT INTO jobs (name TEXT, pay INTEGER, hours INTEGER, fails INTEGER, user INTEGER) VALUES (?, ?, ?, ?, ?)",("None",0,0,0,user.id,))
+
+    # if not str(user.id) in jobs:
+    #     jobs[str(user.id)] = {}
+    #     jobs[str(user.id)]["job"] = {}
+    #     jobs[str(user.id)]["job"]["name"] = 'None'
+    #     jobs[str(user.id)]["job"]["pay"] = 0
+    #     jobs[str(user.id)]["job"]["hours"] = 0
+    #     jobs[str(user.id)]['job']['fails'] = 0
     if not str(user.id) in lootbox_data:
         lootbox_data[str(user.id)] = {}
         lootbox_data[str(user.id)]["common"] = 0

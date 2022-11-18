@@ -18,9 +18,7 @@ class Encryption(commands.Cog):
     async def encode(self, ctx):
         """ All encode methods """
         if ctx.invoked_subcommand is None:
-            with open("databases/prefixes.json", 'r') as f:
-                prefixes = json.load(f)
-            prefix = prefixes[str(ctx.guild.id)]
+            prefix = await config.get_prefix(self.bot,ctx.guild.id)
             em = discord.Embed(title="Encode Help",description=f"**{prefix}encode**\n\nAll encoding methods.\n\n**Commands**\n**{prefix}encode ascii85 <text>** - Encode in ASCII85\n**{prefix}encode base32 <text>** - Encode in base32\n**{prefix}encode base64 <text>** - Encode in base64\n**{prefix}encode base85 <text>** - Encode in base85\n**{prefix}encode hex <text>** - Encode in hex\n**{prefix}encode rot13 <text>** - Encode in rot13\n**{prefix}encode binary <text>** - Encode in binary",color=discord.Color.random()); em.set_footer(text=f"You can also upload .txt files to encode text also! You can view all the aliases of the encode/decode commands by doing '{prefix}encode aliases'.")
             await ctx.reply(embed=em)
 
@@ -28,9 +26,7 @@ class Encryption(commands.Cog):
     async def decode(self, ctx):
         """ All decode methods """
         if ctx.invoked_subcommand is None:
-            with open("databases/prefixes.json", 'r') as f:
-                prefixes = json.load(f)
-            prefix = prefixes[str(ctx.guild.id)]
+            prefix = await config.get_prefix(self.bot,ctx.guild.id)
             em = discord.Embed(title="Decode Help",description=f"**{prefix}decode**\n\nAll decoding methods.\n\n**Commands**\n**{prefix}decode ascii85 <text>** - Decode in ASCII85\n**{prefix}decode base32 <text>** - Decode in base32\n**{prefix}decode base64 <text>** - Decode in base64\n**{prefix}decode base85 <text>** - Decode in base85\n**{prefix}decode hex <text>** - Decode in hex\n**{prefix}decode rot13 <text>** - Decode in rot13\n**{prefix}decode binary <text>** - Decode in binary",color=discord.Color.random()); em.set_footer(text=f"You can also upload .txt files to decode text also! You can view all the aliases of the decode/encode commands by doing '{prefix}encode aliases'.")
             await ctx.reply(embed=em)
 

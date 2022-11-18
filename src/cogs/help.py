@@ -1,8 +1,7 @@
 import nextcord as discord
 from nextcord.ext import commands
-import json
 import re
-
+from .utils import config
 
 def get_economy_embed(prefix):
     economy_embed = discord.Embed(title="Help Commands",description='All the **Economy** commands in the bot. (Page 1)', color=0x00ff00)
@@ -144,16 +143,14 @@ def replaceTextBetween(originalText, delimeterA, delimterB, replacementText):
 
 
 class HelpOptions(discord.ui.Select):
-    def __init__(self, buttons):
+    def __init__(self, buttons,prefix):
         self.parent = buttons
         self.items = [discord.SelectOption(label="Economy",default=True),
                 discord.SelectOption(label="Fun"),
                 discord.SelectOption(label="Moderation"),
                 discord.SelectOption(label="Music")]
         super().__init__(placeholder="Choose a category.",min_values=1,max_values=1,options=self.items)
-        with open('databases/prefixes.json', 'r') as f:
-            self.prefixes = json.load(f)
-        em = get_economy_embed(self.prefixes[str(self.parent.guild.id)])
+        em = get_economy_embed(prefix)
         for i in em:
             i.set_author(name=self.parent.author.name, icon_url=self.parent.author.display_avatar)
         self.current_embed = em[0]
@@ -163,7 +160,7 @@ class HelpOptions(discord.ui.Select):
     async def callback(self, interaction: discord.Interaction) -> None:
         print("callback")
         _type = self.values[0]
-        prefix = self.prefixes[str(interaction.guild_id)]
+        prefix = await config.get_prefix(self.bot,interaction.guild.id)
         if interaction.user != self.parent.author:
             await interaction.response.edit_message(view = self.parent)
             return await interaction.send("This is not your help menu.",ephemeral=True)
@@ -229,11 +226,11 @@ class HelpOptions(discord.ui.Select):
             await interaction.response.edit_message(embed=em[0],view = self.parent)
 
 class CategoriesView(discord.ui.View):
-    def __init__(self, author, guild):
+    def __init__(self, author, guild,prefix):
         super().__init__(timeout=30)
         self.author = author
         self.guild = guild
-        self.select = HelpOptions(self)
+        self.select = HelpOptions(self,prefix)
         self.add_item(self.select)
 
     @discord.ui.button(emoji="<:left_two:982623041228013570>",style=discord.ButtonStyle.green, disabled=True)
@@ -307,8 +304,6 @@ class CategoriesView(discord.ui.View):
 class Info(commands.Cog):
     def __init__(self, client):
         self.client = client
-        with open('databases/prefixes.json', 'r') as f:
-            self.prefixes = json.load(f)
 
     @commands.Cog.listener()
 
@@ -319,7 +314,7 @@ class Info(commands.Cog):
     @commands.command(aliases=['help'])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def _help(self, ctx, query=None):
-        prefix = self.prefixes[str(ctx.guild.id)]
+        prefix = await config.get_prefix(self.bot,ctx.guild.id)
         if query != None:
             selected = None
             all_pages= get_economy_embed(prefix) + get_moderation_embeds(prefix) + get_music_embeds(prefix) + get_fun_embeds(prefix)
@@ -349,8 +344,8 @@ class Info(commands.Cog):
             e.add_field(name=f"Usage: ", value=f"{selected.name}", inline=False)
             e.add_field(name="Description: ",value=selected.value,inline=False)
             return await ctx.reply(embed=e)
-        view = CategoriesView(ctx.author,ctx.guild)
-        view.message = await ctx.reply(f"You can type {prefix}help (any command) to view that command's info!",embed=get_economy_embed(self.prefixes[str(ctx.guild.id)])[0],view=view)
+        view = CategoriesView(ctx.author,ctx.guild, prefix)
+        view.message = await ctx.reply(f"You can type {prefix}help (any command) to view that command's info!",embed=get_economy_embed(prefix)[0],view=view)
 
 def setup(client):
     client.add_cog(Info(client))

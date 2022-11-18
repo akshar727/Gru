@@ -32,7 +32,7 @@ async def get_prefix(client, message):
         await cursor.execute("SELECT prefix FROM prefixes WHERE guild = ?",(message.guild.id,))
         data = await cursor.fetchone()
         if data:
-            return mixedCase(data)
+            return mixedCase(data[0])
         else:
             # with open("databases/server_configs.json", 'r') as f:
             #     configs = json.load(f)
@@ -43,14 +43,18 @@ async def get_prefix(client, message):
             try:
                 await cursor.execute("INSERT INTO prefixes (prefix, guild) VALUES (?, ?)",(config.getenv("BOT_PREFIX"),message.guild.id,))
                 await cursor.execute("SELECT prefix FROM prefixes WHERE guild = ?", (message.guild.id,))
+
                 data = await cursor.fetchone()
                 if data:
-                    return mixedCase(data)
-            except Exception:
-                return config.getenv("BOT_TOKEN")
+                    await cursor.execute("UPDATE prefixes SET prefix = ? WHERE guild = ?", (config.getenv("BOT_PREFIX"),message.guild.id,))
+                    return mixedCase(data[0])
+            except Exception as e:
+                print(e)
+                return mixedCase(config.getenv("BOT_PREFIX"))
 
             # with open("databases/server_configs.json", 'w') as f:
             #     json.dump(configs, f, indent=4)
+    await client.db.commit()
 
 
 def mixedCase(*args):
@@ -286,7 +290,6 @@ async def balance(ctx, user: discord.Member = None):
     await config.open_account(ctx.author)
     await config.open_account(user)
     users = await get_bank_data()
-    jobs = await get_job_data()
     wallet_amt = users[str(user.id)]["wallet"]
     bank_amt = users[str(user.id)]["bank"]
     booster_amt = users[str(user.id)]["booster"]
@@ -294,7 +297,8 @@ async def balance(ctx, user: discord.Member = None):
         await cursor.execute("SELECT name FROM jobs WHERE user = ?", (user.id,))
         job_name = await cursor.fetchone()
         await cursor.execute("SELECT pay FROM jobs WHERE user = ?", (user.id,))
-    max = users[str(user.id)]['max']
+        job_pay = await cursor.fetchone()
+    max_money = users[str(user.id)]['max']
 
     em = discord.Embed(title=f"{user.display_name}'s Balance",
                        color=discord.Color.green())
@@ -527,9 +531,7 @@ fired_users = []
 @client.group(invoke_without_command=True)
 @commands.cooldown(1, 3600, commands.BucketType.user)
 async def work(ctx,*,name: str=None):  
-    with open('databases/prefixes.json') as f:
-        prefixes = json.load(f)
-    prefix = prefixes[str(ctx.guild.id)]
+    prefix = await config.get_prefix(self.bot,ctx.guild.id)
     await config.open_account(ctx.author)
     jobs = await get_job_data()
     if ctx.author in fired_users:
@@ -833,8 +835,7 @@ async def resign(ctx):
     jobs = await get_job_data()
     user = ctx.author
     name = jobs[str(user.id)]["job"]["name"]
-    with open('databases/prefixes.json','r') as f:
-        prefix = json.load(f)[str(ctx.guild.id)]
+    prefix = await config.get_prefix(self.bot,ctx.guild.id)
     if name == 'None':
         await ctx.reply(
             f"You don't have a job! You can get one by doing '{prefix}work <job name>'!!")
@@ -2970,9 +2971,7 @@ async def reactrole(ctx,
                     role: discord.Role = None,
                     *,
                     message=None):
-    with open('databases/prefixes.json') as f:
-        prefixes = json.load(f)
-    prefix = prefixes[str(ctx.guild.id)]
+    prefix = await config.get_prefix(self.bot,ctx.guild.id)
 
     if emoji == None or role == None or message == None and ctx.author.id == ctx.guild.owner_id:
         return await ctx.reply(
@@ -3016,9 +3015,6 @@ async def dump_mainbank_data(data):
         json.dump(data, f, indent=4)
 
 
-async def dump_level_data(data):
-    with open('databases/levels.json', 'w') as f:
-        json.dump(data, f, indent=4)
 
 
 async def dump_lootbox_data(data):
@@ -3230,9 +3226,7 @@ async def give_animal(user, animal):
 async def hunt(ctx):
     vowels = ["a", "e", "i", "o", "u"]
     users = await get_bank_data()
-    with open('databases/prefixes.json', 'r') as f:
-        prefixes = json.load(f)
-    prefix = prefixes[str(ctx.guild.id)]
+    prefix = await config.get_prefix(self.bot,ctx.guild.id)
     user = ctx.author
     has_weapon = False
     try:
@@ -3271,9 +3265,7 @@ async def fish(ctx):
     vowels = ["a", "e", "i", "o", "u"]
     special = ["garbage", "donald duck", "nemo"]
     users = await get_bank_data()
-    with open('databases/prefixes.json', 'r') as f:
-        prefixes = json.load(f)
-    prefix = prefixes[str(ctx.guild.id)]
+    prefix = await config.get_prefix(self.bot,ctx.guild.id)
     user = ctx.author
     has_weapon = False
     try:

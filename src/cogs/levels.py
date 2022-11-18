@@ -39,24 +39,14 @@ async def get_lvl_card(lvl, exp, author):
         'next_lvl_xp': total,
         'percent': per
     }
-    background = Editor(Canvas((900, 300), color="#141414"))
+    background = Editor("assets/bg.png")
     profile_pic = await load_image_async(str(author.display_avatar.url))
     profile = Editor(profile_pic).resize((150, 150)).circle_image()
     poppins = custom_poppins(userData['name'])
     poppins_small = Font.poppins(size=30)
-    bar_color = "#ff0000"
-    if userData['percent'] > 90:
-        bar_color = "#0afc05"
-    elif userData['percent'] > 80:
-        bar_color = "#06d902"
-    elif userData['percent'] > 75:
-        bar_color = "#05b802"
-    elif userData['percent'] > 50:
-        bar_color = "#f4f73b"
-    elif userData['percent'] > 25:
-        bar_color = "#ffbe3b"
+    bar_color = "#FF56B2"
     card_right_shape = [(600, 0), (750, 300), (900, 300), (900, 0)]
-    background.polygon(card_right_shape, color="#545352")
+    background.polygon(card_right_shape, color="#06FFBF")
     background.paste(profile, (30, 30))
     background.rectangle((30, 220),
                          width=650,
@@ -71,7 +61,7 @@ async def get_lvl_card(lvl, exp, author):
                        color=bar_color,
                        radius=border_radius)
     background.text((200, 40), userData['name'], font=poppins, color="#ffffff")
-    background.rectangle((200, 100), width=350, height=2, fill="#ffffff")
+    background.rectangle((200, 100), width=350, height=2, fill="#17F3F6")
     background.text(
         (200, 130),
         f"Level: {userData['lvl']} | XP: {userData['xp']}/{userData['next_lvl_xp']}",
@@ -84,41 +74,7 @@ async def get_lvl_card(lvl, exp, author):
 class Levels(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    @commands.Cog.listener()
-    async def on_message(self,message):
-        if message.author.bot: return
-        with open('databases/server_configs.json', 'r') as f:
-            configs = json.load(f)
-        if configs[str(message.guild.id)]['levels'] is False: return
-        author = message.author
-        guild = message.guild
-        async with self.bot.db.cursor() as cursor:
-            await cursor.execute("SELECT xp FROM levels WHERE user = ? AND guild = ?",(author.id,guild.id,))
-            xp = await cursor.fetchone()
-            await cursor.execute("SELECT level FROM levels WHERE user = ? AND guild = ?",(author.id,guild.id,))
-            level = await cursor.fetchone()
-
-            if not xp or not level:
-                await cursor.execute("INSERT INTO levels (level, xp, user, guild) VALUES (?, ?, ?, ?)",(1,0,author.id,guild.id))
-                await self.bot.db.commit()
-            try:
-                xp = xp[0]
-                level = level[0]
-            except TypeError:
-                xp = 0
-                level = 1
-            
-            xp += level * 1.3
-            await cursor.execute("UPDATE levels SET xp = ? WHERE user = ? AND guild = ?", (xp,author.id,guild.id,))
-
-
-            level_start = level
-            level_end = int(xp**(1/4))
-            if level_start < level_end:
-                await message.channel.send('Congratulations! {} has leveled up to **Level {}** and has a total of **{} xp**! :tada: :tada:'.format(author.mention, level_end, round(xp))) 
-                await cursor.execute("UPDATE levels SET level = ? WHERE user = ? AND guild = ?",(level_end,author.id,guild.id,))
-        await self.bot.db.commit()
-        await self.bot.process_commands(message)
+        
 
 
     @commands.command(aliases=['rank', 'lvl'])

@@ -2,7 +2,7 @@ from nextcord.ext import commands, tasks
 import nextcord as discord
 import json
 import random
-# from cogs.utils import `config`
+from .utils import config
 import aiosqlite
 
 fake_cmds = ['balance', '_help']
@@ -68,7 +68,7 @@ class Events(commands.Cog):
         #     print('Added Giveaway Buttons and Tickets!')
         setattr(self.bot,"db", await aiosqlite.connect("main.db"))
         async with self.bot.db.cursor() as cursor:
-            await cursor.execute("CREATE TABLE IF NOT EXISTS levels (level INTEGER, xp INTEGER, user INTEGER, guild INTEGER)")
+            await cursor.execute("CREATE TABLE IF NOT EXISTS levels (level INTEGER, xp REAL, user INTEGER, guild INTEGER)")
             await cursor.execute("CREATE TABLE IF NOT EXISTS prefixes (prefix TEXT, guild ID)")
             await cursor.execute("CREATE TABLE IF NOT EXISTS jobs (name TEXT, pay INTEGER, hours INTEGER, user INTEGER)")
         print("Connected to {0.user}".format(self.bot))
@@ -127,67 +127,63 @@ class Events(commands.Cog):
                         del x
     @commands.Cog.listener()
     async def on_message(self,message):
-        with open('databases/prefixes.json', 'r') as f:
-            prefixes = json.load(f)
-        ctx = await self.bot.get_context(message)
-        # await config.open_account(ctx.author)
-        if message.guild != None:
-            ctx = await self.bot.get_context(message)
-            if message.content.lower().startswith(prefixes[str(ctx.guild.id)]):
-                if ctx.valid and ctx.command:
-                    if not str(ctx.command) in fake_cmds:
-                        with open('databases/mainbank.json','r') as f:
-                            bank = json.load(f)
-                        data = bank[str(ctx.author.id)]['max']
-                        data += random.randint(50,1000)
-                        bank[str(ctx.author.id)]['max'] = int(data)
-                        with open('databases/mainbank.json','w') as f:
-                            json.dump(bank, f,indent=4)
         try:
             ctx = await self.bot.get_context(message)
             if message.mentions[
                     0] == self.bot.user and message.content == '<@874328552965820416>':
-                with open("databases/prefixes.json", "r") as f:
-                    prefixes = json.load(f)
-                pre = prefixes[str(message.guild.id)]
-                await ctx.reply(f"My prefix for this server is `{pre}`")
+                prefix = await config.get_prefix(self.bot,ctx.guild.id)
+                await ctx.reply(f"My prefix for this server is `{prefix}`")
         except:
             pass
-        if not message.author.bot:
-            with open('databases/server_configs.json', 'r') as f:
-                configs = json.load(f)
-            if configs[str(message.guild.id)]['levels'] == True:
-                author = message.author
-                guild = message.guild
-                async with self.bot.db.cursor() as cursor:
-                    await cursor.execute("SELECT xp FROM levels WHERE user = ? AND guild = ?",(author.id,guild.id,))
-                    xp = await cursor.fetchone()
-                    await cursor.execute("SELECT level FROM levels WHERE user = ? AND guild = ?",(author.id,guild.id,))
-                    level = await cursor.fetchone()
+        if message.author.bot: return
+        with open('databases/server_configs.json', 'r') as f:
+            configs = json.load(f)
+        if configs[str(message.guild.id)]['levels'] is False: return
+        author = message.author
+        guild = message.guild
+        async with self.bot.db.cursor() as cursor:
+            await cursor.execute("SELECT xp FROM levels WHERE user = ? AND guild = ?",(author.id,guild.id,))
+            xp = await cursor.fetchone()
+            await cursor.execute("SELECT level FROM levels WHERE user = ? AND guild = ?",(author.id,guild.id,))
+            level = await cursor.fetchone()
 
-                    if not xp or not level:
-                        await cursor.execute("INSERT INTO levels (level, xp, user, guild) VALUES (?, ?, ?, ?)",(1,0,author.id,guild.id))
-                        await self.bot.db.commit()
-                    try:
-                        xp = xp[0]
-                        level = level[0]
-                    except TypeError:
-                        xp = 0
-                        level = 0
-                    
-                    xp += level * 1.3
-                    await cursor.execute("UPDATE levels SET xp = ? WHERE user = ? AND guild = ?", (xp,author.id,guild.id,))
-
-
-                    level_start = level
-                    level_end = int(xp**(1/4))
-                    if level_start < level_end:
-                        print("lvl up")
-                        await message.channel.send('Congratulations! {} has leveled up to **Level {}** and has a total of **{} xp**! :tada: :tada:'.format(author.mention, level_end, round(xp))) 
-                        await cursor.execute("UPDATE levels SET level = ? WHERE user = ? AND guild = ?",(level_end,author.id,guild.id,))
+            if not xp or not level:
+                await cursor.execute("INSERT INTO levels (level, xp, user, guild) VALUES (?, ?, ?, ?)",(1,0,author.id,guild.id))
                 await self.bot.db.commit()
+            try:
+                xp = xp[0]
+                level = level[0]
+            except TypeError:
+                xp = 0
+                level = 1
+            
+            xp += level * 1.3
+            await cursor.execute("UPDATE levels SET xp = ? WHERE user = ? AND guild = ?", (xp,author.id,guild.id,))
 
-        await self.bot.process_commands(message)
+
+            level_start = level
+            level_end = int(xp**(1/4))
+            if level_start < level_end:
+                await message.channel.send('Congratulations! {} has leveled up to **Level {}** and has a total of **{} xp**! :tada: :tada:'.format(author.mention, level_end, round(xp))) 
+                await cursor.execute("UPDATE levels SET level = ? WHERE user = ? AND guild = ?",(level_end,author.id,guild.id,))
+        await self.bot.db.commit()
+    #     with open('databases/prefixes.json', 'r') as f:
+    #         prefixes = json.load(f)
+    #     ctx = await self.bot.get_context(message)
+    #     # await config.open_account(ctx.author)
+    #     if message.guild != None:
+    #         ctx = await self.bot.get_context(message)
+    #         if message.content.lower().startswith(prefixes[str(ctx.guild.id)]):
+    #             if ctx.valid and ctx.command:
+    #                 if not str(ctx.command) in fake_cmds:
+    #                     with open('databases/mainbank.json','r') as f:
+    #                         bank = json.load(f)
+    #                     data = bank[str(ctx.author.id)]['max']
+    #                     data += random.randint(50,1000)
+    #                     bank[str(ctx.author.id)]['max'] = int(data)
+    #                     with open('databases/mainbank.json','w') as f:
+    #                         json.dump(bank, f,indent=4)
+    #     
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self,payload):

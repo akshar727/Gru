@@ -11,7 +11,7 @@ class HTTPSession(aiohttp.ClientSession):
     def __init__(self, loop=None):
         super().__init__(loop=loop or asyncio.get_event_loop())
 
-    async def __del__(self):
+    def __del__(self):
         """
         Closes the ClientSession instance
         cleanly when the instance is deleted.
@@ -21,7 +21,7 @@ class HTTPSession(aiohttp.ClientSession):
         This would be perfect if discord.py had this as well. :thinking:
         """
         if not self.closed:
-            await self.close()
+            self.close()
 
 
 session = HTTPSession()
