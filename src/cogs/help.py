@@ -314,7 +314,7 @@ class Info(commands.Cog):
     @commands.command(aliases=['help'])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def _help(self, ctx, query=None):
-        prefix = await config.get_prefix(self.bot,ctx.guild.id)
+        prefix = await config.get_prefix(self.client,ctx.guild.id)
         if query != None:
             selected = None
             all_pages= get_economy_embed(prefix) + get_moderation_embeds(prefix) + get_music_embeds(prefix) + get_fun_embeds(prefix)

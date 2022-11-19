@@ -28,42 +28,21 @@ async def get_prefix(bot,guild_id):
             return getenv("BOT_PREFIX")
 
 async def open_account(user):
-    users = await get_bank_data()
-    lootbox_data = await get_lootbox_data()
-
-        
-    if not str(user.id) in users:
-        users[str(user.id)] = {}
-        users[str(user.id)]["wallet"] = random.randint(0, 3000)
-        users[str(user.id)]["bank"] = 0
-        users[str(user.id)]["booster"] = 1
-        users[str(user.id)]["max"] = 10
-    async with aiosqlite.connect("main.db").cursor() as cursor:
-        await cursor.execute("INSERT INTO jobs (name TEXT, pay INTEGER, hours INTEGER, fails INTEGER, user INTEGER) VALUES (?, ?, ?, ?, ?)",("None",0,0,0,user.id,))
-
-    # if not str(user.id) in jobs:
-    #     jobs[str(user.id)] = {}
-    #     jobs[str(user.id)]["job"] = {}
-    #     jobs[str(user.id)]["job"]["name"] = 'None'
-    #     jobs[str(user.id)]["job"]["pay"] = 0
-    #     jobs[str(user.id)]["job"]["hours"] = 0
-    #     jobs[str(user.id)]['job']['fails'] = 0
-    if not str(user.id) in lootbox_data:
-        lootbox_data[str(user.id)] = {}
-        lootbox_data[str(user.id)]["common"] = 0
-        lootbox_data[str(user.id)]["uncommon"] = 0
-        lootbox_data[str(user.id)]["rare"] = 0
-        lootbox_data[str(user.id)]["epic"] = 0
-        lootbox_data[str(user.id)]["legendary"] = 0
-        lootbox_data[str(user.id)]["mythic"] = 0
-        lootbox_data[str(user.id)]["admin"] = 0
-
-    with open('databases/mainbank.json', 'w') as f:
-        json.dump(users, f, indent=4)
-    with open('databases/jobs.json', 'w') as f:
-        json.dump(jobs, f, indent=4)
-    with open('databases/lootboxes.json', 'w') as f:
-        json.dump(lootbox_data, f, indent=4)
+    db = await aiosqlite.connect("main.db")
+    async with db.cursor() as cursor:
+        await cursor.execute("SELECT wallet FROM mainbank WHERE user = ?",(user.id,))
+        bank_data = await cursor.fetchone()
+        if not bank_data:
+            await cursor.execute("INSERT INTO mainbank (wallet, bank, booster, max, user) VALUES (?, ?, ?, ?, ?)",(random.randint(0,3000),0,1,100,user.id,))
+        await cursor.execute("SELECT name FROM jobs WHERE user = ?",(user.id,))
+        job_data = await cursor.fetchone()
+        if not job_data:
+            await cursor.execute("INSERT INTO jobs (name, pay, hours, fails, user) VALUES (?, ?, ?, ?, ?)",("None",0,0,0,user.id,))
+        await cursor.execute("SELECT common FROM lootboxes WHERE user = ?",(user.id,))
+        lootbox_data = await cursor.fetchone()
+        if not lootbox_data:
+            await cursor.execute("INSERT INTO lootboxes (common, uncommon, rare, epic, legendary, mythic, admin, user) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",(0, 0, 0, 0, 0, 0, 0,user.id,))
+    await db.commit()
 
     return True
 

@@ -6,7 +6,6 @@ from io import BytesIO
 from nextcord.ext import commands
 from nextcord.ext.commands.errors import BadArgument
 from .utils import http, config
-import json
 
 
 

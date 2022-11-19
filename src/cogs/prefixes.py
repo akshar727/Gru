@@ -41,9 +41,9 @@ class Prefixes(commands.Cog):
 
         # configs[str(guild.id)] = {}
         # configs[str(guild.id)]["giveaway_role"] = "None"
-        # configs[str(guild.id)]["levels"] = False
         async with self.bot.db.cursor() as cursor:
-            await cursor.execute("INSERT INTO prefixes (prefix, guild) VALUES (?, ?)",(config.getenv("BOT_PREFIX"),guild.id))
+            await cursor.execute("INSERT INTO prefixes (prefix, guild) VALUES (?, ?)",(config.getenv("BOT_PREFIX"),guild.id,))
+            await cursor.execute("INSERT INTO levelSettings VALUES (?, ?, ?, ?)",(False, 0, 0, guild.id,))
         await self.bot.db.commit()
 
         # with open("databases/server_configs.json", 'w') as f:
@@ -60,6 +60,10 @@ class Prefixes(commands.Cog):
             data = await cursor.fetchone()
             if data:
                 await cursor.execute("DELETE FROM prefixes WHERE guild = ?",(guild.id,))
+            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?",(guild.id,))
+            data = await cursor.fetchone()
+            if data:
+                await cursor.execute("DELETE FROM levelSettings WHERE guild = ?",(guild.id,))
         await self.bot.db.commit()
     
         # del configs[str(guild.id)]

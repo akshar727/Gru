@@ -67,7 +67,7 @@ class Fun(commands.Cog):
         if user.bot:
             await ctx.reply("MY KIND ARE UNHACKABLE. STAY AWAY.")
             return self.hack.reset_cooldown(ctx)
-        with open('databases/countries.txt', 'r',encoding="utf8") as f:
+        with open('assets/countries.txt', 'r',encoding="utf8") as f:
             countries = f.read()
             countries_list = list(map(str, countries.split()))
             country = random.choice(countries_list)

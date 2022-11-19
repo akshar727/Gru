@@ -6,40 +6,10 @@ from .utils import config
 import aiosqlite
 
 fake_cmds = ['balance', '_help']
-# client: GruBot = None
 
 
-# def set_client(bot):
-#     client = bot
 
 
-# @tasks.loop(seconds=2.0)
-# async def uptimeCounter():
-#     global ts, tm, th, td
-#     ts += 2
-#     if ts == 60:
-#         ts = 0
-#         tm += 1
-#         if tm == 60:
-#             tm = 0
-#             th += 1
-#             if th == 24:
-#                 th = 0
-#                 td += 1
-
-# @tasks.loop(seconds=4)
-# async def change_status():
-#     await client.change_presence(activity=discord.Game("Try: @Gru | gru help"))
-
-
-ts = 0
-tm = 0
-th = 0
-td = 0
-
-# @uptimeCounter.before_loop
-# async def beforeUptimeCounter():
-#     await client.wait_until_ready()
 
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -49,8 +19,6 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        # change_status.start()
-        # uptimeCounter.start()
         # check_giveaway_ended.start()
         print()
         # with open('databases/giveaways.json','r') as f:
@@ -69,8 +37,11 @@ class Events(commands.Cog):
         setattr(self.bot,"db", await aiosqlite.connect("main.db"))
         async with self.bot.db.cursor() as cursor:
             await cursor.execute("CREATE TABLE IF NOT EXISTS levels (level INTEGER, xp REAL, user INTEGER, guild INTEGER)")
+            await cursor.execute("CREATE TABLE IF NOT EXISTS levelSettings (levelsys BOOL, role INTEGER, levelreq INTEGER, guild INTEGER)")
             await cursor.execute("CREATE TABLE IF NOT EXISTS prefixes (prefix TEXT, guild ID)")
-            await cursor.execute("CREATE TABLE IF NOT EXISTS jobs (name TEXT, pay INTEGER, hours INTEGER, user INTEGER)")
+            await cursor.execute("CREATE TABLE IF NOT EXISTS jobs (name TEXT, pay INTEGER, hours INTEGER, fails INTEGER, user INTEGER)")
+            await cursor.execute("CREATE TABLE IF NOT EXISTS mainbank (wallet INTEGER, bank INTEGER, booster INTEGER, max INTEGER, user INTEGER)")
+            await cursor.execute("CREATE TABLE IF NOT EXISTS lootboxes  (common INTEGER, uncommon INTEGER, rare INTEGER, epic INTEGER, legendary INTEGER, mythic INTEGER, admin INTEGER, user INTEGER)")
         print("Connected to {0.user}".format(self.bot))
 
 
@@ -127,34 +98,35 @@ class Events(commands.Cog):
                         del x
     @commands.Cog.listener()
     async def on_message(self,message):
+        if message.author.bot: return
         try:
-            ctx = await self.bot.get_context(message)
             if message.mentions[
                     0] == self.bot.user and message.content == '<@874328552965820416>':
-                prefix = await config.get_prefix(self.bot,ctx.guild.id)
-                await ctx.reply(f"My prefix for this server is `{prefix}`")
-        except:
+                prefix = await config.get_prefix(self.bot,message.guild.id)
+                await message.channel.send(f"My prefix for this server is `{prefix}`")
+        except IndexError:
             pass
-        if message.author.bot: return
-        with open('databases/server_configs.json', 'r') as f:
-            configs = json.load(f)
-        if configs[str(message.guild.id)]['levels'] is False: return
         author = message.author
         guild = message.guild
         async with self.bot.db.cursor() as cursor:
+            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (guild.id,))
+            levelsys = await cursor.fetchone()
+            if levelsys and not levelsys[0]:
+                # 0: False, 1: True
+                return
             await cursor.execute("SELECT xp FROM levels WHERE user = ? AND guild = ?",(author.id,guild.id,))
             xp = await cursor.fetchone()
             await cursor.execute("SELECT level FROM levels WHERE user = ? AND guild = ?",(author.id,guild.id,))
             level = await cursor.fetchone()
 
             if not xp or not level:
-                await cursor.execute("INSERT INTO levels (level, xp, user, guild) VALUES (?, ?, ?, ?)",(1,0,author.id,guild.id))
+                await cursor.execute("INSERT INTO levels (level, xp, user, guild) VALUES (?, ?, ?, ?)",(1,0,author.id,guild.id,))
                 await self.bot.db.commit()
             try:
                 xp = xp[0]
                 level = level[0]
             except TypeError:
-                xp = 0
+                xp = 1.3
                 level = 1
             
             xp += level * 1.3
