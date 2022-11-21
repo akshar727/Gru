@@ -1,0 +1,156 @@
+{"main_shop":  [
+
+    {
+        "name": "Fishing Rod",
+        "price": 25000,
+        "description": "Allows you to fish and catch sea animals!"
+    },
+    {
+        "name":"Hunting Sniper",
+        "price":27000,
+        "description":"Allows you to hunt and catch land and aerial animals!"
+    },
+    {
+        "name": "2x booster",
+        "price": 50000,
+        "description": "Get a 2x money booster **__Permanent__**"
+    },
+    {
+        "name": "5x booster",
+        "price": 400000,
+        "description": "Get a 5x money booster **__Permanent__**"
+    },
+    {
+        "name": "10x booster",
+        "price": 3500000,
+        "description": "Get a 10x money booster **__Permanent__**"
+    },
+    {
+        "name": "Bank Record",
+        "price": 250000,
+        "description": "Expands your bank. Automatically used when bought."
+    },
+    {
+        "name" : "Uno Reverse Card",
+        "price" : 500000,
+        "description" : "Instead of losing money when you get robbed, you gain money!"
+    }
+],
+
+"animal_shop":[
+    [
+        {
+            "name": "Wolf",
+            "sell_price": 2000
+        }, {
+            "name": "Mountain Lion",
+            "sell_price": 3200
+        }, {
+            "name": "Chicken",
+            "sell_price": 3500
+        }, {
+            "name": "Rabbit",
+            "sell_price": 3700
+        }, {
+            "name": "Deer",
+            "sell_price": 4200
+        }, {
+            "name": "Moose",
+            "sell_price": 4900
+        }, {
+            "name": "Angry Bird",
+            "sell_price": 8500
+        }, {
+            "name": "Minion",
+            "sell_price": 15000
+        }, {
+            "name": "Bengal Tiger",
+            "sell_price": 32000
+        }, {
+            "name": "Evil Minion",
+            "sell_price": 50000
+        }, {
+            "name": "White Tiger",
+            "sell_price": 65000
+        }, {
+            "name": "Unicorn",
+            "sell_price": 85000
+        }],
+               [{
+                   "name": "Duck",
+                   "sell_price": 6000
+               }, {
+                   "name": "Mosasaurus",
+                   "sell_price": 500000
+               }, {
+                   "name": "Fish",
+                   "sell_price": 3400
+               }, {
+                   "name": "Nemo",
+                   "sell_price": 3600
+               }, {
+                   "name": "Great White Shark",
+                   "sell_price": 75000
+               }, {
+                   "name": "Blobfish",
+                   "sell_price": 10000
+               }, {
+                   "name": "Crab",
+                   "sell_price": 1500
+               }, {
+                   "name": "Shell",
+                   "sell_price": 250
+               }, {
+                   "name": "Garbage",
+                   "sell_price": 100
+               }, {
+                   "name": "Water Bottle",
+                   "sell_price": 3000
+               }, {
+                   "name": "Dumbo Octopus",
+                   "sell_price": 35000
+               }, {
+                   "name": "Donald Duck",
+                   "sell_price": 3500
+               }],
+               [{
+                   "name": "Hawk",
+                   "sell_price": 5000
+               }, {
+                   "name": "Bat",
+                   "sell_price": 15000
+               }, {
+                   "name": "Mosquito",
+                   "sell_price": 1000
+               }, {
+                   "name": "Flying Lizard",
+                   "sell_price": 7000
+               }, {
+                   "name": "Bird",
+                   "sell_price": 2000
+               }, {
+                   "name": "Ladybug",
+                   "sell_price": 1500
+               }, {
+                   "name": "Bumblebee",
+                   "sell_price": 9500
+               }, {
+                   "name": "Hummingbird",
+                   "sell_price": 13500
+               }, {
+                   "name": "Eagle",
+                   "sell_price": 15000
+               }, {
+                   "name": "Pigeon",
+                   "sell_price": 5000
+               }, {
+                   "name": "Vulture",
+                   "sell_price": 17500
+               }, {
+                   "name": "Hummingbird",
+                   "sell_price": 13500
+               }, {
+                   "name": "Pterodactyl",
+                   "sell_price": 102000
+               }]]
+}

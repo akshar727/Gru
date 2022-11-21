@@ -1,6 +1,5 @@
 from nextcord.ext import commands
 import nextcord as discord
-import json
 from easy_pil import Editor, Font, load_image_async,Text
 
 
@@ -62,7 +61,6 @@ async def get_lvl_card(lvl, exp, author,rank):
     poppins = custom_poppins(userData['name'])
     poppins_small = Font.poppins(size=30)
     background.paste(profile, (30, 62))
-    background.rounded_corners(10)
     background.rectangle((200, 205),
                          width=650,
                          height=40,
@@ -217,6 +215,60 @@ class Levels(commands.Cog):
                 await ctx.reply(embed=e)
             else:
                 return await ctx.reply("Somehow, there are no users in the leveling system!")
+    
+    @commands.command()
+    async def rewards(self,ctx):
+        async with self.bot.db.cursor() as cursor:
+            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
+            levelsys = await cursor.fetchone()
+            if levelsys and not levelsys[0]:
+                # 0: False, 1: True
+                return await ctx.reply("Levels are disabled in this server.")
+            await cursor.execute("SELECT * FROM levelSettings WHERE guild = ?",(ctx.guild.id,))
+            roleLevels = await cursor.fetchall()
+            if not roleLevels:
+                return await ctx.send("There are no role levels that have been setup for this server!")
+            em = discord.Embed(title="Role Levels",description="The roles that you can get from leveling up in this server.",color=discord.Color.random())
+            for role in roleLevels:
+                if role[1] != 0:
+                    em.add_field(name=f"Level {role[2]}",value=f"{ctx.guild.get_role(role[1]).mention}",inline=False)
+            await ctx.send(embed=em)
+
+    @lvlsys.command(aliases=['sr','addrole','ar'])
+    @commands.has_permissions(manage_messages=True)
+    async def setrole(self,ctx,level:int, *, role:discord.Role):
+        async with self.bot.db.cursor() as cursor:
+            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
+            levelsys = await cursor.fetchone()
+            if levelsys and not levelsys[0]:
+                # 0: False, 1: True
+                return await ctx.reply("Levels are disabled in this server.")
+            await cursor.execute("SELECT role FROM levelSettings WHERE role = ? and guild = ?",(role.id, ctx.guild.id,))
+            roleTF = await cursor.fetchone()
+            await cursor.execute("SELECT role FROM levelSettings WHERE levelReq = ? and guild = ?",(level, ctx.guild.id,))
+            levelTF = await cursor.fetchone()
+            if roleTF or levelTF:
+                return await ctx.send("A reward for the level already exists!")
+            await cursor.execute("INSERT INTO levelSettings VALUES (?, ?, ?, ?)",(True, role.id, level, ctx.guild.id,))
+            await self.bot.db.commit()
+        await ctx.send("That level reward was created!")
+    @lvlsys.command(aliases=['removerole','rr'])
+    @commands.has_permissions(manage_messages=True)
+    async def remrole(self,ctx,level:int):
+        async with self.bot.db.cursor() as cursor:
+            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
+            levelsys = await cursor.fetchone()
+            if levelsys and not levelsys[0]:
+                # 0: False, 1: True
+                return await ctx.reply("Levels are disabled in this server.")
+            await cursor.execute("SELECT role FROM levelSettings WHERE levelReq = ? and guild = ?",(level, ctx.guild.id,))
+            levelTF = await cursor.fetchone()
+            if levelTF:
+                await cursor.execute("DELETE FROM levelSettings WHERE levelReq = ? and guild = ?",(level, ctx.guild.id,))
+                await ctx.send("That level reward has been deleted!")
+            else:
+                await ctx.send("There is not a reward for the level requirement!")
+            await self.bot.db.commit()
 
 
 

@@ -9,15 +9,13 @@ import os
 import json
 import random
 import psutil
-from zoneinfo import ZoneInfo
-from nextcord.ext import commands, tasks
+# from zoneinfo import ZoneInfo
+from nextcord.ext import commands
 from nextcord.utils import get
 from typing import Optional
-from dotenv import load_dotenv
 from PIL import Image
 from io import BytesIO
-from googleapiclient.discovery import build
-import urllib.parse, urllib.request
+# import urllib.request
 from num2words import num2words
 from cogs.utils import http, config
 import humanfriendly
@@ -39,7 +37,6 @@ async def get_prefix(client, message):
 
             # configs[str(message.guild.id)] = {}
             # configs[str(message.guild.id)]["giveaway_role"] = "None"
-            # configs[str(message.guild.id)]["levels"] = False
             try:
                 await cursor.execute("INSERT INTO prefixes (prefix, guild) VALUES (?, ?)",(config.getenv("BOT_PREFIX"),message.guild.id,))
                 await cursor.execute("SELECT prefix FROM prefixes WHERE guild = ?", (message.guild.id,))
@@ -110,44 +107,7 @@ def convert_str_to_number(x):
 ####################################################################
 # Main code starts :)
 
-mainshop = [
 
-    {
-        "name": "Fishing Rod",
-        "price": 25000,
-        "description": "Allows you to fish and catch sea animals!"
-    },
-    {
-        "name":"Hunting Sniper",
-        "price":27000,
-        "description":"Allows you to hunt and catch land and aerial animals!"
-    },
-    {
-        "name": "2x booster",
-        "price": 50000,
-        "description": "Get a 2x money booster **__Permanent__**"
-    },
-    {
-        "name": "5x booster",
-        "price": 400000,
-        "description": "Get a 5x money booster **__Permanent__**"
-    },
-    {
-        "name": "10x booster",
-        "price": 3500000,
-        "description": "Get a 10x money booster **__Permanent__**"
-    },
-    {
-        "name": "Bank Record",
-        "price": 250000,
-        "description": "Expands your bank. Automatically used when bought."
-    },
-    {
-        "name" : "Uno Reverse Card",
-        "price" : 500000,
-        "description" : "Instead of losing money when you get robbed, you gain money!"
-    }
-]
 
 animal_shop = [
     [
@@ -271,14 +231,17 @@ animal_shop = [
 async def stats(ctx):
     global ts, tm, th, td
     e = discord.Embed(title="My Stats!", color=discord.Color.random())
-    e.add_field(name="Days:", value=td, inline=True)
-    e.add_field(name="Hours:", value=th, inline=True)
-    e.add_field(name="Minutes:", value=tm, inline=True)
-    e.add_field(name="Seconds:", value=ts, inline=True)
+    # e.add_field(name="Days:", value=td, inline=True)
+    # e.add_field(name="Hours:", value=th, inline=True)
+    # e.add_field(name="Minutes:", value=tm, inline=True)
+    # e.add_field(name="Seconds:", value=ts, inline=True)
     e.add_field(name="CPU:", value=f"{psutil.cpu_percent()}%", inline=False)
     e.add_field(name="RAM:",
                 value=f"{psutil.virtual_memory()[2]}%",
                 inline=True)
+    e.add_field(name="Version:",
+                value=f"{config.getenv('BOT_VERSION')}",
+                inline=False)
     await ctx.reply(embed=e)
 
 
@@ -364,136 +327,6 @@ async def beg(ctx):
         json.dump(users, f, indent=4)
 
 
-
-active_ticket_users = []
-
-class AddUser(discord.ui.Modal):
-    def __init__(self, channel):
-        super().__init__(
-            "Add User To Ticket",
-            timeout=300
-        )
-
-        self.channel = channel
-        self.user = discord.ui.TextInput(
-            label="User ID",
-            min_length = 2,
-            max_length=30,
-            required=True,
-            placeholder="User ID (Must be a number)"
-        )
-        self.add_item(self.user)
-    async def callback(self, interaction: discord.Interaction) -> None:
-        user = interaction.guild.get_member(int(self.user.value))
-        if user is None:
-            return await interaction.send("Invalid User ID. Make sure the user is in this server!")
-        if self.channel.permissions_for(user).read_messages:
-            return await interaction.send(f"{user.mention} is already in this ticket!",ephemeral=True)
-        overwrites = discord.PermissionOverwrite(read_messages=True)
-        await self.channel.set_permissions(user,overwrite=overwrites)
-        await interaction.send(f"{user.mention} has been added to this ticket!",ephemeral=True)
-
-
-class RemoveUser(discord.ui.Modal):
-    def __init__(self, channel):
-        super().__init__(
-            "Remove User From Ticket",
-            timeout=300
-        )
-
-        self.channel = channel
-        self.user = discord.ui.TextInput(
-            label="User ID",
-            min_length = 2,
-            max_length=30,
-            required=True,
-            placeholder="User ID (Must be a number)"
-        )
-        self.add_item(self.user)
-    async def callback(self, interaction: discord.Interaction) -> None:
-        user = interaction.guild.get_member(int(self.user.value))
-        if user is None:
-            return await interaction.send("Invalid User ID. Make sure the user is in this server!")
-        overwrites = discord.PermissionOverwrite(read_messages=False)
-        if not self.channel.permissions_for(user).read_messages:
-            return await interaction.send(f"{user.mention} is not in this ticket!",ephemeral=True)
-        await self.channel.set_permissions(user,overwrite=overwrites)
-        await interaction.send(f"{user.mention} has been removed from this ticket!",ephemeral=True)
-
-
-
-
-class TicketSettings(discord.ui.View):
-    def __init__(self, user):
-        super().__init__(timeout=None)
-        self.user = user
-
-    @discord.ui.button(label="Close Ticket",style=discord.ButtonStyle.danger, custom_id="ticket_settings:close")
-    async def close_ticket(self, button: discord.ui.Button, interaction: discord.Interaction):
-        with open('databases/tickets.json','r') as f:
-            ticket_data = json.load(f)
-        if self.user != interaction.user.id:
-            return await interaction.response.send_message("This is not your ticket!",ephemeral=True)
-        active_ticket_users = ticket_data["active_ticket_users"]
-        await interaction.response.send_message("The ticket is being closed.",ephemeral=True)
-        await interaction.channel.delete()
-        active_ticket_users.remove(interaction.user.id)
-        ticket_data["active_ticket_users"] = active_ticket_users
-        with open('databases/tickets.json','w') as f:
-            json.dump(ticket_data,f)
-        await interaction.user.send(f"Your ticket in {interaction.guild.name} has been closed successfully!")
-
-    @discord.ui.button(label="Add User",style=discord.ButtonStyle.green, custom_id="ticket_settings:add_user")
-    async def add_user(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if self.user != interaction.user.id:
-            return await interaction.response.send_message("This is not your ticket!"
-            ,ephemeral=True)
-        await interaction.response.send_modal(AddUser(interaction.channel))
-
-    @discord.ui.button(label="Remove User",style=discord.ButtonStyle.gray, custom_id="ticket_settings:remove_user")
-    async def remove_user(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if self.user != interaction.user.id:
-            return await interaction.response.send_message("This is not your ticket!"
-            ,ephemeral=True)
-        await interaction.response.send_modal(RemoveUser(interaction.channel))
-
-
-class CreateTicket(discord.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @discord.ui.button(label="Create Ticket",style=discord.ButtonStyle.blurple, custom_id="create_ticket:main")
-    async def create_ticket(self, button: discord.ui.Button, interaction: discord.Interaction):
-        with open('databases/tickets.json','r') as f:
-            ticket_data = json.load(f)
-        active_ticket_users = ticket_data["active_ticket_users"]
-        if interaction.user.id in active_ticket_users:
-            return await interaction.response.send_message("You already have a ticket open! Close it to open a new one.",ephemeral=True)
-        await interaction.response.send_message("A ticket is being created for you!",ephemeral=True)
-        with open('databases/server_configs.json', 'r') as f:
-            configs = json.load(f)
-        overwrites = {
-            interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            interaction.guild.me: discord.PermissionOverwrite(read_messages=True),
-            interaction.user: discord.PermissionOverwrite(read_messages=True),
-            interaction.guild.get_role(configs[f"{interaction.guild.id}"]["mod_role"]): discord.PermissionOverwrite(read_messages=True),
-        }
-
-        channel = await interaction.guild.create_text_channel(f"{interaction.user}-help", overwrites=overwrites)
-        await interaction.edit_original_message(content=f"Ticket created successfully! {channel.mention}")
-        embed = discord.Embed(title=f"Ticket for {interaction.user}",description=f"{interaction.user} has created a ticket.\nClick one of the buttons below to alter the settings of this ticket.", color=discord.Color.random())
-        await channel.send(embed=embed,view=TicketSettings(interaction.user.id))
-        active_ticket_users.append(interaction.user.id)
-        ticket_data["active_ticket_users"] = active_ticket_users
-        with open('databases/tickets.json','w') as f:
-            json.dump(ticket_data,f)
-
-
-@client.command()
-@commands.has_permissions(manage_guild=True)
-async def setup_tickets(ctx):
-    embed = discord.Embed(title="Create A Ticket!", description = "Click the `Create Ticket` button below to create a new ticket. The server's staff will be notified and shortly aid you with your problem.",color=discord.Color.green())
-    await ctx.send(embed=embed,view=CreateTicket())
 
 
 @client.command()
@@ -1843,78 +1676,78 @@ async def emojify(ctx, *, text):
 
 
 
-@client.command()
-@commands.has_permissions(manage_guild=True)
-async def reroll(ctx, message_id: int):
-    gaw_msg = ...
-    try:
-        gaw_msg = await ctx.channel.fetch_message(message_id)
-    except Exception as e:
-        return await ctx.reply(
-            "Cannot find the message with this ID in this channel!")
-    embed = None
-    try:
-        embed = gaw_msg.embeds[0]
-    except:
-        return await ctx.reply("Could not find the giveaway embed!")
-    if gaw_msg.author != client.user:
-        if gaw_msg.embeds[0].title != "New Giveaway!" and gaw_msg.embeds[
-                0].title != "GIVEAWAY ENDED":
-            return await ctx.reply("This is not a giveaway message!")
-    author = client.get_user(
-        int(gaw_msg.embeds[0].description.split(' is giving away')[0].replace(
-            '<@!', '').replace('>', '').replace('<@','')))
-    await ctx.reply("Picking a random user!")
-    await asyncio.sleep(1)
-    embed.title = "GIVEAWAY ENDED"
-    embed.set_footer(
-        text=
-        f'Giveaway ended at {datetime.datetime.now(ZoneInfo("America/New_York")).strftime("%A, %B %d %Y @ %H:%M:%S %p")}'
-    )
-    with open('databases/giveaways.json') as f: 
-        g = json.load(f)
-    users = []
-    g[str(gaw_msg.id)]['ended'] = True
-    with open('databases/giveaways.json','w') as f: 
-        json.dump(g, f,indent=4)
-    for i in g[str(gaw_msg.id)]['users']:
-        user = client.get_user(int(i))
-        users.append(user)
-    try:
-        winner = random.choice(users)
-    except:
-        if not "Winner: " in embed.description:
-            embed.description += f"\nWinner: None"
-        else:
-            em = embed.description.partition("\nWinner: ")[0]
-        embed.description = em
-        embed.description += f"\nWinner: None"
-        await gaw_msg.edit(embed=embed)
-        await ctx.reply("No one won since no one entered!")
-        return
-    btn = JoinGiveaway(str(gaw_msg.id))
-    for i in btn.children:
-        i.disabled = True
-    prize = gaw_msg.embeds[0].description.partition("\nWinner: ")[0].split(
-        'is giving away')[1].replace(f"\n{len(users)} entrant{'s' if len(users) >1 else ''}",'')[:-2]
-    e = discord.Embed(description="None", color=discord.Color.random())
-    if len(users) == 1:
-        e.description = "1 entrant"
-    else:
-        e.description = f"{len(users)} entrants"
-    if not "Winner: " in embed.description:
-        embed.description += f"\nWinner: {winner.mention}"
-    else:
-        em = embed.description.partition("\nWinner: ")[0]
-        embed.description = em
-        embed.description += f"\nWinner: {winner.mention}"
-    await gaw_msg.edit(embed=embed,view=btn)
-    await ctx.reply(
-        f"YAYYYYY!!!! {winner.mention} has won the giveaway for{prize}!!",
-        embed=e)
+# @client.command()
+# @commands.has_permissions(manage_guild=True)
+# async def reroll(ctx, message_id: int):
+#     gaw_msg = ...
+#     try:
+#         gaw_msg = await ctx.channel.fetch_message(message_id)
+#     except Exception as e:
+#         return await ctx.reply(
+#             "Cannot find the message with this ID in this channel!")
+#     embed = None
+#     try:
+#         embed = gaw_msg.embeds[0]
+#     except:
+#         return await ctx.reply("Could not find the giveaway embed!")
+#     if gaw_msg.author != client.user:
+#         if gaw_msg.embeds[0].title != "New Giveaway!" and gaw_msg.embeds[
+#                 0].title != "GIVEAWAY ENDED":
+#             return await ctx.reply("This is not a giveaway message!")
+#     author = client.get_user(
+#         int(gaw_msg.embeds[0].description.split(' is giving away')[0].replace(
+#             '<@!', '').replace('>', '').replace('<@','')))
+#     await ctx.reply("Picking a random user!")
+#     await asyncio.sleep(1)
+#     embed.title = "GIVEAWAY ENDED"
+#     embed.set_footer(
+#         text=
+#         f'Giveaway ended at {datetime.datetime.now(ZoneInfo("America/New_York")).strftime("%A, %B %d %Y @ %H:%M:%S %p")}'
+#     )
+#     with open('databases/giveaways.json') as f: 
+#         g = json.load(f)
+#     users = []
+#     g[str(gaw_msg.id)]['ended'] = True
+#     with open('databases/giveaways.json','w') as f: 
+#         json.dump(g, f,indent=4)
+#     for i in g[str(gaw_msg.id)]['users']:
+#         user = client.get_user(int(i))
+#         users.append(user)
+#     try:
+#         winner = random.choice(users)
+#     except:
+#         if not "Winner: " in embed.description:
+#             embed.description += f"\nWinner: None"
+#         else:
+#             em = embed.description.partition("\nWinner: ")[0]
+#         embed.description = em
+#         embed.description += f"\nWinner: None"
+#         await gaw_msg.edit(embed=embed)
+#         await ctx.reply("No one won since no one entered!")
+#         return
+#     btn = JoinGiveaway(str(gaw_msg.id))
+#     for i in btn.children:
+#         i.disabled = True
+#     prize = gaw_msg.embeds[0].description.partition("\nWinner: ")[0].split(
+#         'is giving away')[1].replace(f"\n{len(users)} entrant{'s' if len(users) >1 else ''}",'')[:-2]
+#     e = discord.Embed(description="None", color=discord.Color.random())
+#     if len(users) == 1:
+#         e.description = "1 entrant"
+#     else:
+#         e.description = f"{len(users)} entrants"
+#     if not "Winner: " in embed.description:
+#         embed.description += f"\nWinner: {winner.mention}"
+#     else:
+#         em = embed.description.partition("\nWinner: ")[0]
+#         embed.description = em
+#         embed.description += f"\nWinner: {winner.mention}"
+#     await gaw_msg.edit(embed=embed,view=btn)
+#     await ctx.reply(
+#         f"YAYYYYY!!!! {winner.mention} has won the giveaway for{prize}!!",
+#         embed=e)
 
 
-# add to help
+# TODO: add to help
 @client.command()
 async def troll(user, time, type):
     ...
@@ -2023,127 +1856,127 @@ async def usertoid_error(ctx, error):
 """
 
 
-class JoinGiveaway(discord.ui.View):
-    def __init__(self, msg_id):
-        super().__init__(timeout=None)
-        self.msg_id = msg_id
-    @discord.ui.button(label="Join Giveaway!", style=discord.ButtonStyle.green,custom_id='giveaway:join')
-    async def join(self, button: discord.ui.Button, interaction: discord.Interaction):
-        with open("databases/giveaways.json",'r') as f:
-            g = json.load(f)
-        if str(interaction.user.id) == g[str(self.msg_id)]['author']:
-            return await interaction.response.send_message("You cannot join your own giveaway!",ephemeral=True)
-        if str(interaction.user.id) in g[str(self.msg_id)]['users']:
-            return await interaction.response.send_message("You have already entered the giveaway!",ephemeral=True)
-        g[str(self.msg_id)]['users'].append(str(interaction.user.id))
-        msg, embed = None, None
-        try:
-            channel = client.get_channel(int(g[str(self.msg_id)]['channel']))
-            msg = await channel.fetch_message(int(self.msg_id))
-            embed = msg.embeds[0]
-        except:
-            del g[str(self.msg_id)]
-            with open("databases/giveaways.json",'w') as f:
-                json.dump(g, f, indent=4)
-            return await interaction.response.send_message("Could not find the giveaway!",ephemeral=True)
-        embed.description = embed.description.split(f"\n{len(g[str(self.msg_id)]['users'])-1} entrant{'s' if len(g[str(self.msg_id)]['users'])-1 != 1 else ''}")[0]
-        embed.description += f"\n{len(g[str(self.msg_id)]['users'])} entrant{'s' if len(g[str(self.msg_id)]['users']) != 1 else ''}"
-        await msg.edit(embed=embed)
-        with open("databases/giveaways.json",'w') as f:
-            json.dump(g, f, indent=4)
-        return await interaction.response.send_message("You have entered the giveaway!",ephemeral=True)
+# class JoinGiveaway(discord.ui.View):
+#     def __init__(self, msg_id):
+#         super().__init__(timeout=None)
+#         self.msg_id = msg_id
+#     @discord.ui.button(label="Join Giveaway!", style=discord.ButtonStyle.green,custom_id='giveaway:join')
+#     async def join(self, button: discord.ui.Button, interaction: discord.Interaction):
+#         with open("databases/giveaways.json",'r') as f:
+#             g = json.load(f)
+#         if str(interaction.user.id) == g[str(self.msg_id)]['author']:
+#             return await interaction.response.send_message("You cannot join your own giveaway!",ephemeral=True)
+#         if str(interaction.user.id) in g[str(self.msg_id)]['users']:
+#             return await interaction.response.send_message("You have already entered the giveaway!",ephemeral=True)
+#         g[str(self.msg_id)]['users'].append(str(interaction.user.id))
+#         msg, embed = None, None
+#         try:
+#             channel = client.get_channel(int(g[str(self.msg_id)]['channel']))
+#             msg = await channel.fetch_message(int(self.msg_id))
+#             embed = msg.embeds[0]
+#         except:
+#             del g[str(self.msg_id)]
+#             with open("databases/giveaways.json",'w') as f:
+#                 json.dump(g, f, indent=4)
+#             return await interaction.response.send_message("Could not find the giveaway!",ephemeral=True)
+#         embed.description = embed.description.split(f"\n{len(g[str(self.msg_id)]['users'])-1} entrant{'s' if len(g[str(self.msg_id)]['users'])-1 != 1 else ''}")[0]
+#         embed.description += f"\n{len(g[str(self.msg_id)]['users'])} entrant{'s' if len(g[str(self.msg_id)]['users']) != 1 else ''}"
+#         await msg.edit(embed=embed)
+#         with open("databases/giveaways.json",'w') as f:
+#             json.dump(g, f, indent=4)
+#         return await interaction.response.send_message("You have entered the giveaway!",ephemeral=True)
         
-    @discord.ui.button(label="Leave Giveaway!", style=discord.ButtonStyle.red,custom_id='giveaway:leave')
-    async def leave(self, button: discord.ui.Button, interaction: discord.Interaction):
-        with open("databases/giveaways.json",'r') as f:
-            g = json.load(f)
-        if str(interaction.user.id) in g[str(self.msg_id)]['users']:
-            g[str(self.msg_id)]['users'].pop(g[str(self.msg_id)]['users'].index(str(interaction.user.id)))
-            with open("databases/giveaways.json",'w') as f:
-                json.dump(g, f, indent=4)  
-            msg, embed = None, None
-            try:
-                channel = client.get_channel(int(g[str(self.msg_id)]['channel']))
-                msg = await channel.fetch_message(int(self.msg_id))
-                embed = msg.embeds[0]
-            except:
-                del g[str(self.msg_id)]
-                with open("databases/giveaways.json",'w') as f:
-                    json.dump(g, f, indent=4)
-                return await interaction.response.send_message("Could not find the giveaway!",ephemeral=True)  
-            embed.description = embed.description.split(f"\n{len(g[str(self.msg_id)]['users'])+1} entrant{'s' if len(g[str(self.msg_id)]['users'])+1 != 1 else ''}")[0]          
-            embed.description += f"\n{len(g[str(self.msg_id)]['users'])} entrant{'s' if len(g[str(self.msg_id)]['users']) != 1 else ''}"
-            await msg.edit(embed=embed)
-            return await interaction.response.send_message("You have left the giveaway!",ephemeral=True)
-        return await interaction.response.send_message("You have not entered the giveaway!",ephemeral=True)     
+#     @discord.ui.button(label="Leave Giveaway!", style=discord.ButtonStyle.red,custom_id='giveaway:leave')
+#     async def leave(self, button: discord.ui.Button, interaction: discord.Interaction):
+#         with open("databases/giveaways.json",'r') as f:
+#             g = json.load(f)
+#         if str(interaction.user.id) in g[str(self.msg_id)]['users']:
+#             g[str(self.msg_id)]['users'].pop(g[str(self.msg_id)]['users'].index(str(interaction.user.id)))
+#             with open("databases/giveaways.json",'w') as f:
+#                 json.dump(g, f, indent=4)  
+#             msg, embed = None, None
+#             try:
+#                 channel = client.get_channel(int(g[str(self.msg_id)]['channel']))
+#                 msg = await channel.fetch_message(int(self.msg_id))
+#                 embed = msg.embeds[0]
+#             except:
+#                 del g[str(self.msg_id)]
+#                 with open("databases/giveaways.json",'w') as f:
+#                     json.dump(g, f, indent=4)
+#                 return await interaction.response.send_message("Could not find the giveaway!",ephemeral=True)  
+#             embed.description = embed.description.split(f"\n{len(g[str(self.msg_id)]['users'])+1} entrant{'s' if len(g[str(self.msg_id)]['users'])+1 != 1 else ''}")[0]          
+#             embed.description += f"\n{len(g[str(self.msg_id)]['users'])} entrant{'s' if len(g[str(self.msg_id)]['users']) != 1 else ''}"
+#             await msg.edit(embed=embed)
+#             return await interaction.response.send_message("You have left the giveaway!",ephemeral=True)
+#         return await interaction.response.send_message("You have not entered the giveaway!",ephemeral=True)     
 
-@tasks.loop(seconds=1)
-async def check_giveaway_ended():
-    with open('databases/giveaways.json','r') as f:
-        g = json.load(f)
-    time = datetime.datetime.now(ZoneInfo("America/New_York")).timestamp()
-    try:
-        for giveaway in g:
-            i = g[giveaway]
-            if i['ended']:
-                continue
-            if not time >= i['end']:
-                continue
-            channel = client.get_channel(int(i['channel']))
-            gaw_msg = None
-            try:
-                gaw_msg = await channel.fetch_message(int(giveaway))
-            except:
-                del g[giveaway]
-                with open('databases/giveaways.json','w') as f: 
-                    json.dump(g, f,indent=4)
-                continue
-            embed = None
-            try:
-                embed = gaw_msg.embeds[0]
-            except:
-                del g[giveaway]
-                with open('databases/giveaways.json','w') as f: 
-                    json.dump(g, f,indent=4)
-                continue
-            btn = JoinGiveaway(int(giveaway))
-            await channel.send("Picking a random user!")
-            await asyncio.sleep(1)
-            embed.title = "GIVEAWAY ENDED"
-            for bt in btn.children:
-                bt.disabled = True
-            g[giveaway]['ended'] = True
+# @tasks.loop(seconds=1)
+# async def check_giveaway_ended():
+#     with open('databases/giveaways.json','r') as f:
+#         g = json.load(f)
+#     time = datetime.datetime.now(ZoneInfo("America/New_York")).timestamp()
+#     try:
+#         for giveaway in g:
+#             i = g[giveaway]
+#             if i['ended']:
+#                 continue
+#             if not time >= i['end']:
+#                 continue
+#             channel = client.get_channel(int(i['channel']))
+#             gaw_msg = None
+#             try:
+#                 gaw_msg = await channel.fetch_message(int(giveaway))
+#             except:
+#                 del g[giveaway]
+#                 with open('databases/giveaways.json','w') as f: 
+#                     json.dump(g, f,indent=4)
+#                 continue
+#             embed = None
+#             try:
+#                 embed = gaw_msg.embeds[0]
+#             except:
+#                 del g[giveaway]
+#                 with open('databases/giveaways.json','w') as f: 
+#                     json.dump(g, f,indent=4)
+#                 continue
+#             btn = JoinGiveaway(int(giveaway))
+#             await channel.send("Picking a random user!")
+#             await asyncio.sleep(1)
+#             embed.title = "GIVEAWAY ENDED"
+#             for bt in btn.children:
+#                 bt.disabled = True
+#             g[giveaway]['ended'] = True
     
-            await gaw_msg.edit(view=btn)
-            embed.set_footer(
-                text=
-                f'Giveaway ended at {datetime.datetime.fromtimestamp(i["end"],ZoneInfo("America/New_York")).strftime("%A, %B %d %Y @ %H:%M:%S %p")}'
-            )
-            await gaw_msg.edit(embed=embed)
-            users = []
-            for i in g[str(gaw_msg.id)]['users']:
-                user = client.get_user(int(i))
-                users.append(user)
-            try:
-                winner = random.choice(users)
-            except:
-                embed.description += f"\nWinner: None"
-                await gaw_msg.edit(embed=embed)
-                await channel.send("No one won since no one entered!")
-                continue
-            e = discord.Embed(description="None", color=discord.Color.random())
-            e.description = f"{len(users)} entrant{'s' if len(users) >1 else ''}"
-            embed.description += f"\nWinner: {winner.mention}"
-            await gaw_msg.edit(embed=embed)
-            prize = gaw_msg.embeds[0].description.partition("\nWinner: ")[0].split(
-            'is giving away')[1].replace(f"\n{len(users)} entrant{'s' if len(users) >1 else ''}",'')[:-2]
-            await channel.send(
-                f"YAYYYYY!!!! {winner.mention} has won the giveaway for{prize}!!",
-                embed=e)
-    except RuntimeError:
-        pass
-    with open('databases/giveaways.json','w') as f: 
-        json.dump(g, f,indent=4)
+#             await gaw_msg.edit(view=btn)
+#             embed.set_footer(
+#                 text=
+#                 f'Giveaway ended at {datetime.datetime.fromtimestamp(i["end"],ZoneInfo("America/New_York")).strftime("%A, %B %d %Y @ %H:%M:%S %p")}'
+#             )
+#             await gaw_msg.edit(embed=embed)
+#             users = []
+#             for i in g[str(gaw_msg.id)]['users']:
+#                 user = client.get_user(int(i))
+#                 users.append(user)
+#             try:
+#                 winner = random.choice(users)
+#             except:
+#                 embed.description += f"\nWinner: None"
+#                 await gaw_msg.edit(embed=embed)
+#                 await channel.send("No one won since no one entered!")
+#                 continue
+#             e = discord.Embed(description="None", color=discord.Color.random())
+#             e.description = f"{len(users)} entrant{'s' if len(users) >1 else ''}"
+#             embed.description += f"\nWinner: {winner.mention}"
+#             await gaw_msg.edit(embed=embed)
+#             prize = gaw_msg.embeds[0].description.partition("\nWinner: ")[0].split(
+#             'is giving away')[1].replace(f"\n{len(users)} entrant{'s' if len(users) >1 else ''}",'')[:-2]
+#             await channel.send(
+#                 f"YAYYYYY!!!! {winner.mention} has won the giveaway for{prize}!!",
+#                 embed=e)
+#     except RuntimeError:
+#         pass
+#     with open('databases/giveaways.json','w') as f: 
+#         json.dump(g, f,indent=4)
 
 
 
@@ -2153,41 +1986,26 @@ async def check_giveaway_ended():
     
         
     
-@client.command()
-@commands.has_permissions(manage_guild=True)
-async def gcreate(ctx, time=None, *, prize=None):
-    with open('databases/server_configs.json', 'r') as f:
-        configs = json.load(f)
-    guild = ctx.guild
-    giveaway_role = guild.get_role(configs[str(ctx.guild.id)]["giveaway_role"])
-    time_convert = {"s": 1, "m": 60, "h": 3600, "d": 86400}
-    gawtime = int(time[:-1]) * time_convert[time[-1]]
-    time_stamp = datetime.datetime.now(
-        ZoneInfo("America/New_York")) + datetime.timedelta(seconds=gawtime)
-    if time == None:
-        return await ctx.reply('Please include a time!')
-    elif prize == None:
-        return await ctx.reply('Please include a prize!')
-    embed = discord.Embed(
-        title='New Giveaway!',
-        description=f'{ctx.author.mention} is giving away **{prize}**!!',
-        color=discord.Color.random())
-    embed.set_footer(
-        text=
-        f'Giveaway ends at {time_stamp.strftime("%A, %B %d %Y @ %H:%M:%S %p")}.'
-    )
-    if giveaway_role != None:
-        gaw_msg = await ctx.reply(f"{giveaway_role.mention}", embed=embed)
-    else:
-        gaw_msg = await ctx.reply(embed=embed)
-    with open('databases/giveaways.json') as f: 
-        g = json.load(f)
-    g[str(gaw_msg.id)] = {'author':str(ctx.author.id),'users':[], 'channel':str(ctx.channel.id), 'end':time_stamp.timestamp(),'ended':False}
-    with open('databases/giveaways.json','w') as f:
-        json.dump(g, f, indent=4)
-    btn = JoinGiveaway(gaw_msg.id)
+# @client.command()
+# @commands.has_permissions(manage_guild=True)
+# async def gcreate(ctx, time=None, *, prize=None):
+#     with open('databases/server_configs.json', 'r') as f:
+#         configs = json.load(f)
+#     guild = ctx.guild
+#     giveaway_role = guild.get_role(configs[str(ctx.guild.id)]["giveaway_role"])
+#     
+#     if giveaway_role != None:
+#         gaw_msg = await ctx.reply(f"{giveaway_role.mention}", embed=embed)
+#     else:
+#         gaw_msg = await ctx.reply(embed=embed)
+#     with open('databases/giveaways.json') as f: 
+#         g = json.load(f)
+#     g[str(gaw_msg.id)] = {'author':str(ctx.author.id),'users':[], 'channel':str(ctx.channel.id), 'end':time_stamp.timestamp(),'ended':False}
+#     with open('databases/giveaways.json','w') as f:
+#         json.dump(g, f, indent=4)
+#     btn = JoinGiveaway(gaw_msg.id)
 
-    await gaw_msg.edit(view=btn)
+#     await gaw_msg.edit(view=btn)
     
 
 @client.command()
@@ -2274,30 +2092,6 @@ async def bankrob(ctx, user: discord.Member):
             await update_bank(user, earning * -1)
 
 
-@client.command(aliases=["show"])
-async def showpic(ctx, *, search):
-    ran = random.randint(0, 9)
-    resource = build("customsearch", "v1", developerKey=api_key).cse()
-    result = resource.list(q=f"{search}",
-                           cx="ac76df62ee40c6a13",
-                           searchType="image").execute()
-    url = result["items"][ran]["link"]
-    embed1 = discord.Embed(title=f"Here Your Image ({search})",
-                           color=discord.Color.random())
-    embed1.set_image(url=url)
-    await ctx.reply(embed=embed1)
-
-
-@client.command()
-async def youtube(ctx, *, search):
-    query_string = urllib.parse.urlencode({'search_query': search})
-    html_content = urllib.request.urlopen('https://www.youtube.com/results?' +
-                                          query_string)
-    search_results = re.findall(r"watch\?v=(\S{11})",
-                                html_content.read().decode())
-
-    await ctx.reply(f"Here's your video from query {search}!!")
-    await ctx.reply('https://www.youtube.com/watch?v=' + search_results[0])
 
 
 @client.command()
@@ -3323,7 +3117,6 @@ async def config_cmd(ctx):
                       color=discord.Color.random())
     e.add_field(name="Giveaway Role", value=role.mention if role else role)  
     e.add_field(name="Mod Role (Tickets)", value=mod_role.mention if mod_role else mod_role)
-    e.add_field(name="Leveling", value=configs[str(ctx.guild.id)]['levels'])
     await ctx.reply(embed=e,
                     allowed_mentions=discord.AllowedMentions(roles=False))
     await asyncio.sleep(1)

@@ -11,6 +11,8 @@ class HTTPSession(aiohttp.ClientSession):
     def __init__(self, loop=None):
         super().__init__(loop=loop or asyncio.get_event_loop())
 
+    async def stop(self):
+        await self.close()
     def __del__(self):
         """
         Closes the ClientSession instance
@@ -21,7 +23,7 @@ class HTTPSession(aiohttp.ClientSession):
         This would be perfect if discord.py had this as well. :thinking:
         """
         if not self.closed:
-            self.close()
+            asyncio.run(self.stop())
 
 
 session = HTTPSession()

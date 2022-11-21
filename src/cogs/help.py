@@ -143,8 +143,9 @@ def replaceTextBetween(originalText, delimeterA, delimterB, replacementText):
 
 
 class HelpOptions(discord.ui.Select):
-    def __init__(self, buttons,prefix):
+    def __init__(self, buttons,prefix,bot):
         self.parent = buttons
+        self.bot = bot
         self.items = [discord.SelectOption(label="Economy",default=True),
                 discord.SelectOption(label="Fun"),
                 discord.SelectOption(label="Moderation"),
@@ -226,11 +227,11 @@ class HelpOptions(discord.ui.Select):
             await interaction.response.edit_message(embed=em[0],view = self.parent)
 
 class CategoriesView(discord.ui.View):
-    def __init__(self, author, guild,prefix):
+    def __init__(self, author, guild,prefix,bot):
         super().__init__(timeout=30)
         self.author = author
         self.guild = guild
-        self.select = HelpOptions(self,prefix)
+        self.select = HelpOptions(self,prefix,bot)
         self.add_item(self.select)
 
     @discord.ui.button(emoji="<:left_two:982623041228013570>",style=discord.ButtonStyle.green, disabled=True)
@@ -309,7 +310,6 @@ class Info(commands.Cog):
 
     async def on_ready(self):
         print('Info Cog Loaded Succesfully')
-        print("Bot is ready to use.")
 
     @commands.command(aliases=['help'])
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -344,7 +344,7 @@ class Info(commands.Cog):
             e.add_field(name=f"Usage: ", value=f"{selected.name}", inline=False)
             e.add_field(name="Description: ",value=selected.value,inline=False)
             return await ctx.reply(embed=e)
-        view = CategoriesView(ctx.author,ctx.guild, prefix)
+        view = CategoriesView(ctx.author,ctx.guild, prefix,self.client)
         view.message = await ctx.reply(f"You can type {prefix}help (any command) to view that command's info!",embed=get_economy_embed(prefix)[0],view=view)
 
 def setup(client):
