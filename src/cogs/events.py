@@ -1,25 +1,20 @@
-from nextcord.ext import commands, tasks
+from nextcord.ext import commands
 import nextcord as discord
 import json
 import random
-from .utils import config
+from src.utils import config
 import aiosqlite
 
 fake_cmds = ['balance', '_help']
 
 
-
-
-
 class Events(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot):
         self.bot = bot
-
-
 
     @commands.Cog.listener()
     async def on_ready(self):
-        setattr(self.bot,"db", await aiosqlite.connect("main.db"))
+        setattr(self.bot, "db", await aiosqlite.connect("main.db"))
         # check_giveaway_ended.start()
         # with open('databases/giveaways.json','r') as f:
         #     g = json.load(f)
@@ -36,20 +31,29 @@ class Events(commands.Cog):
         #     print('Added Giveaway Buttons and Tickets!')
         async with self.bot.db.cursor() as cursor:
             await cursor.execute("CREATE TABLE IF NOT EXISTS ticketRoles (role INTEGER, guild INTEGER)")
-            await cursor.execute("CREATE TABLE IF NOT EXISTS levels (level INTEGER, xp REAL, user INTEGER, guild INTEGER)")
-            await cursor.execute("CREATE TABLE IF NOT EXISTS levelSettings (levelsys BOOL, role INTEGER, levelreq INTEGER, guild INTEGER)")
+            await cursor.execute(
+                "CREATE TABLE IF NOT EXISTS levels (level INTEGER, xp REAL, user INTEGER, guild INTEGER)")
+            await cursor.execute(
+                "CREATE TABLE IF NOT EXISTS levelSettings (levelsys BOOL, role INTEGER, levelreq INTEGER, "
+                "guild INTEGER)")
             await cursor.execute("CREATE TABLE IF NOT EXISTS prefixes (prefix TEXT, guild ID)")
-            await cursor.execute("CREATE TABLE IF NOT EXISTS jobs (name TEXT, pay INTEGER, hours INTEGER, fails INTEGER, user INTEGER)")
-            await cursor.execute("CREATE TABLE IF NOT EXISTS mainbank (wallet INTEGER, bank INTEGER, booster INTEGER, max INTEGER, user INTEGER)")
-            await cursor.execute("CREATE TABLE IF NOT EXISTS lootboxes  (common INTEGER, uncommon INTEGER, rare INTEGER, epic INTEGER, legendary INTEGER, mythic INTEGER, admin INTEGER, user INTEGER)")
-            await cursor.execute("CREATE TABLE IF NOT EXISTS giveaways (time INTEGER, prize TEXT, message INTEGER, channel INTEGER, guild INTEGER participants TEXT, winners INTEGER, finished BOOL)")
+            await cursor.execute(
+                "CREATE TABLE IF NOT EXISTS jobs (name TEXT, pay INTEGER, hours INTEGER, fails INTEGER, user INTEGER)")
+            await cursor.execute(
+                "CREATE TABLE IF NOT EXISTS mainbank (wallet INTEGER, bank INTEGER, booster INTEGER, max INTEGER, "
+                "user INTEGER)")
+            await cursor.execute(
+                "CREATE TABLE IF NOT EXISTS lootboxes  (common INTEGER, uncommon INTEGER, rare INTEGER, epic INTEGER, "
+                "legendary INTEGER, mythic INTEGER, admin INTEGER, user INTEGER)")
+            await cursor.execute(
+                "CREATE TABLE IF NOT EXISTS giveaways (time INTEGER, prize TEXT, participants TEXT, message INTEGER, "
+                "channel INTEGER, guild INTEGER, winners INTEGER, finished BOOL)")
+            await cursor.execute("CREATE TABLE IF NOT EXISTS ticketUsers (user INTEGER, guild INTEGER)")
         print("Connected to {0.user}".format(self.bot))
         print("All database tables are ready to use!")
 
-
-
     @commands.Cog.listener()
-    async def on_member_join(self,member):
+    async def on_member_join(self, member):
         if not member.bot:
             try:
                 await member.send(
@@ -58,7 +62,7 @@ class Events(commands.Cog):
                 print(f"Cannot send messages to {member}")
 
     @commands.Cog.listener()
-    async def on_raw_reaction_add(self,payload):
+    async def on_raw_reaction_add(self, payload):
         if payload.member.bot:
             pass
 
@@ -66,42 +70,42 @@ class Events(commands.Cog):
             with open('databases/reactrole.json', 'r') as react_file:
                 data = json.load(react_file)
                 for x in data:
-                    if x['emoji'] == payload.emoji.name or x[
-                            'emoji'] == f"<:{payload.emoji.name}:{payload.emoji.id}>" or x[
-                                'emoji'] == f"<a:{payload.emoji.name}:{payload.emoji.id}>":
+                    if x['emoji'] == payload.emoji.name or\
+                            x['emoji'] == f"<:{payload.emoji.name}:{payload.emoji.id}>" or\
+                            x['emoji'] == f"<a:{payload.emoji.name}:{payload.emoji.id}>":
                         role = discord.utils.get(self.bot.get_guild(
                             payload.guild_id).roles,
-                                                id=x['role_id'])
+                                                 id=x['role_id'])
                         if role:
                             await payload.member.add_roles(role)
                         else:
                             del x
 
     @commands.Cog.listener()
-    async def on_raw_reaction_remove(self,payload):
+    async def on_raw_reaction_remove(self, payload):
         with open('databases/reactrole.json', 'r') as react_file:
             data = json.load(react_file)
             for x in data:
-                if x['emoji'] == payload.emoji.name or x[
-                        'emoji'] == f"<:{payload.emoji.name}:{payload.emoji.id}>" or x[
-                            'emoji'] == f"<a:{payload.emoji.name}:{payload.emoji.id}>":
+                if x['emoji'] == payload.emoji.name or\
+                        x['emoji'] == f"<:{payload.emoji.name}:{payload.emoji.id}>" or\
+                        x['emoji'] == f"<a:{payload.emoji.name}:{payload.emoji.id}>":
                     role = discord.utils.get(self.bot.get_guild(
                         payload.guild_id).roles,
-                                            id=x['role_id'])
+                                             id=x['role_id'])
                     if role:
                         await self.bot.get_guild(payload.guild_id
-                                            ).get_member(payload.user_id
-                                                            ).remove_roles(role)
+                                                 ).get_member(payload.user_id
+                                                              ).remove_roles(role)
                     else:
                         del x
-    
+
     @commands.Cog.listener()
-    async def on_message(self,message):
-        if message.author.bot: return
+    async def on_message(self, message):
+        if message.author.bot:
+            return
         try:
-            if message.mentions[
-                    0] == self.bot.user and message.content == '<@874328552965820416>':
-                prefix = await config.get_prefix(self.bot,message.guild.id)
+            if message.mentions[0] == self.bot.user and message.content == '<@874328552965820416>':
+                prefix = await config.get_prefix(self.bot, message.guild.id)
                 await message.channel.send(f"My prefix for this server is `{prefix}`")
         except IndexError:
             pass
@@ -113,13 +117,14 @@ class Events(commands.Cog):
             if levelsys and not levelsys[0]:
                 # 0: False, 1: True
                 return
-            await cursor.execute("SELECT xp FROM levels WHERE user = ? AND guild = ?",(author.id,guild.id,))
+            await cursor.execute("SELECT xp FROM levels WHERE user = ? AND guild = ?", (author.id, guild.id,))
             xp = await cursor.fetchone()
-            await cursor.execute("SELECT level FROM levels WHERE user = ? AND guild = ?",(author.id,guild.id,))
+            await cursor.execute("SELECT level FROM levels WHERE user = ? AND guild = ?", (author.id, guild.id,))
             level = await cursor.fetchone()
 
             if not xp or not level:
-                await cursor.execute("INSERT INTO levels (level, xp, user, guild) VALUES (?, ?, ?, ?)",(1,0,author.id,guild.id,))
+                await cursor.execute("INSERT INTO levels (level, xp, user, guild) VALUES (?, ?, ?, ?)",
+                                     (1, 0, author.id, guild.id,))
                 await self.bot.db.commit()
             try:
                 xp = xp[0]
@@ -127,42 +132,52 @@ class Events(commands.Cog):
             except TypeError:
                 xp = 1.3
                 level = 1
-            
-            xp += level * 1.3
-            await cursor.execute("UPDATE levels SET xp = ? WHERE user = ? AND guild = ?", (xp,author.id,guild.id,))
 
+            xp += level * 1.3
+            await cursor.execute("UPDATE levels SET xp = ? WHERE user = ? AND guild = ?", (xp, author.id, guild.id,))
 
             level_start = level
-            level_end = int(xp**(1/4))
+            level_end = int(xp ** (1 / 4))
             if level_start < level_end:
-                await cursor.execute("UPDATE levels SET level = ? WHERE user = ? AND guild = ?",(level_end,author.id,guild.id,))
-                await cursor.execute("SELECT role FROM levelSettings WHERE levelReq = ? AND guild = ?",(level_end, guild.id,))
+                await cursor.execute("UPDATE levels SET level = ? WHERE user = ? AND guild = ?",
+                                     (level_end, author.id, guild.id,))
+                await cursor.execute("SELECT role FROM levelSettings WHERE levelReq = ? AND guild = ?",
+                                     (level_end, guild.id,))
                 role = await cursor.fetchone()
                 if role:
                     role = role[0]
                     role = guild.get_role(role)
                     try:
                         await author.add_roles(role)
-                        return await message.channel.send('Congratulations! {} has leveled up to **Level {}** and has a total of **{} xp**! :tada: :tada: They also recieved the **{}** role!'.format(author.mention, level_end, round(xp),role.name)) 
-                    except discord.HTTPException:   
-                        return await message.channel.send('Congratulations! {} has leveled up to **Level {}** and has a total of **{} xp**! :tada: :tada: [WAS NOT ABLE TO GIVE LEVEL REWARD ROLE]'.format(author.mention, level_end, round(xp)))
-                await message.channel.send('Congratulations! {} has leveled up to **Level {}** and has a total of **{} xp**! :tada: :tada:'.format(author.mention, level_end, round(xp))) 
+                        return await message.channel.send(
+                            'Congratulations! {} has leveled up to **Level {}** and has a total of **{} xp**! :tada: '
+                            ':tada: They also recieved the **{}** role!'.format(
+                                author.mention, level_end, round(xp), role.name))
+                    except discord.HTTPException:
+                        return await message.channel.send(
+                            'Congratulations! {} has leveled up to **Level {}** and has a total of **{} xp**! :tada: '
+                            ':tada: [WAS NOT ABLE TO GIVE LEVEL REWARD ROLE]'.format(
+                                author.mention, level_end, round(xp)))
+                await message.channel.send(
+                    'Congratulations! {} has leveled up to **Level {}** and has a total of **{} xp**! :tada: :tada:'
+                    .format(
+                        author.mention, level_end, round(xp)))
         await self.bot.db.commit()
+
     @commands.Cog.listener()
     async def on_command_completion(self, ctx):
         await config.open_account(ctx.author)
         async with self.bot.db.cursor() as cursor:
-            await cursor.execute("SELECT max from mainbank WHERE user = ?",(ctx.author.id,))
+            await cursor.execute("SELECT max from mainbank WHERE user = ?", (ctx.author.id,))
             max_amt = await cursor.fetchone()
             max_amt = max_amt[0]
             if ctx.command.qualified_name not in fake_cmds:
-                max_amt += random.randint(50,5000)
-                await cursor.execute("UPDATE mainbank SET max = ? WHERE user = ?",(max_amt,ctx.author.id,))
+                max_amt += random.randint(50, 5000)
+                await cursor.execute("UPDATE mainbank SET max = ? WHERE user = ?", (max_amt, ctx.author.id,))
         await self.bot.db.commit()
 
-
     @commands.Cog.listener()
-    async def on_raw_message_delete(self,payload):
+    async def on_raw_message_delete(self, payload):
         with open('databases/reactrole.json', 'r') as f:
             reaction_roles = json.load(f)
         msgs = [
@@ -223,8 +238,6 @@ class Events(commands.Cog):
 #         users[str(user.guild.id)][str(user.id)]['level'] = lvl_end
 #         with open('databases/levels.json', 'w') as f:
 #             json.dump(users, f, indent=4)
-
-
 
 
 def setup(bot):

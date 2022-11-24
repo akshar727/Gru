@@ -2,7 +2,7 @@ from functools import wraps
 
 
 def cache(maxsize=128):
-    cache = {}
+    cache_dict = {}
 
     def decorator(func):
         @wraps(func)
@@ -14,14 +14,14 @@ def cache(maxsize=128):
             key_end = "_".join(f"{k}:{v}" for k, v in kwargs.items())
             key = f"{key_base}-{key_end}"
 
-            if key in cache:
-                return cache[key]
+            if key in cache_dict:
+                return cache_dict[key]
 
             res = func(*args, **kwargs)
 
-            if len(cache) > maxsize:
-                del cache[list(cache.keys())[0]]
-                cache[key] = res
+            if len(cache_dict) > maxsize:
+                del cache_dict[list(cache_dict.keys())[0]]
+                cache_dict[key] = res
 
             return res
         return inner
@@ -29,7 +29,7 @@ def cache(maxsize=128):
 
 
 def async_cache(maxsize=128):
-    cache = {}
+    cache_dict = {}
 
     def decorator(func):
         @wraps(func)
@@ -41,14 +41,14 @@ def async_cache(maxsize=128):
             key_end = "_".join(f"{k}:{v}" for k, v in kwargs.items())
             key = f"{key_base}-{key_end}"
 
-            if key in cache:
-                return cache[key]
+            if key in cache_dict:
+                return cache_dict[key]
 
             res = await func(*args, **kwargs)
 
-            if len(cache) > maxsize:
-                del cache[list(cache.keys())[0]]
-                cache[key] = res
+            if len(cache_dict) > maxsize:
+                del cache_dict[list(cache_dict.keys())[0]]
+                cache_dict[key] = res
 
             return res
         return inner

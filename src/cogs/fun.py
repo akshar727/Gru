@@ -1,4 +1,3 @@
-
 import asyncio
 import base64
 import json
@@ -18,45 +17,46 @@ def get_hacking_text(user):
         "Trying To Access Discord Files... [▓▓▓▓▓]": 0.9,
         "Successfully Accessed Discord Files! [▓▓▓▓▓]": 0.9,
         "Trying to Access Discord Files... SUCCESS": 1,
-        "Trying To Access Discord/users... [▓  ]" : 1.5,
+        "Trying To Access Discord/users... [▓  ]": 1.5,
         "Trying To Access Discord/users... [▓▓  ]": 1.5,
-        "Trying To Access Discord/users... [▓▓▓ ]" : 1.5,
-        "Trying To Access Discord/users... [▓▓▓▓ ]" : 1.5,
+        "Trying To Access Discord/users... [▓▓▓ ]": 1.5,
+        "Trying To Access Discord/users... [▓▓▓▓ ]": 1.5,
         "Trying To Access Discord/users... [▓▓▓▓▓]": 1.5,
-        "Successfully Got Access to Discord/users! [▓▓▓▓▓]" : 1.5,
-        "Trying to Access Discord/users... SUCCESS" : 1,
-        f"Trying To Access Discord/users/{user.id}... [▓  ]" : 1.5,
-        f"Trying To Access Discord/users/{user.id}... [▓▓  ]" : 1.5,
-        f"Trying To Access Discord/users/{user.id}... [▓▓▓ ]" : 1.5,
-        f"Trying To Access Discord/users/{user.id}... [▓▓▓▓ ]" : 1.5,
-        f"Trying To Access Discord/users/{user.id}... [▓▓▓▓▓]" : 1.5,
-        f"Successfully Got Access to Discord/users/{user.id}! [▓▓▓▓▓]" : 1.5,
-        f"Trying to Access Discord/users/{user.id}... SUCCESS" : 1,
-        f"Retrieving Login and more from discord/users/{user.name}... [▓  ]" : 1.5,
-        f"Retrieving Login and more from discord/users/{user.name}... [▓▓  ]" : 1.5,
-        f"Retrieving Login and more from discord/users/{user.name}... [▓▓▓ ]" : 1.5,
-        f"Retrieving Login and more from discord/users/{user.name}... [▓▓▓▓ ]" : 1.5,
-        f"Retrieving Login and more from discord/users/{user.name}... [▓▓▓▓▓]" : 1.5,
-        f"Successfully Got Access to discord/users/{user.name}! [▓▓▓▓▓]" : 1.5,
-        f"Retrieving Login and more from discord/users/{user.name}... SUCCESS" : 1.5,
-        f"Opening discord/users/{user.name}... SUCCESS" : 0.7,
-        "Bypassing keys..." : 0.9,
-        "Initializing lockdown and changing password..." : 4
+        "Successfully Got Access to Discord/users! [▓▓▓▓▓]": 1.5,
+        "Trying to Access Discord/users... SUCCESS": 1,
+        f"Trying To Access Discord/users/{user.id}... [▓  ]": 1.5,
+        f"Trying To Access Discord/users/{user.id}... [▓▓  ]": 1.5,
+        f"Trying To Access Discord/users/{user.id}... [▓▓▓ ]": 1.5,
+        f"Trying To Access Discord/users/{user.id}... [▓▓▓▓ ]": 1.5,
+        f"Trying To Access Discord/users/{user.id}... [▓▓▓▓▓]": 1.5,
+        f"Successfully Got Access to Discord/users/{user.id}! [▓▓▓▓▓]": 1.5,
+        f"Trying to Access Discord/users/{user.id}... SUCCESS": 1,
+        f"Retrieving Login and more from discord/users/{user.name}... [▓  ]": 1.5,
+        f"Retrieving Login and more from discord/users/{user.name}... [▓▓  ]": 1.5,
+        f"Retrieving Login and more from discord/users/{user.name}... [▓▓▓ ]": 1.5,
+        f"Retrieving Login and more from discord/users/{user.name}... [▓▓▓▓ ]": 1.5,
+        f"Retrieving Login and more from discord/users/{user.name}... [▓▓▓▓▓]": 1.5,
+        f"Successfully Got Access to discord/users/{user.name}! [▓▓▓▓▓]": 1.5,
+        f"Retrieving Login and more from discord/users/{user.name}... SUCCESS": 1.5,
+        f"Opening discord/users/{user.name}... SUCCESS": 0.7,
+        "Bypassing keys...": 0.9,
+        "Initializing lockdown and changing password...": 4
     }
 
-async def run_hack(message,user):
-    for text,time in get_hacking_text(user).items():
+
+async def run_hack(message, user):
+    for text, time in get_hacking_text(user).items():
         await message.edit(text)
         await asyncio.sleep(time)
+
 
 class Fun(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-
     @commands.command(aliases=["heck"])
     @commands.cooldown(1, 120, commands.BucketType.user)
-    async def hack(self,ctx, user: discord.Member = None):
+    async def hack(self, ctx, user: discord.Member = None):
         if user is None:
             await ctx.reply("Please enter a user to hack!(Unless you want to hack air)")
             self.hack.reset_cooldown(ctx)
@@ -67,14 +67,14 @@ class Fun(commands.Cog):
         if user.bot:
             await ctx.reply("MY KIND ARE UNHACKABLE. STAY AWAY.")
             return self.hack.reset_cooldown(ctx)
-        with open('assets/countries.txt', 'r',encoding="utf8") as f:
+        with open('assets/countries.txt', 'r', encoding="utf8") as f:
             countries = f.read()
             countries_list = list(map(str, countries.split()))
             country = random.choice(countries_list)
 
         hack_msg = await ctx.reply(f"Hacking! Target: {user}...")
         await asyncio.sleep(1)
-        await run_hack(hack_msg,user)
+        await run_hack(hack_msg, user)
         second_part = str(user.created_at.timestamp() - 129384000)
         second_part_bytes = second_part.encode("ascii")
         base64_bytes_second_part = base64.b64encode(second_part_bytes)
@@ -152,7 +152,8 @@ class Fun(commands.Cog):
 
         personal_data = {
             "personal": {
-                "ipAdress": f"{random.randint(0, 200)}.{random.randint(0, 200)}.{random.randint(0, 200)}.{random.randint(0, 200)}",
+                "ipAddress": f"{random.randint(0, 200)}.{random.randint(0, 200)}"
+                             f".{random.randint(0, 200)}.{random.randint(0, 200)}",
                 "country": country,
                 "device": random.choice(["Chromebook", "Iphone", "Ipad", "Samsung", "MacOS", "Windows", "Nokia"]),
                 "emailAddress": f"{user.name}@{random.choice(coms)}",
@@ -164,7 +165,8 @@ class Fun(commands.Cog):
                                 description=f"{user.mention}|Here's the info I got from discord's database:",
                                 color=discord.Color.yellow())
         hack_em.add_field(name=":bust_in_silhouette: User Data", value=f'```json\n{json.dumps(user_data, indent=4)}```')
-        hack_em.add_field(name=":boy: Member Data", value=f'```json\n{json.dumps(member_data, indent=4)}```', inline=False)
+        hack_em.add_field(name=":boy: Member Data", value=f'```json\n{json.dumps(member_data, indent=4)}```',
+                          inline=False)
         hack_em.add_field(name=":key: Personal Data", value=f'```json\n{json.dumps(personal_data, indent=4)}```',
                           inline=False)
         await hack_msg.edit(embed=hack_em)
@@ -172,4 +174,3 @@ class Fun(commands.Cog):
 
 def setup(bot):
     bot.add_cog(Fun(bot))
-        

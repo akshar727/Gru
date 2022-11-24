@@ -1,22 +1,23 @@
-from cogs.utils import config
+from src.utils import config
 import nextcord as discord
-from nextcord.ext import commands,tasks
-
-
-
-
-ts = 0
-tm = 0
-th = 0
-td = 0
+from nextcord.ext import commands, tasks
 
 
 class GruBot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.db = None
+        self.ts = 0
+        self.tm = 0
+        self.th = 0
+        self.td = 0
         self.persistent_views_added = False
         self.change_status.start()
-        self.uptimeCounter.start()
+        self.uptime_counter.start()
+
+    def get_uptime(self):
+        return [self.ts, self.tm, self.th, self.td]
+
     async def is_owner(self, user: discord.User):
         if user.id == int(config.getenv("BOT_OWNER_ID")):
             return True
@@ -26,23 +27,24 @@ class GruBot(commands.Bot):
     @tasks.loop(seconds=4)
     async def change_status(self):
         await self.change_presence(activity=discord.Game("Try: @Gru | gru help"))
+
     @change_status.before_loop
-    async def beforeChangeStatus(self):
+    async def before_change_status(self):
         await self.wait_until_ready()
 
     @tasks.loop(seconds=2.0)
-    async def uptimeCounter(self):
-        global ts, tm, th, td
-        ts += 2
-        if ts == 60:
-            ts = 0
-            tm += 1
-            if tm == 60:
-                tm = 0
-                th += 1
-                if th == 24:
-                    th = 0
-                    td += 1
-    @uptimeCounter.before_loop
-    async def beforeUptimeCounter(self):
+    async def uptime_counter(self):
+        self.ts += 2
+        if self.ts == 60:
+            self.ts = 0
+            self.tm += 1
+            if self.tm == 60:
+                self.tm = 0
+                self.th += 1
+                if self.th == 24:
+                    self.th = 0
+                    self.td += 1
+
+    @uptime_counter.before_loop
+    async def before_uptime_counter(self):
         await self.wait_until_ready()

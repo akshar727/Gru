@@ -1,27 +1,47 @@
 from nextcord.ext import commands
 import nextcord as discord
-from easy_pil import Editor, Font, load_image_async,Text
-
+from easy_pil import Editor, Font, load_image_async, Text
 
 
 def level_by_xp(xp):
-    return xp**(1 / 4)
+    return xp ** (1 / 4)
+
+
+async def get_level_data(bot, user, guild):
+    async with bot.db.cursor() as cursor:
+        await cursor.execute("SELECT xp FROM levels WHERE user = ? AND guild = ?", (user.id, guild.id,))
+        xp = await cursor.fetchone()
+        await cursor.execute("SELECT level FROM levels WHERE user = ? AND guild = ?", (user.id, guild.id,))
+        level = await cursor.fetchone()
+        if not xp or not level:
+            await cursor.execute("INSERT INTO levels (level, xp, user, guild) VALUES (?, ?, ?, ?)",
+                                 (1, 0, user.id, guild.id,))
+            await bot.db.commit()
+            xp = 0
+            level = 1
+    try:
+        xp = xp[0]
+        level = level[0]
+    except KeyError:
+        xp = 0
+        level = 1
+    return [xp, level]
 
 
 def xp_by_level(level):
     return level ** 4
 
 
-async def get_rank(bot,user,guild):
+async def get_rank(bot, user, guild):
     async with bot.db.cursor() as cursor:
-        await cursor.execute("SELECT level, xp, user FROM levels WHERE guild = ? ORDER BY level DESC, xp DESC LIMIT 1000",(guild.id,))
+        await cursor.execute(
+            "SELECT level, xp, user FROM levels WHERE guild = ? ORDER BY level DESC, xp DESC LIMIT 1000", (guild.id,))
         data = await cursor.fetchall()
         if data:
-            for pos,item in enumerate(data):
+            for pos, item in enumerate(data):
                 if item[2] == user.id:
-                    return pos+1
+                    return pos + 1
             return None
-
 
 
 def custom_poppins(text):
@@ -30,17 +50,17 @@ def custom_poppins(text):
     if len(text) > 30:
         return Font.poppins(size=25)
 
-async def get_lvl_card(lvl, exp, author,rank):
-    _exp = ...
-    total = ...
+
+async def get_lvl_card(lvl, exp, author, rank):
     exponent = 4
     next_lvl = lvl + 1
-    next_lvl_xp = next_lvl**exponent
-    current_xp = exp - (lvl)**exponent
-    next_lvl_xp -= lvl**exponent
+    next_lvl_xp = next_lvl ** exponent
+    current_xp = exp - lvl ** exponent
+    next_lvl_xp -= lvl ** exponent
     total = next_lvl_xp
     _exp = current_xp
-    if _exp < 0: _exp = 0
+    if _exp < 0:
+        _exp = 0
     per = round(float(_exp / total) * 100)
     border_radius = 20
     primary_color = "#ffffff"
@@ -52,7 +72,7 @@ async def get_lvl_card(lvl, exp, author,rank):
         'xp': round(_exp),
         'next_lvl_xp': total,
         'percent': per,
-        'rank':rank
+        'rank': rank
     }
     background = Editor("assets/bg.png")
     background.blur()
@@ -77,28 +97,25 @@ async def get_lvl_card(lvl, exp, author,rank):
     background.text((490, 215), f'{userData["percent"]}%', font=poppins_small, color=secondary_color)
     background.ellipse((30, 62), width=176, height=176, outline=accent_color, stroke_width=4)
     rank_level_texts = []
-    if rank != None:
+    if rank is not None:
         rank_level_texts.append(Text("Rank ", color=primary_color, font=poppins))
         rank_level_texts.append(Text(f"#{userData['rank']}", color=secondary_color, font=poppins))
-    
+
     rank_level_texts += [Text("   Level ", color=primary_color, font=poppins),
-    Text(f"{userData['lvl']}", color=secondary_color, font=poppins)]
+                         Text(f"{userData['lvl']}", color=secondary_color, font=poppins)]
 
     background.multi_text((850, 30), texts=rank_level_texts, align="right")
-
-
 
     file = discord.File(fp=background.image_bytes, filename="levelcard.png")
     return file
 
+
 class Levels(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        
-
 
     @commands.command(aliases=['rank', 'lvl'])
-    async def level(self,ctx, member: discord.Member = None):
+    async def level(self, ctx, member: discord.Member = None):
         async with self.bot.db.cursor() as cursor:
             await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
             levelsys = await cursor.fetchone()
@@ -107,103 +124,80 @@ class Levels(commands.Cog):
                 return await ctx.reply("Levels are disabled in this server.")
         if not member:
             user = ctx.message.author
-            async with self.bot.db.cursor() as cursor:
-                await cursor.execute("SELECT xp FROM levels WHERE user = ? AND guild = ?",(user.id,ctx.guild.id,))
-                xp = await cursor.fetchone()
-                await cursor.execute("SELECT level FROM levels WHERE user = ? AND guild = ?",(user.id,ctx.guild.id,))
-                level = await cursor.fetchone()
-                if not xp or not level:
-                    await cursor.execute("INSERT INTO levels (level, xp, user, guild) VALUES (?, ?, ?, ?)",(1,0,user.id,ctx.guild.id,))
-                    await self.bot.db.commit()
-                    xp = 0
-                    level = 1
-            try:
-                xp = xp[0]
-                level = level[0]
-            except KeyError:
-                xp = 0
-                level = 1
+            lvl_data = await get_level_data(self.bot, user, ctx.guild)
+            level = lvl_data[1]
+            xp = lvl_data[0]
             # this is to prevent showing numbers over 100% (when user levels up by sending this command)
             level_start = level
-            level_end = int(int(xp)**(1/4))
+            level_end = int(int(xp) ** (1 / 4))
             if level_start < level_end:
                 level += 1
 
-            rank = await get_rank(self.bot,ctx.author,ctx.guild)
-            return await ctx.reply(file=await get_lvl_card(level, xp, ctx.author,rank))
+            rank = await get_rank(self.bot, ctx.author, ctx.guild)
+            return await ctx.reply(file=await get_lvl_card(level, xp, ctx.author, rank))
 
         else:
             if member.bot:
                 await ctx.reply("Bots aren't in the database!")
                 return
             user = member
-            async with self.bot.db.cursor() as cursor:
-                await cursor.execute("SELECT xp FROM levels WHERE user = ? AND guild = ?",(user.id,ctx.guild.id,))
-                xp = await cursor.fetchone()
-                await cursor.execute("SELECT level FROM levels WHERE user = ? AND guild = ?",(user.id,ctx.guild.id,))
-                level = await cursor.fetchone()
-                if not xp or not level:
-                    await cursor.execute("INSERT INTO levels (level, xp, user, guild) VALUES (?, ?, ?, ?)",(1,0,user.id,ctx.guild.id,))
-                    await self.bot.db.commit()
-                    xp = 0
-                    level = 1
-            try:
-                xp = xp[0]
-                level = level[0]
-            except KeyError:
-                xp = 0
-                level = 1
-            rank = await get_rank(self.bot,member,ctx.guild)
-            return await ctx.reply(file=await get_lvl_card(level, xp, member,rank))
+            lvl_data = await get_level_data(self.bot, user, ctx.guild)
+            level = lvl_data[1]
+            xp = lvl_data[0]
+            rank = await get_rank(self.bot, member, ctx.guild)
+            return await ctx.reply(file=await get_lvl_card(level, xp, member, rank))
+
     @commands.group()
-    async def lvlsys(self,ctx):
+    async def lvlsys(self, ctx):
         return
+
     # TODO: ADD TO HELP
-    @lvlsys.command(aliases=['e','en'])
+    @lvlsys.command(aliases=['e', 'en'])
     @commands.has_permissions(manage_guild=True)
-    async def enable(self,ctx):
+    async def enable(self, ctx):
         async with self.bot.db.cursor() as cursor:
             await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
             levelsys = await cursor.fetchone()
             if levelsys:
                 if levelsys[0]:
                     return await ctx.reply("The leveling system is already enabled!")
-                await cursor.execute("UPDATE levelSettings SET levelsys = ? WHERE guild = ?",(True, ctx.guild.id,))
+                await cursor.execute("UPDATE levelSettings SET levelsys = ? WHERE guild = ?", (True, ctx.guild.id,))
             else:
-                await cursor.execute("INSERT INTO levelSettings VALUES (?, ?, ?, ?)",(True, 0, 0, ctx.guild.id,))
+                await cursor.execute("INSERT INTO levelSettings VALUES (?, ?, ?, ?)", (True, 0, 0, ctx.guild.id,))
             await ctx.reply("The leveling system has been enabled!")
         await self.bot.db.commit()
-    
-    @lvlsys.command(aliases=['d','dis'])
+
+    @lvlsys.command(aliases=['d', 'dis'])
     @commands.has_permissions(manage_guild=True)
-    async def disable(self,ctx):
+    async def disable(self, ctx):
         async with self.bot.db.cursor() as cursor:
             await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
             levelsys = await cursor.fetchone()
             if levelsys:
                 if not levelsys[0]:
                     return await ctx.reply("The leveling system is already disabled!")
-                await cursor.execute("UPDATE levelSettings SET levelsys = ? WHERE guild = ?",(False, ctx.guild.id,))
+                await cursor.execute("UPDATE levelSettings SET levelsys = ? WHERE guild = ?", (False, ctx.guild.id,))
             else:
-                await cursor.execute("INSERT INTO levelSettings VALUES (?, ?, ?, ?)",(False, 0, 0, ctx.guild.id,))
+                await cursor.execute("INSERT INTO levelSettings VALUES (?, ?, ?, ?)", (False, 0, 0, ctx.guild.id,))
             await ctx.reply("The leveling system has been disabled!")
         await self.bot.db.commit()
 
     @commands.command(aliases=['lvllb', 'levellb', 'llb'])
-    async def levelleaderboard(self,ctx):
+    async def levelleaderboard(self, ctx):
         async with self.bot.db.cursor() as cursor:
             await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
             levelsys = await cursor.fetchone()
             if levelsys and not levelsys[0]:
                 # 0: False, 1: True
                 return await ctx.reply("Levels are disabled in this server.")
-            await cursor.execute("SELECT level, xp, user FROM levels WHERE guild = ? ORDER BY level DESC, xp DESC LIMIT 10",(ctx.guild.id,))
+            await cursor.execute(
+                "SELECT level, xp, user FROM levels WHERE guild = ? ORDER BY level DESC, xp DESC LIMIT 10",
+                (ctx.guild.id,))
             data = await cursor.fetchall()
             if data:
                 e = discord.Embed(
                     title="Level Leaderboard",
-                    description=
-                    f"These are the top {len(data)} users in this server with the highest XP.",
+                    description=f"These are the top {len(data)} users in this server with the highest XP.",
                     color=discord.Color.random())
                 count = 0
                 for table in data:
@@ -215,67 +209,67 @@ class Levels(commands.Cog):
                 await ctx.reply(embed=e)
             else:
                 return await ctx.reply("Somehow, there are no users in the leveling system!")
-    
+
     @commands.command()
-    async def rewards(self,ctx):
+    async def rewards(self, ctx):
         async with self.bot.db.cursor() as cursor:
             await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
             levelsys = await cursor.fetchone()
             if levelsys and not levelsys[0]:
                 # 0: False, 1: True
                 return await ctx.reply("Levels are disabled in this server.")
-            await cursor.execute("SELECT * FROM levelSettings WHERE guild = ?",(ctx.guild.id,))
+            await cursor.execute("SELECT * FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
             roleLevels = await cursor.fetchall()
             if not roleLevels:
                 return await ctx.send("There are no role levels that have been setup for this server!")
-            em = discord.Embed(title="Role Levels",description="The roles that you can get from leveling up in this server.",color=discord.Color.random())
+            em = discord.Embed(title="Role Levels",
+                               description="The roles that you can get from leveling up in this server.",
+                               color=discord.Color.random())
             for role in roleLevels:
                 if role[1] != 0:
-                    em.add_field(name=f"Level {role[2]}",value=f"{ctx.guild.get_role(role[1]).mention}",inline=False)
+                    em.add_field(name=f"Level {role[2]}", value=f"{ctx.guild.get_role(role[1]).mention}", inline=False)
             await ctx.send(embed=em)
 
-    @lvlsys.command(aliases=['sr','addrole','ar'])
+    @lvlsys.command(aliases=['sr', 'addrole', 'ar'])
     @commands.has_permissions(manage_messages=True)
-    async def setrole(self,ctx,level:int, *, role:discord.Role):
+    async def setrole(self, ctx, level: int, *, role: discord.Role):
         async with self.bot.db.cursor() as cursor:
             await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
             levelsys = await cursor.fetchone()
             if levelsys and not levelsys[0]:
                 # 0: False, 1: True
                 return await ctx.reply("Levels are disabled in this server.")
-            await cursor.execute("SELECT role FROM levelSettings WHERE role = ? and guild = ?",(role.id, ctx.guild.id,))
+            await cursor.execute("SELECT role FROM levelSettings WHERE role = ? and guild = ?",
+                                 (role.id, ctx.guild.id,))
             roleTF = await cursor.fetchone()
-            await cursor.execute("SELECT role FROM levelSettings WHERE levelReq = ? and guild = ?",(level, ctx.guild.id,))
+            await cursor.execute("SELECT role FROM levelSettings WHERE levelReq = ? and guild = ?",
+                                 (level, ctx.guild.id,))
             levelTF = await cursor.fetchone()
             if roleTF or levelTF:
                 return await ctx.send("A reward for the level already exists!")
-            await cursor.execute("INSERT INTO levelSettings VALUES (?, ?, ?, ?)",(True, role.id, level, ctx.guild.id,))
+            await cursor.execute("INSERT INTO levelSettings VALUES (?, ?, ?, ?)", (True, role.id, level, ctx.guild.id,))
             await self.bot.db.commit()
         await ctx.send("That level reward was created!")
-    @lvlsys.command(aliases=['removerole','rr'])
+
+    @lvlsys.command(aliases=['removerole', 'rr'])
     @commands.has_permissions(manage_messages=True)
-    async def remrole(self,ctx,level:int):
+    async def remrole(self, ctx, level: int):
         async with self.bot.db.cursor() as cursor:
             await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
             levelsys = await cursor.fetchone()
             if levelsys and not levelsys[0]:
                 # 0: False, 1: True
                 return await ctx.reply("Levels are disabled in this server.")
-            await cursor.execute("SELECT role FROM levelSettings WHERE levelReq = ? and guild = ?",(level, ctx.guild.id,))
+            await cursor.execute("SELECT role FROM levelSettings WHERE levelReq = ? and guild = ?",
+                                 (level, ctx.guild.id,))
             levelTF = await cursor.fetchone()
             if levelTF:
-                await cursor.execute("DELETE FROM levelSettings WHERE levelReq = ? and guild = ?",(level, ctx.guild.id,))
+                await cursor.execute("DELETE FROM levelSettings WHERE levelReq = ? and guild = ?",
+                                     (level, ctx.guild.id,))
                 await ctx.send("That level reward has been deleted!")
             else:
                 await ctx.send("There is not a reward for the level requirement!")
             await self.bot.db.commit()
-
-
-
-
-
-
-
 
 
 def setup(bot):

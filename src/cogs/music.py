@@ -5,6 +5,7 @@ from datetime import timedelta
 import asyncio
 import requests
 
+
 class ControlPanel(discord.ui.View):
     def __init__(self, vc, ctx):
         super().__init__(timeout=200)
@@ -12,16 +13,17 @@ class ControlPanel(discord.ui.View):
         self.ctx = ctx
         self.skip_button = self.children[2]
         self.skip_button.disabled = self.vc.queue.is_empty
-    
+
     @discord.ui.button(label="Resume/Pause", style=discord.ButtonStyle.blurple)
     async def resume_and_pause(self, button: discord.ui.Button, interaction: discord.Interaction):
         if not interaction.user == self.ctx.author:
             await interaction.message.edit(content=interaction.message.content, view=self)
-            return await interaction.response.send_message("You can't do that. run the command yourself to use these buttons", ephemeral=True)
+            return await interaction.response.send_message(
+                "You can't do that. run the command yourself to use these buttons", ephemeral=True)
         if self.vc.queue.is_empty:
-            self.skip_button.disabled=True
+            self.skip_button.disabled = True
         else:
-            self.skip_button.disabled=False
+            self.skip_button.disabled = False
         if self.vc.is_paused():
             await self.vc.resume()
             await interaction.message.edit(content="Resumed", view=self)
@@ -33,15 +35,16 @@ class ControlPanel(discord.ui.View):
     async def queue(self, button: discord.ui.Button, interaction: discord.Interaction):
         if not interaction.user == self.ctx.author:
             await interaction.message.edit(content=interaction.message.content, view=self)
-            return await interaction.response.send_message("You can't do that. run the command yourself to use these buttons", ephemeral=True)
+            return await interaction.response.send_message(
+                "You can't do that. run the command yourself to use these buttons", ephemeral=True)
         if self.vc.queue.is_empty:
-            self.skip_button.disabled=True
+            self.skip_button.disabled = True
         else:
-            self.skip_button.disabled=False
+            self.skip_button.disabled = False
         if self.vc.queue.is_empty:
             await interaction.message.edit(content=interaction.message.content, view=self)
             return await interaction.response.send_message("The queue is empty!", ephemeral=True)
-    
+
         em = discord.Embed(title="Queue")
         queue = self.vc.queue.copy()
         songCount = 0
@@ -50,15 +53,16 @@ class ControlPanel(discord.ui.View):
             songCount += 1
             em.add_field(name=f"Song Num {str(songCount)}", value=f"`{song}`")
         await interaction.message.edit(embed=em, view=self)
-    
+
     @discord.ui.button(label="Skip", style=discord.ButtonStyle.blurple)
     async def skip(self, button: discord.ui.Button, interaction: discord.Interaction):
         if not interaction.user == self.ctx.author:
-            return await interaction.response.send_message("You can't do that. run the command yourself to use these buttons", ephemeral=True)
+            return await interaction.response.send_message(
+                "You can't do that. run the command yourself to use these buttons", ephemeral=True)
         if self.vc.queue.is_empty:
-            self.skip_button.disabled=True
+            self.skip_button.disabled = True
         else:
-            self.skip_button.disabled=False
+            self.skip_button.disabled = False
         if self.vc.queue.is_empty:
             await interaction.message.edit(content=interaction.message.content, view=self)
             return await interaction.response.send_message("The queue is empty!", ephemeral=True)
@@ -71,12 +75,13 @@ class ControlPanel(discord.ui.View):
         except Exception:
             await interaction.message.edit(content=interaction.message.content, view=self)
             return await interaction.response.send_message("The queue is empty!", ephemeral=True)
-    
+
     @discord.ui.button(label="Disconnect", style=discord.ButtonStyle.red)
     async def disconnect(self, button: discord.ui.Button, interaction: discord.Interaction):
         if not interaction.user == self.ctx.author:
             await interaction.message.edit(content=interaction.message.content, view=self)
-            return await interaction.response.send_message("You can't do that. run the command yourself to use these buttons", ephemeral=True)
+            return await interaction.response.send_message(
+                "You can't do that. run the command yourself to use these buttons", ephemeral=True)
         for child in self.children:
             child.disabled = True
         await self.vc.disconnect()
@@ -86,6 +91,7 @@ class ControlPanel(discord.ui.View):
         for x in self.children:
             x.disabled = True
         await self.message.edit(view=self)
+
 
 class Music(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -105,7 +111,7 @@ class Music(commands.Cog):
         print(f"Node <{node.identifier}> is ready!")
 
     @commands.Cog.listener()
-    async def on_wavelink_track_end(self,player: wavelink.Player,track: wavelink.Track,reason):
+    async def on_wavelink_track_end(self, player: wavelink.Player, track: wavelink.Track, reason):
         ctx = player.ctx
         vc: player = ctx.voice_client
         if vc.loop:
@@ -140,8 +146,7 @@ class Music(commands.Cog):
         try:
             if vc.loop: return
         except:
-            setattr(vc,"loop",False)
-
+            setattr(vc, "loop", False)
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
@@ -151,7 +156,6 @@ class Music(commands.Cog):
                 player = node.get_player(before.channel.guild)
                 if player != None:
                     await player.disconnect()
-
 
     @commands.command()
     async def panel(self, ctx: commands.Context):
@@ -164,7 +168,7 @@ class Music(commands.Cog):
             vc: wavelink.Player = ctx.voice_client
         if not vc.is_playing():
             return await ctx.reply("You're not playing any music!")
-        
+
         em = discord.Embed(title="Music Panel", description="Control the bot by clicking on the buttons below")
         view = ControlPanel(vc, ctx)
         view.message = await ctx.reply(embed=em, view=view)
@@ -213,6 +217,7 @@ class Music(commands.Cog):
             vc: wavelink.Player = ctx.voice_client
         await vc.disconnect()
         await ctx.reply("The music has been stopped.")
+
     @commands.command()
     async def loop(self, ctx: commands.Context):
         if not ctx.voice_client:
@@ -225,18 +230,15 @@ class Music(commands.Cog):
         try:
             vc.loop ^= True
         except Exception:
-            setattr(vc,"loop",False)
-
+            setattr(vc, "loop", False)
 
         if vc.loop:
             return await ctx.reply("Looping is now enabled!")
         else:
             return await ctx.reply("Looping is now disabled!")
 
-                
-            
     @commands.command(aliases=['q'])
-    async def queue(self,ctx: commands.Context):
+    async def queue(self, ctx: commands.Context):
         if not ctx.voice_client:
             return await ctx.reply("You're not playing any music!")
         elif not getattr(ctx.author.voice, "channel", None):
@@ -244,12 +246,12 @@ class Music(commands.Cog):
         vc: wavelink.Player = ctx.voice_client
         if vc.queue.is_empty:
             return await ctx.reply("The queue is empty.")
-        em = discord.Embed(title="Queue",color=discord.Color.random())
+        em = discord.Embed(title="Queue", color=discord.Color.random())
         queue = vc.queue.copy()
         song_count = 0
         for song in queue:
             song_count += 1
-            em.add_field(name=f"Song #{song_count}",value=f"{song}")
+            em.add_field(name=f"Song #{song_count}", value=f"{song}")
 
         return await ctx.reply(embed=em)
 
@@ -287,7 +289,8 @@ class Music(commands.Cog):
             await vc.stop()
         except Exception:
             return await ctx.reply("The queue is empty!")
-    @commands.command(aliases=["np","playing","current"])
+
+    @commands.command(aliases=["np", "playing", "current"])
     async def nowplaying(self, ctx: commands.Context):
         if not ctx.voice_client:
             return await ctx.reply("You're not playing any music!")
@@ -297,12 +300,12 @@ class Music(commands.Cog):
             vc: wavelink.Player = ctx.voice_client
         if not vc.is_playing():
             return await ctx.reply("I'm not playing any music!")
-        em = discord.Embed(title=f"Now Playing: {vc.track.title}",description=f"Artist: {vc.track.author}", color=discord.Color.random())
-        em.add_field(name="Duration",value=f"`{str(timedelta(seconds=vc.track.length))}`")
-        em.add_field(name="Song URL",value=f"[Click Here]({str(vc.track.uri)})")
+        em = discord.Embed(title=f"Now Playing: {vc.track.title}", description=f"Artist: {vc.track.author}",
+                           color=discord.Color.random())
+        em.add_field(name="Duration", value=f"`{str(timedelta(seconds=vc.track.length))}`")
+        em.add_field(name="Song URL", value=f"[Click Here]({str(vc.track.uri)})")
         return await ctx.reply(embed=em)
-        
+
 
 def setup(bot):
     bot.add_cog(Music(bot))
-

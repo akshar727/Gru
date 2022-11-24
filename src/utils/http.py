@@ -13,7 +13,8 @@ class HTTPSession(aiohttp.ClientSession):
 
     async def stop(self):
         await self.close()
-    def __del__(self):
+
+    def __del__(self, **kwargs):
         """
         Closes the ClientSession instance
         cleanly when the instance is deleted.

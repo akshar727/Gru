@@ -2,27 +2,27 @@ from nextcord.ext import commands
 import nextcord as discord
 import traceback
 import datetime
-import json
-from .utils import config
+from src.utils import config
+
 
 class Exceptions(commands.Cog):
-    def __init__(self,bot: commands.Bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
-    
+
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error):
         if isinstance(error, commands.CommandInvokeError):
             error = error.original
             with open("databases/errors.txt", 'a') as f:
                 traceback.print_exception(type(error),
-                                        error,
-                                        error.__traceback__,
-                                        file=f)
+                                          error,
+                                          error.__traceback__,
+                                          file=f)
                 f.write("\n")
         if isinstance(error, commands.CommandNotFound):
             if ctx.author in config.working_users:
                 return config.working_users.pop(config.working_users.index(ctx.author))
-            prefix = await config.get_prefix(self.bot,ctx.guild.id)
+            prefix = await config.get_prefix(self.bot, ctx.guild.id)
             await ctx.reply(
                 f"Unknown command. Try {prefix}help for a list of commands")
             return
@@ -47,9 +47,9 @@ class Exceptions(commands.Cog):
                 await ctx.reply(ctx.author.mention, embed=em)
             elif error.retry_after <= 86400:
                 time = error.retry_after
-                hrs = int(time// 3600)
+                hrs = int(time // 3600)
                 time -= hrs * 3600
-                mins =  int(time // 60)
+                mins = int(time // 60)
                 time -= mins * 60
                 secs = int(time)
                 em = discord.Embed(
@@ -62,15 +62,15 @@ class Exceptions(commands.Cog):
                 time = error.retry_after
                 days = int(time // 86400)
                 time -= days * 86400
-                hrs = int(time// 3600)
+                hrs = int(time // 3600)
                 time -= hrs * 3600
-                mins =  int(time // 60)
+                mins = int(time // 60)
                 time -= mins * 60
                 secs = int(time)
                 em = discord.Embed(
                     title=f"Slow it down bro!",
                     description="**Still on cooldown**, please try again in {}d {}h {}m {}s, or {}"
-                    .format(days,hrs, mins, secs, _str),
+                    .format(days, hrs, mins, secs, _str),
                     color=discord.Color.green())
                 em.set_footer(text=f"That is at {_str}!")
                 await ctx.reply(ctx.author.mention, embed=em)
@@ -83,11 +83,11 @@ class Exceptions(commands.Cog):
             return
         elif isinstance(error, commands.NotOwner):
             await ctx.reply(
-                ":x: You are not allowed to do this! Only the owner of the bot can do this. Please contact Elon Musk#7655 if you think this is a mistake."
+                ":x: You are not allowed to do this! Only the owner of the bot can do this."
             )
             return
         elif isinstance(error, commands.MissingRequiredArgument):
-            prefix = await config.get_prefix(self.bot,ctx.guild.id)
+            prefix = await config.get_prefix(self.bot, ctx.guild.id)
             await ctx.reply(
                 f":x: Missing arguments! check {prefix}help if you need to know about how to use the command."
             )
@@ -114,18 +114,20 @@ class Exceptions(commands.Cog):
             # await modlog.send(f"Error found: {error}\n")
             with open("databases/errors.txt", 'a') as f:
                 traceback.print_exception(type(error),
-                                        error,
-                                        error.__traceback__,
-                                        file=f)
+                                          error,
+                                          error.__traceback__,
+                                          file=f)
                 f.write("\n")
             try:
                 self.bot.get_command(ctx.invoked_with).reset_cooldown(ctx)
             except:
                 pass
-            prefix = await config.get_prefix(self.bot,ctx.guild.id)
+            prefix = await config.get_prefix(self.bot, ctx.guild.id)
             return await ctx.reply(
-                f"An error has occurred with the command! :(.Please check `{prefix}help` to make sure you are using the command correctly. This error has been reported."
+                f"An error has occurred with the command!."
+                f"Please check `{prefix}help` to make sure you are using the command correctly. Error reported."
             )
+
 
 def setup(bot):
     bot.add_cog(Exceptions(bot))
