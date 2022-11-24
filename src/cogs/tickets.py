@@ -1,4 +1,6 @@
 from io import BytesIO
+
+from nextcord import Interaction, SlashOption, ChannelType
 from nextcord.ext import commands
 import nextcord as discord
 import aiosqlite
@@ -146,28 +148,36 @@ class Tickets(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @discord.slash_command(description="Create a ticket view for others to create a ticket.")
     @commands.has_permissions(manage_guild=True)
-    async def setup_tickets(self, ctx):
+    async def setup_tickets(self, interaction: Interaction,
+                            channel: discord.TextChannel = SlashOption(
+                                description="The channel to send the ticket view to.", channel_types=[ChannelType.text],
+                                required=True)
+                            ):
         embed = discord.Embed(title="Create A Ticket!",
                               description="Click the `Create Ticket` button below to create a new ticket. The "
                                           "server's staff will be notified and shortly aid you with your problem.",
                               color=discord.Color.green())
-        await ctx.send(embed=embed, view=CreateTicket(self.bot))
+        await channel.send(embed=embed, view=CreateTicket(self.bot))
+        await interaction.response.send_message("The ticket view has been sent to the specified channel.",
+                                                ephemeral=True)
 
     # TODO: Add to help
-    @commands.command()
+    @discord.slash_command(name="ticket_role", description="Set the role that can see tickets like a 'mod' role")
     @commands.has_permissions(manage_guild=True)
-    async def ticket_role(self, ctx, role: discord.Role):
+    async def ticket_role(self, interaction: Interaction,
+                          role: discord.Role = SlashOption(description="The role to set.")):
         async with self.bot.db.cursor() as cursor:
-            await cursor.execute("SELECT role FROM ticketRoles WHERE guild = ?", (ctx.guild.id,))
+            await cursor.execute("SELECT role FROM ticketRoles WHERE guild = ?", (interaction.guild.id,))
             role2 = await cursor.fetchone()
             if role2:
-                await cursor.execute("UPDATE ticketRoles SET role = ? WHERE guild = ?", (role.id, ctx.guild.id,))
-                await ctx.send("Tickets Auto-Assigned role successfully updated!")
+                await cursor.execute("UPDATE ticketRoles SET role = ? WHERE guild = ?",
+                                     (role.id, interaction.guild.id,))
+                await interaction.response.send_message("Tickets Auto-Assigned role successfully updated!")
             else:
-                await cursor.execute("INSERT INTO ticketRoles VALUES (?, ?)", (role.id, ctx.guild.id,))
-                await ctx.send("Tickets Auto-Assigned role successfully added!")
+                await cursor.execute("INSERT INTO ticketRoles VALUES (?, ?)", (role.id, interaction.guild.id,))
+                await interaction.response.send_message("Tickets Auto-Assigned role successfully added!")
 
     @commands.Cog.listener()
     async def on_ready(self):

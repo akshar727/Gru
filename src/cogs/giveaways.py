@@ -1,7 +1,6 @@
 from nextcord.ext import commands, application_checks
 import nextcord as discord
 from nextcord import Interaction, ChannelType, SlashOption, TextChannel
-# from nextcord.abc import GuildChannel
 # import asyncio
 import humanfriendly
 import time as py_time
@@ -57,14 +56,6 @@ class Giveaway(commands.Cog):
     async def on_ready(self):
         print("Giveaways Cog ready to use!")
 
-    # TODO: Add to help
-    @discord.slash_command(name="ping", description="Check the bot's ping!")
-    async def ping(self, interaction: Interaction):
-        em = discord.Embed(title="Bot Ping", color=discord.Color.random())
-        em.add_field(name="My Api Latency is:", value=f"{round(self.bot.latency * 1000)}ms")
-        em.set_footer(text=f"Ping requested by {interaction.user}", icon_url=interaction.user.display_avatar.url)
-        await interaction.response.send_message(embed=em)
-
     @discord.slash_command(name="giveaway", description="Base giveaway command [No function]")
     async def giveaway(self, interaction: discord.Interaction):
         return
@@ -75,8 +66,8 @@ class Giveaway(commands.Cog):
     async def start(self, interaction: Interaction,
                     prize: str = SlashOption(description="The prize of the giveaway", required=True),
                     channel: TextChannel = SlashOption(channel_types=[ChannelType.text],
-                                                        description="In which channel should the giveaway be in?",
-                                                        required=True),
+                                                       description="In which channel should the giveaway be in?",
+                                                       required=True),
                     time: str = SlashOption(description="How long should the giveaway go for? [Ex. 25s, 3h, 5d, 20m]",
                                             required=True),
                     winners: int = SlashOption(description="How many people should win this giveaway?", required=True)):

@@ -15,7 +15,7 @@ class ControlPanel(discord.ui.View):
         self.skip_button.disabled = self.vc.queue.is_empty
 
     @discord.ui.button(label="Resume/Pause", style=discord.ButtonStyle.blurple)
-    async def resume_and_pause(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def resume_and_pause(self, _: discord.ui.Button, interaction: discord.Interaction):
         if not interaction.user == self.ctx.author:
             await interaction.message.edit(content=interaction.message.content, view=self)
             return await interaction.response.send_message(
@@ -101,14 +101,15 @@ class Music(commands.Cog):
     async def node_connect(self):
         await self.bot.wait_until_ready()
         await wavelink.NodePool.create_node(bot=self.bot,
-                                            host='connect.freelavalink.ga',
+                                            host='www.lavalinknodepublic.ml',
                                             port=443,
-                                            password='www.freelavalink.ga',
+                                            password="mrextinctcodes",
                                             https=True)
 
     @commands.Cog.listener()
     async def on_wavelink_node_ready(self, node: wavelink.Node):
         print(f"Node <{node.identifier}> is ready!")
+        print("Music commands are ready!")
 
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, player: wavelink.Player, track: wavelink.Track, reason):
@@ -144,7 +145,8 @@ class Music(commands.Cog):
             await ctx.reply(f"Added `{search.title}` to the queue...")
         vc.ctx = ctx
         try:
-            if vc.loop: return
+            if vc.loop:
+                return
         except:
             setattr(vc, "loop", False)
 
@@ -193,7 +195,7 @@ class Music(commands.Cog):
     @commands.command()
     async def resume(self, ctx: commands.Context):
         if not ctx.voice_client and getattr(ctx.author.voice, "channel", None):
-            vc: wavelink.Player = await ctx.author.voice.channel.connect(
+            await ctx.author.voice.channel.connect(
                 cls=wavelink.Player)
             return await ctx.reply("You're not playing any music!")
         else:

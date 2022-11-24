@@ -11,9 +11,7 @@ import psutil
 from nextcord.ext import commands
 from nextcord.utils import get
 from typing import Optional
-from PIL import Image
 from io import BytesIO
-from num2words import num2words
 from src.utils import http, config
 import humanfriendly
 import itertools
@@ -22,7 +20,6 @@ import logging
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
-
 
 
 async def get_prefix(bot, message):
@@ -100,122 +97,10 @@ def convert_str_to_number(x):
 # Main code starts :)
 
 
-animal_shop = [
-    [
-        {
-            "name": "Wolf",
-            "sell_price": 2000
-        }, {
-        "name": "Mountain Lion",
-        "sell_price": 3200
-    }, {
-        "name": "Chicken",
-        "sell_price": 3500
-    }, {
-        "name": "Rabbit",
-        "sell_price": 3700
-    }, {
-        "name": "Deer",
-        "sell_price": 4200
-    }, {
-        "name": "Moose",
-        "sell_price": 4900
-    }, {
-        "name": "Angry Bird",
-        "sell_price": 8500
-    }, {
-        "name": "Minion",
-        "sell_price": 15000
-    }, {
-        "name": "Bengal Tiger",
-        "sell_price": 32000
-    }, {
-        "name": "Evil Minion",
-        "sell_price": 50000
-    }, {
-        "name": "White Tiger",
-        "sell_price": 65000
-    }, {
-        "name": "Unicorn",
-        "sell_price": 85000
-    }],
-    [{
-        "name": "Duck",
-        "sell_price": 6000
-    }, {
-        "name": "Mosasaurus",
-        "sell_price": 500000
-    }, {
-        "name": "Fish",
-        "sell_price": 3400
-    }, {
-        "name": "Nemo",
-        "sell_price": 3600
-    }, {
-        "name": "Great White Shark",
-        "sell_price": 75000
-    }, {
-        "name": "Blobfish",
-        "sell_price": 10000
-    }, {
-        "name": "Crab",
-        "sell_price": 1500
-    }, {
-        "name": "Shell",
-        "sell_price": 250
-    }, {
-        "name": "Garbage",
-        "sell_price": 100
-    }, {
-        "name": "Water Bottle",
-        "sell_price": 3000
-    }, {
-        "name": "Dumbo Octopus",
-        "sell_price": 35000
-    }, {
-        "name": "Donald Duck",
-        "sell_price": 3500
-    }],
-    [{
-        "name": "Hawk",
-        "sell_price": 5000
-    }, {
-        "name": "Bat",
-        "sell_price": 15000
-    }, {
-        "name": "Mosquito",
-        "sell_price": 1000
-    }, {
-        "name": "Flying Lizard",
-        "sell_price": 7000
-    }, {
-        "name": "Bird",
-        "sell_price": 2000
-    }, {
-        "name": "Ladybug",
-        "sell_price": 1500
-    }, {
-        "name": "Bumblebee",
-        "sell_price": 9500
-    }, {
-        "name": "Hummingbird",
-        "sell_price": 13500
-    }, {
-        "name": "Eagle",
-        "sell_price": 15000
-    }, {
-        "name": "Pigeon",
-        "sell_price": 5000
-    }, {
-        "name": "Vulture",
-        "sell_price": 17500
-    }, {
-        "name": "Hummingbird",
-        "sell_price": 13500
-    }, {
-        "name": "Pterodactyl",
-        "sell_price": 102000
-    }]]
+with open('assets/shops.json', 'r') as f:
+    data = json.load(f)
+    animal_shop = data['animal_shop']
+    mainshop = data['main_shop']
 
 
 @client.command()
@@ -242,7 +127,6 @@ async def balance(ctx, user: discord.Member = None):
     else:
         await config.open_account(user)
     await config.open_account(ctx.author)
-    users = await get_bank_data()
     async with client.db.cursor() as cursor:
         await cursor.execute("SELECT name, pay FROM jobs WHERE user = ?", (user.id,))
         job_data = await cursor.fetchone()
@@ -260,9 +144,8 @@ async def balance(ctx, user: discord.Member = None):
     em.add_field(name="Wallet Balance",
                  value=f"{int(wallet):,} Minions™", inline=False)
     em.add_field(name='Bank Balance',
-                 value=
-                 f"{int(bank):,} **/** {int(max_amt):,} Minions™ `({round(float(int(bank) / int(max_amt)) * 100, 2)}% full)`"
-                 , inline=False)
+                 value=f"{int(bank):,} **/** {int(max_amt):,} Minions™"
+                       f" `({round(float(int(bank) / int(max_amt)) * 100, 2)}% full)`", inline=False)
     em.add_field(name='Job', value=job_name, inline=False)
     em.add_field(name='Job salary',
                  value=f"{int(job_pay):,} Minions™ per hour", inline=False)
@@ -300,8 +183,7 @@ async def beg(ctx):
         beg_embed.set_author(name=person)
         if booster != 1:
             beg_embed.set_footer(
-                text=
-                f"You earned {(earnings * (booster - 1)):,} extra Minions™ since you had a {booster:,}x booster!"
+                text=f"You earned {(earnings * (booster - 1)):,} extra Minions™ since you had a {booster:,}x booster!"
             )
         await ctx.reply(embed=beg_embed)
         users[str(user.id)]["wallet"] += earnings * booster
@@ -375,7 +257,8 @@ async def work(ctx, *, name: str = None):
         with open('databases/jobs.json', 'w') as f:
             json.dump(jobs, f, indent=4)
         await ctx.reply(
-            f"You have been fired from your job as a {work_name}. You have to wait 4 hours before applying for another job.")
+            f"You have been fired from your job as a {work_name}. You have to wait 4 hours before applying for "
+            f"another job.")
         fired_users.append(ctx.author)
         await asyncio.sleep(14400)
         fired_users.pop(fired_users.index(ctx.author))
@@ -394,7 +277,8 @@ async def work(ctx, *, name: str = None):
                         json.dump(jobs, f, indent=4)
                     work.reset_cooldown(ctx)
                     return await ctx.reply(
-                        f"You are now a **{item}**. Your salary is now {_work['pay']:,} Minions™. Be careful not to fail too many times, or you will get fired!")
+                        f"You are now a **{item}**. Your salary is now {_work['pay']:,} Minions™. Be careful not to "
+                        f"fail too many times, or you will get fired!")
                 work.reset_cooldown(ctx)
                 return await ctx.reply("You have not unlocked this job yet, work more to unlock it!")
 
@@ -412,7 +296,8 @@ async def work(ctx, *, name: str = None):
                         json.dump(jobs, f, indent=4)
                     work.reset_cooldown(ctx)
                     return await ctx.reply(
-                        f"You are now a **{item}**. Your salary is now {_work['pay']:,} Minions™. Be careful not to fail too many times, or you will get fired!")
+                        f"You are now a **{item}**. Your salary is now {_work['pay']:,} Minions™. Be careful not to "
+                        f"fail too many times, or you will get fired!")
                 work.reset_cooldown(ctx)
                 return await ctx.reply("You have not unlocked this job yet, work more to unlock it!")
     if work_name == 'None':
@@ -428,7 +313,8 @@ async def work(ctx, *, name: str = None):
     config.working_users.append(ctx.author)
     if typeofwork == 'memory':
         await ctx.reply(
-            f'''**Working as a {work_name}** - Memory Game - A fact about Gru Things™ will come up on the screen! then it will disappear after a few seconds. Your job is to rewrite the fact!'''
+            f'''**Working as a {work_name}** - Memory Game - A fact about Gru Things™ will come up on the screen! 
+            then it will disappear after a few seconds. Your job is to rewrite the fact! '''
         )
         fact = "\u200B" + random.choice(facts)
 
@@ -443,8 +329,7 @@ async def work(ctx, *, name: str = None):
         except asyncio.TimeoutError:
             work_em = discord.Embed(
                 title="Terrible job!",
-                description=
-                f"You were given `{int(work_amt / 3):,} Minions™` for 1/3 of an hour of pay",
+                description=f"You were given `{int(work_amt / 3):,} Minions™` for 1/3 of an hour of pay",
                 color=discord.Color.random())
             work_em.set_footer(text=f'Working as a {work_name.title()}')
             jobs[str(user.id)]['job']['fails'] += 1
@@ -461,8 +346,7 @@ async def work(ctx, *, name: str = None):
         elif msg.content.lower() != fact.lower()[1:]:
             work_em = discord.Embed(
                 title="Terrible job!",
-                description=
-                f"You were given `{int(work_amt / 3):,} Minions™` for 1/3 of an hour of pay",
+                description=f"You were given `{int(work_amt / 3):,} Minions™` for 1/3 of an hour of pay",
                 color=discord.Color.random())
             work_em.set_footer(text=f'Working as a {work_name.capitalize()}')
             jobs[str(user.id)]['job']['fails'] += 1
@@ -475,8 +359,7 @@ async def work(ctx, *, name: str = None):
         get_crate = random.randint(0, 5)
         work_em = discord.Embed(
             title="Great job!",
-            description=
-            f"You were given `{work_amt:,} Minions™` for an hour of pay",
+            description=f"You were given `{work_amt:,} Minions™` for an hour of pay",
             color=discord.Color.random())
         work_em.set_footer(text=f'Working as a {work_name.title()}')
         await update_bank(ctx.author, work_amt)
@@ -496,7 +379,8 @@ async def work(ctx, *, name: str = None):
                 "common", "common", "common", "common"
             ])
             await ctx.reply(
-                f"Your boss saw that you were doing so well, he gave you a **{crate_type.capitalize()}** <:chest:898333946557894716> lootbox!! :tada:"
+                f"Your boss saw that you were doing so well, he gave you a **{crate_type.capitalize()}** <:chest"
+                f":898333946557894716> lootbox!! :tada: "
             )
             lootboxes[str(ctx.author.id)][crate_type] += 1
             with open('databases/lootboxes.json', 'w') as f:
@@ -516,7 +400,8 @@ async def work(ctx, *, name: str = None):
         if promote_pay == 8:
             num = random.randint(0, 1000)
             await ctx.reply(
-                f"Since you are doing really well in your work, your manager has decided to give you a bonus of `{work_amt * 3 + num:,} Minions™`!! :tada: :tada:"
+                f"Since you are doing really well in your work"
+                f", your manager has decided to give you a bonus of `{work_amt * 3 + num:,} Minions™`!! :tada: :tada: "
             )
             await update_bank(ctx.author, work_amt * 3 + num)
 
@@ -653,10 +538,12 @@ async def jobs(ctx):
     page2.set_footer(text="Page 2/2")
     for i in jobpays:
         page1.add_field(name=f"{i}",
-                        value=f"{jobpays[i]['pay']:,} Minions™ Per Hour {':x:' if jobpays[i]['hours'] > hours_worked else '<:check:985365213933097010>'}")
+                        value=f"{jobpays[i]['pay']:,} Minions™ Per Hour"
+                              f" {':x:' if jobpays[i]['hours'] > hours_worked else '<:check:985365213933097010>'}")
     for i in p2:
         page2.add_field(name=f"{i}",
-                        value=f"{p2[i]['pay']:,} Minions™ Per Hour {':x:' if p2[i]['hours'] > hours_worked else '<:check:985365213933097010>'}")
+                        value=f"{p2[i]['pay']:,} Minions™ Per Hour"
+                              f" {':x:' if p2[i]['hours'] > hours_worked else '<:check:985365213933097010>'}")
 
     embeds = [page1, page2]
     cur = embeds[0]
@@ -701,7 +588,7 @@ async def purge(ctx, amount: int = 5):
 @client.command(aliases=['with'])
 async def withdraw(ctx, amount=None):
     await config.open_account(ctx.author)
-    if amount == None:
+    if amount is None:
         await ctx.reply("Please enter an amount!")
         return
     amount = amount.lower()
@@ -738,7 +625,7 @@ async def withdraw(ctx, amount=None):
 @client.command(aliases=['dep'])
 async def deposit(ctx, amount=None):
     await config.open_account(ctx.author)
-    if amount == None:
+    if amount is None:
         await ctx.reply("Please enter an amount!")
         return
     amount = amount.lower()
@@ -779,7 +666,7 @@ async def deposit(ctx, amount=None):
 async def send(ctx, member: discord.Member, amount=None):
     await config.open_account(ctx.author)
     await config.open_account(member)
-    if amount == None:
+    if amount is None:
         await ctx.reply("Please enter an amount!")
         return
     amount = amount.lower()
@@ -883,7 +770,7 @@ async def rob(ctx, member: discord.Member):
 @client.command()
 async def slots(ctx, amount=None):
     await config.open_account(ctx.author)
-    if amount == None:
+    if amount is None:
         await ctx.reply("Please enter an amount!")
         return
 
@@ -935,8 +822,7 @@ async def shop(ctx):
 
     page2 = discord.Embed(
         title="Animal Shop",
-        description=
-        "These are all the animals you can find by hunting or fishing and the prices that you can sell them for.",
+        description="These are all the animals you can find by hunting or fishing and the prices that you can sell them for.",
         color=discord.Color.random())
     page2.set_footer(text="Page 2/3")
     page2.add_field(
@@ -956,13 +842,11 @@ async def shop(ctx):
 
     page3 = discord.Embed(
         title="Animal Shop (Page 2)",
-        description=
-        "These are all the animals you can find by hunting or fishing and the prices that you can sell them for.",
+        description="These are all the animals you can find by hunting or fishing and the prices that you can sell them for.",
         color=discord.Color.random())
     page3.add_field(
         name="Water Animals (Part 2)",
-        value=
-        "These are all the water animals you can get from fishing (Part 2)",
+        value="These are all the water animals you can get from fishing (Part 2)",
         inline=False)
     page3.set_footer(text="Page 3/3")
     for animal in animal_shop[1][-1:]:
@@ -1015,7 +899,8 @@ async def buy(ctx, amount: Optional[int] = 1, *, item):
             new = random.randint(20000, 150000) * amount
             users[str(ctx.author.id)]["max"] += new
             await ctx.reply(
-                f"You give your record{'s' if amount != 1 else ''} to the teller, and he increases your bank space by `{new:,} Minions™️`!")
+                f"You give your record{'s' if amount != 1 else ''} to the teller, "
+                f"and he increases your bank space by `{new:,} Minions™️`!")
             with open('databases/mainbank.json', 'w') as f:
                 json.dump(users, f, indent=4)
             return
@@ -1069,17 +954,17 @@ async def buy(ctx, amount: Optional[int] = 1, *, item):
             return
         if res[1] == 2:
             await ctx.reply(
-                f"You don't have enough money in your wallet to buy `{amount}x` {res[2].title()}!"
+                f"You don't have enough money in your wallet to buy `{amount}x` {res[3].title()}!"
             )
     e = discord.Embed(title=f"{ctx.author.name}'s Purchase", color=discord.Color.random())
     e.description = f":white_check_mark: You just bought `{amount}x` {res[3].title()} for `{int(res[2]):,} Minions™`!"
     await ctx.reply(embed=e)
 
 
-## 200 LINES
+# 200 LINES
 @client.command(aliases=['inv'])
 async def inventory(ctx, user: discord.Member = None):
-    if user == None:
+    if user is None:
         user = ctx.author
         await config.open_account(ctx.author)
     else:
@@ -1115,7 +1000,7 @@ async def inventory(ctx, user: discord.Member = None):
         await ctx.reply(embed=em)
         return
 
-    elif len(bag) >= 26 and len(bag) <= 50:
+    elif 26 <= len(bag) <= 50:
         page2 = discord.Embed(title="Your inventory (Page 2)",
                               color=discord.Color.random())
         if user != ctx.author:
@@ -1157,7 +1042,6 @@ async def inventory(ctx, user: discord.Member = None):
         pages = [em, page2]
         paginator = Paginator(ctx.author, pages, pages[0])
         paginator.message = await ctx.reply(embed=pages[0], view=paginator)
-
 
     elif len(bag) > 50:
         page2 = discord.Embed(title="Your inventory (Page 2)",
@@ -1224,9 +1108,10 @@ async def inventory(ctx, user: discord.Member = None):
         paginator.message = await ctx.reply(embed=pages[0], view=paginator)
 
 
-async def buy_this(user, item_name, amount):
+async def buy_this(user, item_name, amount) -> list[bool, int, int, str]:
     item_name = item_name.lower()
     name_ = None
+    price = None
     for item in mainshop:
         name = item["name"].lower()
         if name == item_name or item_name in name:
@@ -1234,8 +1119,8 @@ async def buy_this(user, item_name, amount):
             price = item["price"]
             break
 
-    if name_ == None:
-        return [False, 1, name_]
+    if name_ is None:
+        return [False, 1, -1, name_]
 
     cost = price * amount
     users = await get_bank_data()
@@ -1243,7 +1128,7 @@ async def buy_this(user, item_name, amount):
     bal = await update_bank(user)
 
     if bal[0] < cost:
-        return [False, 2, name_]
+        return [False, 2, -1, name_]
 
     try:
         index = 0
@@ -1257,7 +1142,7 @@ async def buy_this(user, item_name, amount):
                 t = 1
                 break
             index += 1
-        if t == None:
+        if t is None:
             obj = {"item": name_, "amount": amount}
             users[str(user.id)]["bag"].append(obj)
     except:
@@ -1283,7 +1168,7 @@ async def sell(ctx, amount: Optional[int] = 1, *, item=None):
         for item in inv:
             pass
 
-    res = await sell_this(ctx.author, item, amount)
+    res: list[bool, int, int, str] = await sell_this(ctx.author, item, amount)
     for items in mainshop:
         if items["name"].lower() == item.lower():
             item = items["name"]
@@ -1311,7 +1196,8 @@ async def sell(ctx, amount: Optional[int] = 1, *, item=None):
     e.description = f":white_check_mark: You just sold `{amount}x` {res[3].title()} for `{int(res[2]):,} Minions™`!"
     if is_animal:
         e.set_footer(
-            text=f"You got {int(res[2] - animal_obj['sell_price']):,} more minions because you had a {bal[3]:,}x booster!")
+            text=f"You got {int(res[2] - animal_obj['sell_price']):,} more minions because you had a {bal[3]:,}x "
+                 f"booster!")
     await ctx.reply(embed=e)
 
 
@@ -1322,7 +1208,7 @@ async def sell_this(user, item_name, amount, price=None):
         name = item["name"].lower()
         if name == item_name or item_name in name:
             name_ = name
-            if price == None:
+            if price is None:
                 price = 0.7 * item["price"]
             break
     is_animal = False
@@ -1332,11 +1218,11 @@ async def sell_this(user, item_name, amount, price=None):
             if name == item_name or item_name in name:
                 name_ = name
                 is_animal = True
-                if price == None:
+                if price is None:
                     price = animal["sell_price"]
                 break
 
-    if name_ == None:
+    if name_ is None:
         return [False, 1, name_]
     cost = ...
 
@@ -1363,7 +1249,7 @@ async def sell_this(user, item_name, amount, price=None):
                 t = 1
                 break
             index += 1
-        if t == None:
+        if t is None:
             return [False, 3, name_]
     except:
         return [False, 3, name_]
@@ -1505,7 +1391,7 @@ async def take(ctx, user: discord.Member, amount: int, area: str = "wallet"):
 @client.command()
 async def poop(ctx):
     await ctx.reply(
-        f"{ctx.author.mention} :poop::poop::poop::poop::poop::poop::poop::poop::poop::poop::poop::poop::poop::poop::poop::poop::poop::poop::poop::poop::poop::poop:"
+        f"{ctx.author.mention} {':poop:' * 15}"
     )
 
 
@@ -1515,7 +1401,7 @@ async def set_channel_name(ctx,
                            channel: discord.TextChannel = None,
                            *,
                            new_name):
-    if channel == None:
+    if channel is None:
         channel = ctx.channel
     await channel.edit(name=new_name)
     await ctx.reply(":white_check_mark: Done!")
@@ -1573,10 +1459,8 @@ async def takerole(ctx, user: discord.Member, *, role: discord.Role):
 async def membercount(ctx):
     delta = datetime.datetime.now()
     embed = discord.Embed(
-        title=('Member Count'),
-        description=
-        (f'There are currently **{ctx.guild.member_count}** members in the server!'
-         ),
+        title='Member Count',
+        description=f'There are currently **{ctx.guild.member_count}** members in the server!',
         timestamp=delta,
         url='',
         color=discord.Color.dark_blue())
@@ -1597,13 +1481,13 @@ async def leaderboard(ctx, x: Optional[int] = 10):
     leader_board = {}
     for user in users:
         us = client.get_user(int(user))
-        if not us in ctx.guild.members:
+        if us not in ctx.guild.members:
             continue
         leader_board[user] = users[user]["wallet"] + users[user]["bank"]
 
     users_who_are_in = []
     new = dict(sorted(leader_board.items(), key=lambda t: t[::-1]))
-    final = sorted(new.items(), key=lambda x: x[1], reverse=True)
+    final = sorted(new.items(), key=lambda p: p[1], reverse=True)
     final = dict(final)
 
     em = discord.Embed(
@@ -1629,38 +1513,6 @@ async def leaderboard(ctx, x: Optional[int] = 10):
     em.title = f"Top {len(users_who_are_in)} Richest People In The Server"
     await ctx.reply(embed=em)
 
-
-@client.command()
-async def emojify(ctx, *, text):
-    emojis = []
-    for s in text.lower():
-        if s.isdecimal():
-            num2emo = {
-                '0': 'zero',
-                '1': 'one',
-                '2': 'two',
-                '3': 'three',
-                '4': 'four',
-                '5': 'five',
-                '6': 'six',
-                '7': 'seven',
-                '8': 'eight',
-                '9': 'nine'
-            }
-            emojis.append(f':{num2emo.get(s)}:')
-
-        elif s.isalpha():
-            emojis.append(f':regional_indicator_{s}:')
-        elif s == '!':
-            emojis.append(':grey_exclamation:')
-        elif s == '?':
-            emojis.append(':grey_question:')
-        elif s == "#":
-            emojis.append(":hash:")
-        else:
-            emojis.append(s)
-
-    await ctx.reply(' '.join(emojis))
 
 
 # @client.command()
@@ -1734,67 +1586,6 @@ async def emojify(ctx, *, text):
 #         embed=e)
 
 
-
-
-
-@client.command()
-@commands.cooldown(1, 15, commands.BucketType.user)
-async def wanted(ctx, user: discord.Member = None):
-    if user == None:
-        user = ctx.author
-
-    wanted = Image.open("pictures/wanted.jpeg")
-
-    asset = user.display_avatar.with_size(128)
-
-    data = BytesIO(await asset.read())
-    profilepic = Image.open(data)
-
-    profilepic = profilepic.resize((300, 300))
-    wanted.paste(profilepic, (78, 219))
-
-    wanted.save("pictures/wantedpic.jpeg")
-
-    await ctx.reply(file=discord.File("pictures/wantedpic.jpeg"))
-    await ctx.reply(f"{user.display_name} has a bounty of 100k OMG POGGGGG!")
-    await asyncio.sleep(0.5)
-    if user == client.user:
-        await ctx.reply("Oh no that's me. I gotta RUNNNNN!!!!")
-    wanted.close()
-
-
-@client.command()
-@commands.cooldown(1, 30, commands.BucketType.user)
-async def guessing(ctx):
-    number = random.randint(0, 100)
-    channel = ctx.message.channel
-
-    def check(m):
-        return m.content is not None and m.author == ctx.author and m.channel == channel
-
-    tries = 10
-    for i in range(0, 10):
-        await ctx.reply(
-            f'Guess a number between 0 and 100. You have {tries} tries left')
-        response = await client.wait_for('message', check=check)
-        try:
-            guess = int(response.content)
-        except:
-            return await ctx.reply("The game ended because you typed an invalid guess!")
-        if i == 9:
-            await ctx.reply(
-                f"You lost. The number was {number}. Thanks for playing!")
-            break
-        if guess > number:
-            await ctx.reply('Your number is too big!')
-            tries -= 1
-        elif guess < number:
-            await ctx.reply('Your number is too small!')
-            tries -= 1
-        else:
-            await ctx.reply('Correct! You win. Thanks for playing!')
-            break
-    return
 
 
 @client.command()
@@ -1985,7 +1776,7 @@ async def usertoid_error(ctx, error):
 @client.command()
 @commands.has_permissions(kick_members=True)
 async def kick(ctx, user: discord.Member = None, *, reason=None):
-    if user == None:
+    if user is None:
         await ctx.reply("Please enter a user!")
         return
 
@@ -1996,7 +1787,7 @@ async def kick(ctx, user: discord.Member = None, *, reason=None):
 @client.command()
 @commands.has_permissions(ban_members=True)
 async def ban(ctx, user: discord.Member = None, *, reason=None):
-    if user == None:
+    if user is None:
         await ctx.reply("Please enter a user!")
         return
 
@@ -2159,7 +1950,11 @@ async def crates(ctx, user: discord.Member = None):
         admin = get(ctx.guild.roles, name="Admin")
         mod = get(ctx.guild.roles, name="Moderator")
         owner = get(ctx.guild.roles, name="Owner")
-        if admin_amt >= 1 or sradmin in ctx.author.roles or admin in ctx.author.roles or mod in ctx.author.roles or owner in ctx.author.roles:
+        if admin_amt >= 1 or\
+                sradmin in ctx.author.roles or\
+                admin in ctx.author.roles or\
+                mod in ctx.author.roles or\
+                owner in ctx.author.roles:
             e.add_field(name="Admin", value=admin_amt)
         await ctx.reply(embed=e)
 
@@ -2181,7 +1976,7 @@ async def crateinfo(ctx):
 
 
 @client.command(aliases=["open"])
-async def opencrate(ctx, type=None, amount=None):
+async def open_crate(ctx, type=None, amount=None):
     user = ctx.author
     lootbox_data = await get_lootbox_data()
     total_lootboxes = lootbox_data[str(user.id)]["common"] + lootbox_data[str(
@@ -2192,14 +1987,14 @@ async def opencrate(ctx, type=None, amount=None):
         user.id)]["mythic"] + lootbox_data[str(
         user.id)]["admin"]
 
-    if amount == None:
+    if amount is None:
         amount = 1
 
     types = [
         "admin", "common", "c", "uncommon", "u", "rare", "r", "epic",
         "legendary", "l", "mythic", "m", "all", "a", "e"
     ]
-    if type == None:
+    if type is None:
         await ctx.reply("Please enter something to open")
         return
     elif type.lower() not in types:
@@ -2224,7 +2019,8 @@ async def opencrate(ctx, type=None, amount=None):
             e.add_field(
                 name=f"{ctx.author.name}'s crate opening session!",
                 value=
-                f"You opened {amt} **Admin** {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
+                f"You opened {amt} **Admin** {'crate' if amt == 1 else 'crates'}"
+                f" <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada: "
             )
             await update_bank(ctx.author, total_cash)
             await ctx.reply(embed=e)
@@ -2246,8 +2042,8 @@ async def opencrate(ctx, type=None, amount=None):
                               color=discord.Color.random())
             e.add_field(
                 name=f"{ctx.author.name}'s crate opening session!",
-                value=
-                f"You opened {amt} **Mythic** {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
+                value=f"You opened {amt} **Mythic**"
+                      f" {'crate' if amt == 1 else 'crates'} <:chest:898333946557894716> and got `{total_cash:,} Minions™`!!! :tada:"
             )
             await update_bank(ctx.author, total_cash)
             await ctx.reply(embed=e)
@@ -2592,115 +2388,11 @@ async def opencrate(ctx, type=None, amount=None):
             json.dump(lootbox_data, f, indent=4)
 
 
-@opencrate.error
+@open_crate.error
 async def crate_error(ctx, error):
     if isinstance(error, commands.BadArgument):
-        await ctx.reply("Your amount can't be text or a number with a decimal!"
-                        )
+        await ctx.reply("Your amount can't be text or a number with a decimal!")
         return
-
-
-@client.command()
-async def num2text(ctx, num: int = None):
-    if num is None:
-        await ctx.reply("Please enter a number!")
-        return
-    if num >= 1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000:
-        await ctx.reply("Too big of a number!")
-        return
-    if len(num2words(num).capitalize()) > 4096:
-        await ctx.reply("Too big of a number!")
-        return
-
-    new = num2words(num).capitalize()
-    e = discord.Embed(title=":capital_abcd: Numbers to words",
-                      description=f"**Input**:{num}\n\n**Output**:{new}",
-                      color=discord.Color.random())
-    e.set_footer(text=ctx.author, icon_url=ctx.author.display_avatar)
-    await ctx.reply(embed=e)
-
-
-@client.command()
-async def reverse(ctx, *, msg=None):
-    if msg is None:
-        await ctx.reply("Please enter a message!")
-        return
-    t_rev = msg[::-1].replace("@", "@\u200B").replace("&", "&\u200B")
-    await ctx.reply(f"**🔁 Text ==> txeT | {ctx.author}**\n```{t_rev}```")
-
-
-@client.command()
-async def dogfact(ctx):
-    async with aiohttp.ClientSession() as ses:
-        async with ses.get('http://some-random-api.ml/facts/dog') as r:
-            if r.status in range(200, 299):
-                data = await r.json()
-                fact = data['fact']
-                em = discord.Embed(title='Dog Fact',
-                                   description=f'{fact}',
-                                   color=discord.Color.random())
-                await ctx.reply(embed=em)
-                await ses.close()
-            else:
-                await ctx.reply("Error when making request...")
-                await ses.close()
-
-
-@client.command()
-async def jail(ctx, user: discord.Member = None):
-    loading = await ctx.reply("<a:loading:898340114164490261>")
-    if user is None:
-        user = ctx.author
-    async with aiohttp.ClientSession() as trigSession:
-        async with trigSession.get(
-                f'https://some-random-api.ml/canvas/jail?avatar={user.display_avatar.with_size(1024)}'
-        ) as trigImg:  # get users avatar as png with 1024 size
-            if trigImg.status in range(200, 299):
-                imageData = BytesIO(await
-                                    trigImg.read())  # read the image/bytes
-                await trigSession.close()  # closing the session and;
-                await ctx.reply(file=discord.File(imageData, 'image.png'))
-                await loading.delete()
-            else:
-                await ctx.reply("Error when making request...")
-                await trigSession.close()
-
-
-@client.command(aliases=["trigger"])
-async def triggered(ctx, user: discord.Member = None):
-    loading = await ctx.reply("<a:loading:898340114164490261>")
-    if user is None:
-        user = ctx.author
-    async with aiohttp.ClientSession() as trigSession:
-        async with trigSession.get(
-                f'https://some-random-api.ml/canvas/triggered?avatar={user.display_avatar.with_size(1024)}'
-        ) as trigImg:
-            if trigImg.status in range(200, 299):
-                imageData = BytesIO(await
-                                    trigImg.read())  # read the image/bytes
-                await trigSession.close()  # closing the session and;
-                await ctx.reply(file=discord.File(imageData, 'triggered.gif'))
-                await loading.delete()
-            else:
-                await ctx.reply("Error when making request...")
-                await trigSession.close()
-
-
-@client.command()
-async def joke(ctx):
-    async with aiohttp.ClientSession as ses:
-        async with ses.get('https://some-random-api.ml/joke') as r:
-            if r.status in range(200, 299):
-                data = await r.json()
-                fact = data['joke']
-                em = discord.Embed(title='Joke',
-                                   description=f'{fact}',
-                                   color=discord.Color.random())
-                await ctx.reply(embed=em)
-                await ses.close()
-            else:
-                await ctx.reply("Error when making request...")
-                await ses.close()
 
 
 @client.command()
@@ -2712,9 +2404,10 @@ async def reactrole(ctx,
                     message=None):
     prefix = await config.get_prefix(client, ctx.guild.id)
 
-    if emoji == None or role == None or message == None and ctx.author.id == ctx.guild.owner_id:
+    if emoji is None or role is None or message is None and ctx.author.id == ctx.guild.owner_id:
         return await ctx.reply(
-            f"Please enter an emoji role or message! The way you make a reaction role is `{prefix}reactrole <emoji> <role> <message>`."
+            f"Please enter an emoji role or message! The way you make a reaction role is `{prefix}reactrole <emoji> "
+            f"<role> <message>`."
         )
 
     if role.position >= ctx.me.top_role.position:
@@ -2764,32 +2457,6 @@ async def dump_job_data(data):
         json.dump(data, f, indent=4)
 
 
-@client.command(aliases=["gender"])
-async def genderify(ctx, *, name=None):
-    if name is None:
-        await ctx.reply("Please enter a name!")
-        return
-
-    genderify = await http.get(f"https://api.genderize.io?name={name.lower()}",
-                               res_method="json")
-    if str(genderify["gender"]) == "None":
-        return await ctx.reply("I don't have a gender for that name!")
-
-    e = discord.Embed(title="Genderify",
-                      description="I will guess the gender of a name!",
-                      color=discord.Color.random())
-    e.add_field(name="Name",
-                value=genderify["name"].capitalize(),
-                inline=False)
-    e.add_field(name="Gender",
-                value=genderify["gender"].capitalize(),
-                inline=False)
-    e.add_field(name="Probability",
-                value=f"{genderify['probability'] * 100}%",
-                inline=False)
-    e.add_field(name="Count", value=genderify["count"])
-
-    await ctx.reply("I have guessed the gender!!", embed=e)
 
 
 @client.event
@@ -2808,51 +2475,14 @@ async def on_raw_bulk_message_delete(payload):
                         json.dump(roles, f, indent=4)
 
 
-@client.command()
-async def spam(ctx):
-    await ctx.reply(
-        "Type as many characters you can in 30 seconds! I will tell you when to send the message for it to be counted."
-    )
-    await asyncio.sleep(1)
-    countdown = await ctx.reply("3")
-    await asyncio.sleep(1)
-    await countdown.edit("2")
-    await asyncio.sleep(1)
-    await countdown.edit("1")
-    await asyncio.sleep(1)
-    await countdown.edit("TYPE!!!!")
-    new_countdown = await ctx.reply("30")
-    for num in range(30, -1, -1):
-        await new_countdown.edit(f"{num}")
-        await asyncio.sleep(1)
-    await ctx.reply("Times up!")
-    await ctx.reply(
-        "Please send you message within 3 seconds or your run is disqualified!"
-    )
-    user_msg = None
-    try:
-        user_msg = await client.wait_for(
-            'message',
-            timeout=3,
-            check=lambda message: message.author == ctx.author and message.
-            channel == ctx.channel)
-    except asyncio.TimeoutError:
-        return await ctx.reply("You ran out of time to submit your message! :(")
-    if len(user_msg.content) >= 1200:
-        return await ctx.reply(
-            "I know you didn't type all of this in a legit way...")
-    await ctx.reply(
-        f"Your message was **{len(user_msg.content)}** characters long!! :tada: :tada:"
-    )
-
 
 @client.command()
 async def eadd(ctx, url: str = None, *, name=None):
     guild = ctx.guild
     if ctx.author.id == ctx.guild.owner_id:
-        if name == None:
+        if name is None:
             return await ctx.reply("Please enter a name for the emoji!")
-        if url == None:
+        if url is None:
             return await ctx.reply(
                 "Please enter the url of the emoji you want to add to your server!"
             )
@@ -2877,30 +2507,11 @@ async def eadd(ctx, url: str = None, *, name=None):
         await ctx.reply("Only server owners can create custom emojis!")
 
 
-def calculator(exp):
-    o = exp.replace('x', '*')
-    o = o.replace('÷', '/')
-    result = 0
-    try:
-        result = str(eval(o))
-    except:
-        result = "An error occurred"
-    return result
 
 
-@client.command()
-async def sqrt(ctx, *, expression):
-    try:
-        return await ctx.reply(
-            f"The square root \u221A of the expression/number {expression} is\n{math.sqrt(float(calculator(expression)))}"
-        )
-    except Exception as e:
-        return await ctx.reply(f"An error occurred :( . ({e})")
-
-
-@client.command()
+@client.command(aliases=["exit"])
 @commands.is_owner()
-async def exit(ctx):
+async def exit_bot(ctx):
     await ctx.reply("Logging out now...")
     await asyncio.sleep(1)
     await client.close()
@@ -2908,7 +2519,7 @@ async def exit(ctx):
 
 @client.command()
 async def gay(ctx, user: discord.Member = None):
-    if user == None:
+    if user is None:
         user = ctx.author
     if user.id == 717512097725939795 and ctx.author != user:
         await ctx.reply(f"{ctx.author.mention} he's not gay, you are.")
@@ -2947,7 +2558,7 @@ async def give_animal(user, animal):
                 t = 1
                 break
             index += 1
-        if t == None:
+        if t is None:
             obj = {"item": animal_name, "amount": 1}
             users[str(user.id)]["bag"].append(obj)
     except:
@@ -3068,6 +2679,9 @@ async def credits(ctx):
     e.add_field(name="Creature ideas for when hunting or fishing",
                 value=p1,
                 inline=False)
+    e.add_field(name="Image apis",
+                value="AlexFlipnote",
+                inline=False)
     e.add_field(name="Starter Code",
                 value="https://github.com/AyushSehrawat/Economy-Bot")
     await ctx.reply(embed=e)
@@ -3104,7 +2718,8 @@ async def config_cmd(ctx):
     elif change_config.lower() == 'y':
         await ctx.reply("Choose a configuration to change:")
         await ctx.reply(
-            "Type `1` to change the giveaway role.\nType `2` to toggle the leveling system.\nType `3` to change the mod role."
+            "Type `1` to change the giveaway role.\nType `2` to toggle the leveling system.\nType `3` to change the "
+            "mod role. "
         )
         change_config_type = ...
         try:

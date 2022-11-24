@@ -1,4 +1,5 @@
 import nextcord as discord
+from nextcord import Interaction, SlashOption
 from nextcord.ext import commands
 import re
 from src.utils import config
@@ -354,12 +355,14 @@ class Info(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print('Info Cog Loaded Succesfully')
+        print('Info Cog Loaded Successfully')
 
-    @commands.command(aliases=['help'])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def _help(self, ctx, query=None):
-        prefix = await config.get_prefix(self.client, ctx.guild.id)
+    @discord.slash_command(name="help", description="Shows the help menu")
+    # @commands.cooldown(1, 10, commands.BucketType.user)
+    async def _help(self, interaction: Interaction,
+                    query: str = SlashOption(name="query", description="The command you want to get info on",
+                                             required=False)):
+        prefix = await config.get_prefix(self.client, interaction.guild.id)
         if query is not None:
             selected = None
             all_pages = get_economy_embed(prefix) + get_moderation_embeds(prefix) + get_music_embeds(
@@ -378,21 +381,19 @@ class Info(commands.Cog):
                             break
                         elif i[len(i) - 1] == " ":
                             original_text[original_text.index(i)] = i.replace(" ", "").lower()
-                            # i = i.replace(" ", "")
+                            i = i.replace(" ", "")
                     if space:
                         continue
                     if query.lower() in original_text:
                         selected = field
             if selected is None:
-                self._help.reset_cooldown(ctx)
-                return await ctx.send("Could not find a command with that query!")
+                return await interaction.response.send_message("Could not find a command with that query!")
             e = discord.Embed(title=f"The '{query.lower()}' command", color=discord.Color.random())
             e.add_field(name=f"Usage: ", value=f"{selected.name}", inline=False)
             e.add_field(name="Description: ", value=selected.value, inline=False)
-            return await ctx.reply(embed=e)
-        view = CategoriesView(ctx.author, ctx.guild, prefix, self.client)
-        view.message = await ctx.reply(f"You can type {prefix}help (any command) to view that command's info!",
-                                       embed=get_economy_embed(prefix)[0], view=view)
+            return await interaction.response.send_message(embed=e)
+        view = CategoriesView(interaction.user, interaction.guild, prefix, self.client)
+        view.message = await interaction.response.send_message(embed=get_economy_embed(prefix)[0], view=view)
 
 
 def setup(client):

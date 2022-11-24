@@ -1,6 +1,19 @@
+import simpleeval
 from nextcord.ext import commands
 import nextcord as discord
 import asyncio
+from simpleeval import simple_eval
+
+
+def calculator(exp):
+    o = exp.replace('x', '*')
+    o = o.replace('÷', '/')
+    try:
+        result = str(simple_eval(o))
+        return result
+    except simpleeval.FeatureNotAvailable:
+        result = "An error occurred"
+        return result
 
 
 exception_texts = ["An error occurred", "Too big of a number"]
@@ -17,17 +30,6 @@ async def calculator_button(self, button, interaction):
         else:
             self.calculator_embed.description += button.label
         await self.calculator_message.edit(embed=self.calculator_embed)
-
-
-def calculator(exp):
-    o = exp.replace('x', '*')
-    o = o.replace('÷', '/')
-    try:
-        result = str(eval(o))
-    except:
-        result = "An error occurred"
-
-    return result
 
 
 class Calculator_Buttons(discord.ui.View):
