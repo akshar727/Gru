@@ -2,7 +2,7 @@ from nextcord.ext import commands
 import nextcord as discord
 import json
 import random
-from src.utils import config
+from src.utils import functions
 import aiosqlite
 
 fake_cmds = ['balance', '_help']
@@ -105,7 +105,7 @@ class Events(commands.Cog):
             return
         try:
             if message.mentions[0] == self.bot.user and message.content == '<@874328552965820416>':
-                prefix = await config.get_prefix(self.bot, message.guild.id)
+                prefix = await functions.get_prefix(self.bot, message.guild.id)
                 await message.channel.send(f"My prefix for this server is `{prefix}`")
         except IndexError:
             pass
@@ -166,7 +166,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_completion(self, ctx):
-        await config.open_account(ctx.author)
+        await functions.open_account(ctx.author)
         async with self.bot.db.cursor() as cursor:
             await cursor.execute("SELECT max from mainbank WHERE user = ?", (ctx.author.id,))
             max_amt = await cursor.fetchone()

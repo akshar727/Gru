@@ -1,8 +1,10 @@
 import simpleeval
+from nextcord import Interaction, SlashOption
 from nextcord.ext import commands
 import nextcord as discord
 import asyncio
 from simpleeval import simple_eval
+import math
 
 
 def calculator(exp):
@@ -178,29 +180,35 @@ class Calculator_Buttons(discord.ui.View):
             pass
 
 
-class Calculator(commands.Cog):
+class Mathematics(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.calculator_users = []
 
-    @commands.command()
-    async def calc(self, ctx):
-        if f'{ctx.author.id}' in self.calculator_users:
-            await ctx.reply("You already have a calculator open! Close it to open another one!")
+    @discord.slash_command(name="calculator", description="A calculator made out of buttons!")
+    async def calc(self, interaction: Interaction):
+        if f'{interaction.user.id}' in self.calculator_users:
+            await interaction.response.send_message("You already have a calculator open! Close it to open another one!")
             return
-        self.calculator_users.append(f'{ctx.author.id}')
-        try:
-            await ctx.message.delete()
-        except (discord.HTTPException, discord.NotFound):
-            pass
-        e = discord.Embed(title=f"{ctx.author.name}'s calculator! | {ctx.author.id}", description="0",
+        self.calculator_users.append(f'{interaction.user.id}')
+        e = discord.Embed(title=f"{interaction.user.name}'s calculator! | {interaction.user.id}", description="0",
                           color=discord.Color.random())
-        p = await ctx.send("Calculator loading...", embed=e)
-        view = Calculator_Buttons(ctx.author, p, e, self.calculator_users)
+        p = await interaction.response.send_message("Calculator loading...", embed=e)
+        view = Calculator_Buttons(interaction.user, p, e, self.calculator_users)
         await asyncio.sleep(1)
-        await p.edit(view=view)
-        await p.edit("Calculator Loaded!")
+        await interaction.edit_original_message(content="Calculator loaded!", view=view)
+
+    @discord.slash_command(description="Get the square root of a number or expression")
+    async def sqrt(self, interaction: Interaction,
+                   expression: str = SlashOption(description="The number to get the square root of")):
+        try:
+            return await interaction.response.send_message(
+                f"The square root \u221A of the expression/number {expression} is"
+                f"\n{math.sqrt(float(calculator(expression)))}"
+            )
+        except simpleeval.FeatureNotAvailable:
+            return await interaction.response.send_message(f"An error occurred :(.")
 
 
 def setup(bot):
-    bot.add_cog(Calculator(bot))
+    bot.add_cog(Mathematics(bot))

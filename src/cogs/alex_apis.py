@@ -41,9 +41,10 @@ class AlexApis(commands.Cog):
                           color1: int = SlashOption(description="The 1st color value (red) 0-255", required=True),
                           color2: int = SlashOption(description="The 2nd color value (green) 0-255", required=True),
                           color3: int = SlashOption(description="The 3rd color value (blue) 0-255", required=True),
-                          color4: int = SlashOption(description="The last color value (opacity) 0-255", required=True),
+                          color4: int = SlashOption(description="The last color value (opacity) 0-255",
+                                                    default=255, required=False),
                           icon: int = SlashOption(description="Icon for the achievement (leave blank for random"
-                                                              "). Icons can be found in the gru achicons command",
+                                                              "). Icons can be found in the /achicons command",
                                                   required=False)
                           ):
         """Create an achievement image."""

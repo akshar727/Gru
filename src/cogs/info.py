@@ -1,8 +1,9 @@
 import nextcord as discord
+import psutil
 from nextcord import Interaction, SlashOption
 from nextcord.ext import commands
 import re
-from src.utils import config
+from src.utils import functions
 
 
 def get_economy_embed(prefix):
@@ -137,7 +138,6 @@ def get_fun_embeds(prefix):
 
     page2 = discord.Embed(title="Help Commands", description='All the **Fun** commands in the bot. (Page 2)',
                           color=0x00ff00)
-    page2.add_field(name=f'{prefix}guessing', value='''Opens up a guessing game!''', inline=False)
     page2.add_field(name=f'{prefix}calc', value='''Opens up a virtual calculator!''', inline=False)
     page2.add_field(name=f'{prefix}gayrate <user>', value='''Check how gay someone is!''', inline=False)
     page2.add_field(name=f'{prefix}avatar <user> ', value="Allows you to see someone's avatar picture!", inline=False)
@@ -156,7 +156,6 @@ def get_fun_embeds(prefix):
                     inline=False)
     page3.add_field(name=f'{prefix}sqrt <number or expression>',
                     value="Gives you the square root of a number or expression!", inline=False)
-    page3.add_field(name=f'{prefix}spam', value="Type as many characters as you can in 30 seconds!", inline=False)
     page3.add_field(name=f'{prefix}gay <user>', value="Makes a gay overlay!", inline=False)
     page3.add_field(name=f'{prefix}stats', value='''Allows you to see the bot's stats!''', inline=False)
     page3.set_footer(text="Arguments that are surrounded in [] are optional. Page 3/4")
@@ -204,7 +203,7 @@ class HelpOptions(discord.ui.Select):
 
     async def callback(self, interaction: discord.Interaction):
         _type = self.values[0]
-        prefix = await config.get_prefix(self.bot, interaction.guild.id)
+        prefix = await functions.get_prefix(self.bot, interaction.guild.id)
         if interaction.user != self.parent.author:
             await interaction.response.edit_message(view=self.parent)
             return await interaction.send("This is not your help menu.", ephemeral=True)
@@ -357,12 +356,26 @@ class Info(commands.Cog):
     async def on_ready(self):
         print('Info Cog Loaded Successfully')
 
-    @discord.slash_command(name="help", description="Shows the help menu")
-    # @commands.cooldown(1, 10, commands.BucketType.user)
-    async def _help(self, interaction: Interaction,
-                    query: str = SlashOption(name="query", description="The command you want to get info on",
-                                             required=False)):
-        prefix = await config.get_prefix(self.client, interaction.guild.id)
+    @commands.command()
+    async def stats(self,ctx):
+        e = discord.Embed(title="My Stats!", color=discord.Color.random())
+        e.add_field(name="Days:", value=self.client.td, inline=True)
+        e.add_field(name="Hours:", value=self.client.th, inline=True)
+        e.add_field(name="Minutes:", value=self.client.tm, inline=True)
+        e.add_field(name="Seconds:", value=self.client.ts, inline=True)
+        e.add_field(name="CPU:", value=f"{psutil.cpu_percent()}%", inline=False)
+        e.add_field(name="RAM:",
+                    value=f"{psutil.virtual_memory()[2]}%",
+                    inline=True)
+        e.add_field(name="Version:",
+                    value=f"{functions.getenv('BOT_VERSION')}",
+                    inline=False)
+        await ctx.reply(embed=e)
+
+    @commands.command(aliases=['help'])
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def _help(self, ctx,query: str):
+        prefix = await functions.get_prefix(self.client, ctx.guild.id)
         if query is not None:
             selected = None
             all_pages = get_economy_embed(prefix) + get_moderation_embeds(prefix) + get_music_embeds(
@@ -387,13 +400,13 @@ class Info(commands.Cog):
                     if query.lower() in original_text:
                         selected = field
             if selected is None:
-                return await interaction.response.send_message("Could not find a command with that query!")
+                return await ctx.reply("Could not find a command with that query!")
             e = discord.Embed(title=f"The '{query.lower()}' command", color=discord.Color.random())
             e.add_field(name=f"Usage: ", value=f"{selected.name}", inline=False)
             e.add_field(name="Description: ", value=selected.value, inline=False)
-            return await interaction.response.send_message(embed=e)
-        view = CategoriesView(interaction.user, interaction.guild, prefix, self.client)
-        view.message = await interaction.response.send_message(embed=get_economy_embed(prefix)[0], view=view)
+            return await ctx.reply(embed=e)
+        view = CategoriesView(ctx.author, ctx.guild, prefix, self.client)
+        view.message = await ctx.reply(embed=get_economy_embed(prefix)[0], view=view)
 
 
 def setup(client):

@@ -1,8 +1,9 @@
+import cooldowns
 from nextcord.ext import commands
 import nextcord as discord
 import traceback
 import datetime
-from src.utils import config
+from src.utils import functions
 
 
 class Exceptions(commands.Cog):
@@ -19,14 +20,17 @@ class Exceptions(commands.Cog):
                                           error.__traceback__,
                                           file=f)
                 f.write("\n")
-        if isinstance(error, commands.CommandNotFound):
-            if ctx.author in config.working_users:
-                return config.working_users.pop(config.working_users.index(ctx.author))
-            prefix = await config.get_prefix(self.bot, ctx.guild.id)
+            traceback.print_exception(type(error),
+                                      error,
+                                      error.__traceback__)
+        elif isinstance(error, commands.CommandNotFound):
+            if ctx.author in functions.working_users:
+                return functions.working_users.pop(functions.working_users.index(ctx.author))
+            prefix = await functions.get_prefix(self.bot, ctx.guild.id)
             await ctx.reply(
                 f"Unknown command. Try {prefix}help for a list of commands")
             return
-        elif isinstance(error, commands.CommandOnCooldown):
+        elif isinstance(error, commands.CommandOnCooldown) or isinstance(error, cooldowns.exceptions.CallableOnCooldown):
             tim = datetime.datetime.now() + datetime.timedelta(seconds=error.retry_after)
             _str = f"<t:{int(tim.timestamp())}:R>"
             if error.retry_after <= 60:
@@ -87,7 +91,7 @@ class Exceptions(commands.Cog):
             )
             return
         elif isinstance(error, commands.MissingRequiredArgument):
-            prefix = await config.get_prefix(self.bot, ctx.guild.id)
+            prefix = await functions.get_prefix(self.bot, ctx.guild.id)
             await ctx.reply(
                 f":x: Missing arguments! check {prefix}help if you need to know about how to use the command."
             )
@@ -122,11 +126,13 @@ class Exceptions(commands.Cog):
                 self.bot.get_command(ctx.invoked_with).reset_cooldown(ctx)
             except:
                 pass
-            prefix = await config.get_prefix(self.bot, ctx.guild.id)
+            prefix = await functions.get_prefix(self.bot, ctx.guild.id)
             return await ctx.reply(
                 f"An error has occurred with the command!."
                 f"Please check `{prefix}help` to make sure you are using the command correctly. Error reported."
             )
+        else:
+            raise error
 
 
 def setup(bot):

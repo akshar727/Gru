@@ -1,4 +1,3 @@
-from nextcord import Interaction, SlashOption
 from nextcord.ext import commands
 import nextcord as discord
 from easy_pil import Editor, Font, load_image_async, Text
@@ -115,20 +114,17 @@ class Levels(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @discord.slash_command(name="level", description="Get yours or other's level cards")
-    async def lvl(self, interaction: Interaction,
-                  member: discord.Member = SlashOption(name="member", description="Member to get level card of",
-                                                       required=False)
-                  ):
+    @commands.command(aliases=['rank', 'lvl'])
+    async def level(self, ctx, member: discord.Member = None):
         async with self.bot.db.cursor() as cursor:
-            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (interaction.guild.id,))
+            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
             levelsys = await cursor.fetchone()
             if levelsys and not levelsys[0]:
                 # 0: False, 1: True
-                return await interaction.response.send_message("Levels are disabled in this server.")
+                return await ctx.reply("Levels are disabled in this server.")
         if not member:
-            user = interaction.user
-            lvl_data = await get_level_data(self.bot, user, interaction.guild)
+            user = ctx.message.author
+            lvl_data = await get_level_data(self.bot, user, ctx.guild)
             level = lvl_data[1]
             xp = lvl_data[0]
             # this is to prevent showing numbers over 100% (when user levels up by sending this command)
@@ -137,70 +133,66 @@ class Levels(commands.Cog):
             if level_start < level_end:
                 level += 1
 
-            rank = await get_rank(self.bot, user, interaction.guild)
-            return await interaction.response.send_message(file=await get_lvl_card(level, xp, user, rank))
+            rank = await get_rank(self.bot, ctx.author, ctx.guild)
+            return await ctx.reply(file=await get_lvl_card(level, xp, ctx.author, rank))
 
         else:
             if member.bot:
-                return await interaction.response.send_message("Bots aren't in the database!")
+                await ctx.reply("Bots aren't in the database!")
+                return
             user = member
-            lvl_data = await get_level_data(self.bot, user, interaction.guild)
+            lvl_data = await get_level_data(self.bot, user, ctx.guild)
             level = lvl_data[1]
             xp = lvl_data[0]
-            rank = await get_rank(self.bot, member, interaction.guild)
-            return await interaction.response.send_message(file=await get_lvl_card(level, xp, member, rank))
+            rank = await get_rank(self.bot, member, ctx.guild)
+            return await ctx.reply(file=await get_lvl_card(level, xp, member, rank))
 
-    @discord.slash_command(name="lvlsys", description="Base level system command [No function]")
-    async def lvlsys(self, interaction: discord.Interaction):
+    @commands.group()
+    async def lvlsys(self, ctx):
         return
 
     # TODO: ADD TO HELP
-    @lvlsys.subcommand(name="enable", description="Enable the level system.")
+    @lvlsys.command(aliases=['e', 'en'])
     @commands.has_permissions(manage_guild=True)
-    async def enable(self, interaction: Interaction):
+    async def enable(self, ctx):
         async with self.bot.db.cursor() as cursor:
-            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (interaction.guild.id,))
+            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
             levelsys = await cursor.fetchone()
             if levelsys:
                 if levelsys[0]:
-                    return await interaction.response.send_message("The leveling system is already enabled!")
-                await cursor.execute("UPDATE levelSettings SET levelsys = ? WHERE guild = ?",
-                                     (True, interaction.guild.id,))
+                    return await ctx.reply("The leveling system is already enabled!")
+                await cursor.execute("UPDATE levelSettings SET levelsys = ? WHERE guild = ?", (True, ctx.guild.id,))
             else:
-                await cursor.execute("INSERT INTO levelSettings VALUES (?, ?, ?, ?)",
-                                     (True, 0, 0, interaction.guild.id,))
-            await interaction.response.send_message("The leveling system has been enabled!")
+                await cursor.execute("INSERT INTO levelSettings VALUES (?, ?, ?, ?)", (True, 0, 0, ctx.guild.id,))
+            await ctx.reply("The leveling system has been enabled!")
         await self.bot.db.commit()
 
-    @lvlsys.subcommand(name="disable", description="Disable the level system.")
+    @lvlsys.command(aliases=['d', 'dis'])
     @commands.has_permissions(manage_guild=True)
-    async def disable(self, interaction: Interaction):
+    async def disable(self, ctx):
         async with self.bot.db.cursor() as cursor:
-            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (interaction.guild.id,))
+            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
             levelsys = await cursor.fetchone()
             if levelsys:
                 if not levelsys[0]:
-                    return await interaction.response.send_message("The leveling system is already disabled!")
-                await cursor.execute("UPDATE levelSettings SET levelsys = ? WHERE guild = ?",
-                                     (False, interaction.guild.id,))
+                    return await ctx.reply("The leveling system is already disabled!")
+                await cursor.execute("UPDATE levelSettings SET levelsys = ? WHERE guild = ?", (False, ctx.guild.id,))
             else:
-                await cursor.execute("INSERT INTO levelSettings VALUES (?, ?, ?, ?)",
-                                     (False, 0, 0, interaction.guild.id,))
-            await interaction.response.send_message("The leveling system has been disabled!")
+                await cursor.execute("INSERT INTO levelSettings VALUES (?, ?, ?, ?)", (False, 0, 0, ctx.guild.id,))
+            await ctx.reply("The leveling system has been disabled!")
         await self.bot.db.commit()
 
-    @discord.slash_command(name="level_leaderboard", description="Get a leaderboard with the users that have the "
-                                                                 "highest level and xp.") 
-    async def _levelleaderboard(self, interaction: Interaction):
+    @commands.command(aliases=['lvllb', 'levellb', 'llb'])
+    async def levelleaderboard(self, ctx):
         async with self.bot.db.cursor() as cursor:
-            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (interaction.guild.id,))
+            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
             levelsys = await cursor.fetchone()
             if levelsys and not levelsys[0]:
                 # 0: False, 1: True
-                return await interaction.response.send_message("Levels are disabled in this server.")
+                return await ctx.reply("Levels are disabled in this server.")
             await cursor.execute(
                 "SELECT level, xp, user FROM levels WHERE guild = ? ORDER BY level DESC, xp DESC LIMIT 10",
-                (interaction.guild.id,))
+                (ctx.guild.id,))
             data = await cursor.fetchall()
             if data:
                 e = discord.Embed(
@@ -210,80 +202,73 @@ class Levels(commands.Cog):
                 count = 0
                 for table in data:
                     count += 1
-                    user = interaction.guild.get_member(table[2])
+                    user = ctx.guild.get_member(table[2])
                     e.add_field(name=f"{count}. {user.name}#{user.discriminator}",
                                 value=f"Level: {table[0]}| XP: {round(table[1])}",
                                 inline=False)
-                await interaction.response.send_message(embed=e)
+                await ctx.reply(embed=e)
             else:
-                return await interaction.response.send_message("Somehow, there are no users in the leveling system!")
+                return await ctx.reply("Somehow, there are no users in the leveling system!")
 
-    @discord.slash_command(name="rewards", description="Get a list of all the rewards you can get from leveling up.")
-    async def _rewards(self, interaction: Interaction):
+    @commands.command()
+    async def rewards(self, ctx):
         async with self.bot.db.cursor() as cursor:
-            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (interaction.guild.id,))
+            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
             levelsys = await cursor.fetchone()
             if levelsys and not levelsys[0]:
                 # 0: False, 1: True
-                return await interaction.response.send_message("Levels are disabled in this server.")
-            await cursor.execute("SELECT * FROM levelSettings WHERE guild = ? ORDER BY levelReq",
-                                 (interaction.guild.id,))
+                return await ctx.reply("Levels are disabled in this server.")
+            await cursor.execute("SELECT * FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
             roleLevels = await cursor.fetchall()
             if not roleLevels:
-                return await interaction.response.send_message("There are no role levels that have been setup for "
-                                                               "this server!")
+                return await ctx.send("There are no level rewards that have been setup for this server!")
             em = discord.Embed(title="Role Levels",
                                description="The roles that you can get from leveling up in this server.",
                                color=discord.Color.random())
             for role in roleLevels:
                 if role[1] != 0:
-                    em.add_field(name=f"Level {role[2]}", value=f"{interaction.guild.get_role(role[1]).mention}",
-                                 inline=False)
-            await interaction.response.send_message(embed=em)
+                    em.add_field(name=f"Level {role[2]}", value=f"{ctx.guild.get_role(role[1]).mention}", inline=False)
+            await ctx.send(embed=em)
 
-    @lvlsys.subcommand(name="role", description="Set a role to be given to a user when they reach a certain level.")
+    @lvlsys.command(aliases=['sr', 'addrole', 'ar'])
     @commands.has_permissions(manage_messages=True)
-    async def setrole(self, interaction: Interaction,
-                      level: int = SlashOption(description="The level that this will be the reward for"),
-                      role: discord.Role = SlashOption(description="The role that will be given to the user.")):
+    async def setrole(self, ctx, level: int, *, role: discord.Role):
         async with self.bot.db.cursor() as cursor:
-            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (interaction.guild.id,))
+            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
             levelsys = await cursor.fetchone()
             if levelsys and not levelsys[0]:
                 # 0: False, 1: True
-                return await interaction.response.send_message("Levels are disabled in this server.")
+                return await ctx.reply("Levels are disabled in this server.")
             await cursor.execute("SELECT role FROM levelSettings WHERE role = ? and guild = ?",
-                                 (role.id, interaction.guild.id,))
+                                 (role.id, ctx.guild.id,))
             roleTF = await cursor.fetchone()
             await cursor.execute("SELECT role FROM levelSettings WHERE levelReq = ? and guild = ?",
-                                 (level, interaction.guild.id,))
+                                 (level, ctx.guild.id,))
             levelTF = await cursor.fetchone()
             if roleTF or levelTF:
-                return await interaction.response.send_message("A reward for the level already exists!")
-            await cursor.execute("INSERT INTO levelSettings VALUES (?, ?, ?, ?)",
-                                 (True, role.id, level, interaction.guild.id,))
+                return await ctx.send("A reward for the level already exists!")
+            await cursor.execute("INSERT INTO levelSettings VALUES (?, ?, ?, ?)", (True, role.id, level, ctx.guild.id,))
             await self.bot.db.commit()
-        await interaction.response.send_message("That level reward was created!")
+        await ctx.send("That level reward was created!")
 
-    @lvlsys.subcommand(name="remove", description="Remove a role reward from a level.")
+    @lvlsys.command(aliases=['removerole', 'rr'])
     @commands.has_permissions(manage_messages=True)
-    async def remrole(self, interaction: Interaction,
-                      level: int = SlashOption(description="The level that the reward was originally for.")):
+    async def remrole(self, ctx, level: int):
         async with self.bot.db.cursor() as cursor:
-            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (interaction.guild.id,))
+            await cursor.execute("SELECT levelsys FROM levelSettings WHERE guild = ?", (ctx.guild.id,))
             levelsys = await cursor.fetchone()
             if levelsys and not levelsys[0]:
                 # 0: False, 1: True
-                return await interaction.response.send_message("Levels are disabled in this server.")
+                return await ctx.reply("Levels are disabled in this server.")
             await cursor.execute("SELECT role FROM levelSettings WHERE levelReq = ? and guild = ?",
-                                 (level, interaction.guild.id,))
+                                 (level, ctx.guild.id,))
             levelTF = await cursor.fetchone()
             if levelTF:
                 await cursor.execute("DELETE FROM levelSettings WHERE levelReq = ? and guild = ?",
-                                     (level, interaction.guild.id,))
-                await interaction.response.send_message("That level reward has been deleted!")
+                                     (level, ctx.guild.id,))
+                await ctx.send("That level reward has been deleted!")
             else:
-                await interaction.response.send_message("There is not a reward for the level requirement!")
+                await ctx.send("There is not a reward for the level requirement!")
             await self.bot.db.commit()
 
 

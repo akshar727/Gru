@@ -164,20 +164,18 @@ class Tickets(commands.Cog):
                                                 ephemeral=True)
 
     # TODO: Add to help
-    @discord.slash_command(name="ticket_role", description="Set the role that can see tickets like a 'mod' role")
+    @commands.command()
     @commands.has_permissions(manage_guild=True)
-    async def ticket_role(self, interaction: Interaction,
-                          role: discord.Role = SlashOption(description="The role to set.")):
+    async def ticket_role(self, ctx, role: discord.Role):
         async with self.bot.db.cursor() as cursor:
-            await cursor.execute("SELECT role FROM ticketRoles WHERE guild = ?", (interaction.guild.id,))
+            await cursor.execute("SELECT role FROM ticketRoles WHERE guild = ?", (ctx.guild.id,))
             role2 = await cursor.fetchone()
             if role2:
-                await cursor.execute("UPDATE ticketRoles SET role = ? WHERE guild = ?",
-                                     (role.id, interaction.guild.id,))
-                await interaction.response.send_message("Tickets Auto-Assigned role successfully updated!")
+                await cursor.execute("UPDATE ticketRoles SET role = ? WHERE guild = ?", (role.id, ctx.guild.id,))
+                await ctx.send("Tickets Auto-Assigned role successfully updated!")
             else:
-                await cursor.execute("INSERT INTO ticketRoles VALUES (?, ?)", (role.id, interaction.guild.id,))
-                await interaction.response.send_message("Tickets Auto-Assigned role successfully added!")
+                await cursor.execute("INSERT INTO ticketRoles VALUES (?, ?)", (role.id, ctx.guild.id,))
+                await ctx.send("Tickets Auto-Assigned role successfully added!")
 
     @commands.Cog.listener()
     async def on_ready(self):

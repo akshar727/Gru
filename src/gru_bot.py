@@ -1,4 +1,4 @@
-from src.utils import config
+from src.utils import functions
 import nextcord as discord
 from nextcord.ext import commands, tasks
 
@@ -19,7 +19,7 @@ class GruBot(commands.Bot):
         return [self.ts, self.tm, self.th, self.td]
 
     async def is_owner(self, user: discord.User):
-        if user.id == int(config.getenv("BOT_OWNER_ID")):
+        if user.id == int(functions.getenv("BOT_OWNER_ID")):
             return True
         else:
             return False

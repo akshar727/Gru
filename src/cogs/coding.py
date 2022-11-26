@@ -5,7 +5,7 @@ import nextcord as discord
 from io import BytesIO
 from nextcord.ext import commands
 from nextcord.ext.commands.errors import BadArgument
-from src.utils import http, config
+from src.utils import http, functions
 import sys
 
 
@@ -30,7 +30,7 @@ async def encrypt_out(ctx, convert: str, input_text):
 
         try:
             return await ctx.reply(content=f"📑 **{convert}**",
-                                   file=discord.File(data, filename=config.timetext("Encryption")))
+                                   file=discord.File(data, filename=functions.timetext("Encryption")))
         except discord.HTTPException:
             return await ctx.reply(f"The file I returned was over 8 MB, sorry {ctx.author.name}...")
 
@@ -69,7 +69,7 @@ class Encryption(commands.Cog):
     async def encode(self, ctx):
         """ All encode methods """
         if ctx.invoked_subcommand is None:
-            prefix = await config.get_prefix(self.bot, ctx.guild.id)
+            prefix = await functions.get_prefix(self.bot, ctx.guild.id)
             em = discord.Embed(title="Encode Help",
                                description=f"**{prefix}encode**\n\nAll encoding methods.\n\n"
                                            "**Commands**\n**{prefix}encode ascii85 <text>** - Encode in ASCII85\n**{"
@@ -88,7 +88,7 @@ class Encryption(commands.Cog):
     async def decode(self, ctx):
         """ All decode methods """
         if ctx.invoked_subcommand is None:
-            prefix = await config.get_prefix(self.bot, ctx.guild.id)
+            prefix = await functions.get_prefix(self.bot, ctx.guild.id)
             em = discord.Embed(title="Decode Help",
                                description=f"**{prefix}decode**\n\nAll decoding methods.\n\n"
                                            "**Commands**\n**{prefix}decode ascii85 <text>** - Decode in ASCII85\n**{"
@@ -336,7 +336,7 @@ class Encryption(commands.Cog):
 
             """ Invite me to your server """
             await ctx.reply(
-                f"**{ctx.author.name}**, use this URL to invite me\n<{config.getenv('discord_inv_link')}>")
+                f"**{ctx.author.name}**, use this URL to invite me\n<{functions.getenv('discord_inv_link')}>")
         else:
             await ctx.reply(
                 'Currently, no one but the owner of this bot can invite me.')

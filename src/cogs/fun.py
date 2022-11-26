@@ -1,7 +1,6 @@
 import asyncio
 import base64
 import json
-import math
 import random
 import re
 import string
@@ -12,25 +11,14 @@ from io import BytesIO
 
 import aiohttp
 import nextcord as discord
-import simpleeval
 from easy_pil import Editor, load_image_async
 from googleapiclient.discovery import build
+from nextcord import SlashOption, Interaction
 from nextcord.ext import commands
 from num2words import num2words
-from simpleeval import simple_eval
+import cooldowns
 
-from src.utils import http, config
-
-
-def calculator(exp):
-    o = exp.replace('x', '*')
-    o = o.replace('÷', '/')
-    try:
-        result = str(simple_eval(o))
-        return result
-    except AttributeError:
-        result = "An error occurred"
-        return result
+from src.utils import http, functions
 
 
 class DropdownImageSelect(discord.ui.Select):
@@ -112,9 +100,9 @@ def get_hacking_text(user):
     }
 
 
-async def run_hack(message, user):
+async def run_hack(interaction, user):
     for text, wait_time in get_hacking_text(user).items():
-        await message.edit(text)
+        await interaction.edit_original_message(content=text)
         await asyncio.sleep(wait_time)
 
 
@@ -126,27 +114,23 @@ class Fun(commands.Cog):
     async def on_ready(self):
         print("Fun Cog has been loaded!")
 
-    @commands.command(aliases=["heck"])
-    @commands.cooldown(1, 120, commands.BucketType.user)
-    async def hack(self, ctx, user: discord.Member = None):
-        if user is None:
-            await ctx.reply("Please enter a user to hack!(Unless you want to hack air)")
-            self.hack.reset_cooldown(ctx)
-            return
+    @discord.slash_command(description="Does a very real hack on a user")
+    @cooldowns.cooldown(1, 120, cooldowns.SlashBucket.author)
+    async def hack(self, interaction: Interaction, user: discord.Member = SlashOption(description="The user you want to hack")):
         if user == self.bot:
-            await ctx.reply("I AM UNHACKABLE.")
-            return self.hack.reset_cooldown(ctx)
+            await interaction.response.send_message("I AM UNHACKABLE.")
+            return cooldowns.reset_bucket(self.hack)
         if user.bot:
-            await ctx.reply("MY KIND ARE UNHACKABLE. STAY AWAY.")
-            return self.hack.reset_cooldown(ctx)
+            await interaction.response.send_message("MY KIND ARE UNHACKABLE. STAY AWAY.")
+            return cooldowns.reset_bucket(self.hack)
         with open('assets/countries.txt', 'r', encoding="utf8") as f:
             countries = f.read()
             countries_list = list(map(str, countries.split()))
             country = random.choice(countries_list)
 
-        hack_msg = await ctx.reply(f"Hacking! Target: {user}...")
+        hack_msg = await interaction.response.send_message(f"Hacking! Target: {user}...")
         await asyncio.sleep(1)
-        await run_hack(hack_msg, user)
+        await run_hack(interaction, user)
         second_part = str(user.created_at.timestamp() - 129384000)
         second_part_bytes = second_part.encode("ascii")
         base64_bytes_second_part = base64.b64encode(second_part_bytes)
@@ -189,7 +173,7 @@ class Fun(commands.Cog):
             "member": {
                 "joinedAt": str(user.joined_at.strftime("%A, %B %d %Y @ %H:%M:%S %p")),
                 "activity": str(user.activity),
-                "guildName": ctx.guild.name,
+                "guildName": interaction.guild.name,
                 "nick": str(user.nick),
                 "pending": str(user.pending),
                 "status": str(status),
@@ -243,8 +227,9 @@ class Fun(commands.Cog):
                           inline=False)
         await hack_msg.edit(embed=hack_em)
 
-    @commands.command()
-    async def emojify(self, ctx, *, text):
+    @discord.slash_command(description="Turns letters into emojis")
+    async def emojify(self, interaction: Interaction,
+                      text: str = SlashOption(description="The text to emojify")):
         emojis = []
         for s in text.lower():
             if s.isdecimal():
@@ -273,87 +258,49 @@ class Fun(commands.Cog):
             else:
                 emojis.append(s)
 
-        await ctx.reply(' '.join(emojis))
+        await interaction.response.send_message(' '.join(emojis))
 
-    @commands.command()
-    @commands.cooldown(1, 15, commands.BucketType.user)
-    async def wanted(self, ctx, user: discord.Member = None):
-        if user is None:
-            user = ctx.author
-
+    @discord.slash_command(description="Sends a wanted poster of a user")
+    @cooldowns.cooldown(1, 15, cooldowns.SlashBucket.author)
+    async def wanted(self, interaction: Interaction,
+                     user: discord.Member = SlashOption(description="The user to make a wanted poster of")):
         background = Editor("assets/wanted.jpeg")
 
         profile_pic = await load_image_async(str(user.display_avatar.url))
         profile = Editor(profile_pic).resize((300, 300))
         background.paste(profile, (78, 219))
 
-        await ctx.reply(file=discord.File(fp=background.image_bytes, filename="wanted.jpeg"))
-        await asyncio.sleep(0.5)
-        if user == self.bot.user:
-            await ctx.reply("Oh no that's me. I gotta RUNNNNN!!!!")
+        await interaction.response.send_message(file=discord.File(fp=background.image_bytes, filename="wanted.jpeg"))
 
-    @commands.command()
-    @commands.cooldown(1, 30, commands.BucketType.user)
-    async def guessing(self, ctx):
-        number = random.randint(0, 100)
-        channel = ctx.message.channel
-
-        def check(m):
-            return m.content is not None and m.author == ctx.author and m.channel == channel
-
-        tries = 10
-        for i in range(0, 10):
-            await ctx.reply(
-                f'Guess a number between 0 and 100. You have {tries} tries left')
-            response = await self.bot.wait_for('message', check=check)
-            try:
-                guess = int(response.content)
-            except ValueError:
-                return await ctx.reply("The game ended because you typed an invalid guess!")
-            if i == 9:
-                await ctx.reply(
-                    f"You lost. The number was {number}. Thanks for playing!")
-                break
-            if guess > number:
-                await ctx.reply('Your number is too big!')
-                tries -= 1
-            elif guess < number:
-                await ctx.reply('Your number is too small!')
-                tries -= 1
-            else:
-                await ctx.reply('Correct! You win. Thanks for playing!')
-                break
-        return
-
-    @commands.command()
-    async def num2text(self, ctx, num: int = None):
-        if num is None:
-            await ctx.reply("Please enter a number!")
+    @discord.slash_command(description="Converts numbers to text")
+    @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.author)
+    async def num2text(self, interaction: Interaction, num: str = SlashOption(description="The number to convert")):
+        if not num.isnumeric():
+            await interaction.response.send_message("Please only enter numeric characters!")
             return
+        num = float(num)
         if num >= 1.000000e+306:
-            await ctx.reply("Too big of a number!")
+            await interaction.response.send_message("Too big of a number!")
             return
         if len(num2words(num).capitalize()) > 4096:
-            await ctx.reply("Too big of a number!")
+            await interaction.response.send_message("Too big of a number!")
             return
 
         new = num2words(num).capitalize()
         e = discord.Embed(title=":capital_abcd: Numbers to words",
                           description=f"**Input**:{num}\n\n**Output**:{new}",
                           color=discord.Color.random())
-        e.set_footer(text=ctx.author, icon_url=ctx.author.display_avatar)
-        await ctx.reply(embed=e)
+        e.set_footer(text=interaction.user, icon_url=interaction.user.display_avatar)
+        await interaction.response.send_message(embed=e)
 
-    @commands.command()
-    async def reverse(self, ctx, *, msg=None):
-        if msg is None:
-            await ctx.reply("Please enter a message!")
-            return
-        t_rev = msg[::-1].replace("@", "@\u200B").replace("&", "&\u200B")
-        await ctx.reply(f"**🔁 Text ==> txeT | {ctx.author}**\n```{t_rev}```")
+    @discord.slash_command(description="Reverses text")
+    async def reverse(self, interaction: Interaction, text: str = SlashOption(description="The text to reverse")):
+        t_rev = text[::-1].replace("@", "@\u200B").replace("&", "&\u200B")
+        await interaction.response.send_message(f"**🔁 Text ==> txeT | {interaction.user}**\n```{t_rev}```")
 
-    @commands.command()
-    async def dogfact(self, ctx):
+    @discord.slash_command(description="Gets a random dog fact")
+    @cooldowns.cooldown(1, 10, cooldowns.SlashBucket.author)
+    async def dogfact(self, interaction: Interaction):
         async with aiohttp.ClientSession() as ses:
             async with ses.get('https://some-random-api.ml/facts/dog') as r:
                 if r.status in range(200, 299):
@@ -362,17 +309,17 @@ class Fun(commands.Cog):
                     em = discord.Embed(title='Dog Fact',
                                        description=f'{fact}',
                                        color=discord.Color.random())
-                    await ctx.reply(embed=em)
+                    await interaction.response.send_message(embed=em)
                     await ses.close()
                 else:
-                    await ctx.reply("Error when making request...")
+                    await interaction.response.send_message("Error when making request...")
                     await ses.close()
 
-    @commands.command()
-    async def jail(self, ctx, user: discord.Member = None):
-        loading = await ctx.reply("<a:loading:898340114164490261>")
-        if user is None:
-            user = ctx.author
+    @discord.slash_command(description="Makes a picture of a user in jail")
+    @cooldowns.cooldown(1, 10, cooldowns.SlashBucket.author)
+    async def jail(self, interaction: Interaction,
+                   user: discord.Member = SlashOption(description="The user to jail")):
+        await interaction.response.send_message("<a:loading:898340114164490261>")
         async with aiohttp.ClientSession() as trigSession:
             async with trigSession.get(
                     f'https://some-random-api.ml/canvas/jail?avatar={user.display_avatar.with_size(1024)}'
@@ -381,57 +328,54 @@ class Fun(commands.Cog):
                     imageData = BytesIO(await
                                         trigImg.read())  # read the image/bytes
                     await trigSession.close()  # closing the session and;
-                    await ctx.reply(file=discord.File(imageData, 'image.png'))
-                    await loading.delete()
+                    await interaction.edit_original_message(file=discord.File(imageData, 'image.png'), content="")
                 else:
-                    await ctx.reply("Error when making request...")
+                    await interaction.edit_original_message(content="Error when making request...")
                     await trigSession.close()
 
-    @commands.command(aliases=["trigger"])
-    async def triggered(self, ctx, user: discord.Member = None):
-        loading = await ctx.reply("<a:loading:898340114164490261>")
-        if user is None:
-            user = ctx.author
+    @discord.slash_command(description="Makes a picture of a user being triggered")
+    @cooldowns.cooldown(1, 10, cooldowns.SlashBucket.author)
+    async def triggered(self, interaction: Interaction,
+                        user: discord.Member = SlashOption(description="The user to trigger")):
+        await interaction.response.send_message("<a:loading:898340114164490261>")
         async with aiohttp.ClientSession() as trigSession:
             async with trigSession.get(
                     f'https://some-random-api.ml/canvas/triggered?avatar={user.display_avatar.with_size(1024)}'
             ) as trigImg:
                 if trigImg.status in range(200, 299):
                     imageData = BytesIO(await
-                                        trigImg.read())  # read the image/bytes
-                    await trigSession.close()  # closing the session and;
-                    await ctx.reply(file=discord.File(imageData, 'triggered.gif'))
-                    await loading.delete()
+                                        trigImg.read())
+                    await trigSession.close()
+                    await interaction.edit_original_message(file=discord.File(imageData, 'image.png'), content="")
                 else:
-                    await ctx.reply("Error when making request...")
+                    await interaction.edit_original_message(content="Error when making request...")
                     await trigSession.close()
 
-    @commands.command()
-    async def joke(self, ctx):
-        async with aiohttp.ClientSession as ses:
+    @discord.slash_command(description="Gets a random joke")
+    @cooldowns.cooldown(1, 10, cooldowns.SlashBucket.author)
+    async def joke(self, interaction: Interaction):
+        async with aiohttp.ClientSession() as ses:
             async with ses.get('https://some-random-api.ml/joke') as r:
                 if r.status in range(200, 299):
                     data = await r.json()
-                    fact = data['joke']
+                    joke = data['joke']
                     em = discord.Embed(title='Joke',
-                                       description=f'{fact}',
+                                       description=f'{joke}',
                                        color=discord.Color.random())
-                    await ctx.reply(embed=em)
+                    await interaction.response.send_message(embed=em)
                     await ses.close()
                 else:
-                    await ctx.reply("Error when making request...")
+                    await interaction.response.send_message("Error when making request...")
                     await ses.close()
 
-    @commands.command(aliases=["gender"])
-    async def genderify(self, ctx, *, name=None):
-        if name is None:
-            await ctx.reply("Please enter a name!")
-            return
-
+    @discord.slash_command(description="Guesses the gender based off of a name")
+    @cooldowns.cooldown(1, 10, cooldowns.SlashBucket.author)
+    async def genderify(self, interaction: Interaction,
+                        name: str = SlashOption(description="The name to guess the gender of")):
         gender_api = await http.get(f"https://api.genderize.io?name={name.lower()}",
                                     res_method="json")
         if str(gender_api["gender"]) == "None":
-            return await ctx.reply("I don't have a gender for that name!")
+            return await interaction.response.send_message("I couldn't find a gender for that name!")
 
         e = discord.Embed(title="Genderify",
                           description="I will guess the gender of a name!",
@@ -447,91 +391,50 @@ class Fun(commands.Cog):
                     inline=False)
         e.add_field(name="Count", value=gender_api["count"])
 
-        await ctx.reply("I have guessed the gender!!", embed=e)
-
-    @commands.command()
-    async def spam(self, ctx):
-        await ctx.reply(
-            "Type as many characters you can in 30 seconds! I will tell you when to send the message for it to be "
-            "counted. "
-        )
-        await asyncio.sleep(1)
-        countdown = await ctx.reply("3")
-        await asyncio.sleep(1)
-        await countdown.edit("2")
-        await asyncio.sleep(1)
-        await countdown.edit("1")
-        await asyncio.sleep(1)
-        await countdown.edit("TYPE!!!!")
-        new_countdown = await ctx.reply("30")
-        for num in range(30, -1, -1):
-            await new_countdown.edit(f"{num}")
-            await asyncio.sleep(1)
-        await ctx.reply("Times up!")
-        await ctx.reply(
-            "Please send you message within 3 seconds or your run is disqualified!"
-        )
-        try:
-            user_msg = await self.bot.wait_for(
-                'message',
-                timeout=3,
-                check=lambda message: message.author == ctx.author and message.
-                channel == ctx.channel)
-        except asyncio.TimeoutError:
-            return await ctx.reply("You ran out of time to submit your message! :(")
-        if len(user_msg.content) >= 1200:
-            return await ctx.reply(
-                "I know you didn't type all of this in a legit way...")
-        await ctx.reply(
-            f"Your message was **{len(user_msg.content)}** characters long!! :tada: :tada:"
-        )
-
-    @commands.command()
-    async def sqrt(self, ctx, *, expression):
-        try:
-            return await ctx.reply(
-                f"The square root \u221A of the expression/number {expression} is"
-                f"\n{math.sqrt(float(calculator(expression)))}"
-            )
-        except simpleeval.FeatureNotAvailable:
-            return await ctx.reply(f"An error occurred :(.")
+        await interaction.response.send_message(embed=e, content="I have guessed the gender!")
 
     # TODO: add to help
-    @commands.command(aliases=["craiyon", "gen_img"])
-    async def generate(self, ctx, *, prompt: str):
+    @discord.slash_command(name="craiyon", description="Ask an AI for any picture query!")
+    @cooldowns.cooldown(1, 50, cooldowns.SlashBucket.author)
+    async def generate(self, interaction: Interaction, query: str = SlashOption(description="The query to search for")):
         eta = int(time.time() + 60)
-        msg = await ctx.reply(f"Go grab some popcorn, this may take some time... ETA: <t:{eta}:R>")
-        async with aiohttp.request("POST", "https://backend.craiyon.com/generate", json={"prompt": prompt}) as resp:
+        msg = await interaction.response.send_message(
+            f"Go grab some popcorn, this may take some time... ETA: <t:{eta}:R>"
+        )
+        async with aiohttp.request("POST", "https://backend.craiyon.com/generate", json={"prompt": query}) as resp:
             r = await resp.json()
             images = r['images']
             image = BytesIO(base64.decodebytes(images[0].encode("utf-8")))
-            return await msg.edit(content="Images generated by **https://craiyon.com**",
-                                  file=discord.File(image, filename="generatedImage.png"),
-                                  view=DropdownImageView(msg, images, ctx.author.id))
+            return await interaction.edit_original_message(content="Images generated by **https://craiyon.com**",
+                                                           file=discord.File(image, filename="generatedImage.png"),
+                                                           view=DropdownImageView(msg, images, interaction.user.id))
 
-    @commands.command(aliases=["show"])
-    async def showpic(self, ctx, *, search):
+    @discord.slash_command(name="google", description="Shows a picture based on your query from Google.")
+    @cooldowns.cooldown(1, 10, cooldowns.SlashBucket.author)
+    async def showpic(self, interaction: Interaction, query: str = SlashOption(description="The query to search for")):
         ran = random.randint(0, 9)
-        resource = build("customsearch", "v1", developerKey=config.getenv("GOOGLE_API_KEY")).cse()
-        result = resource.list(q=f"{search}",
+        resource = build("customsearch", "v1", developerKey=functions.getenv("GOOGLE_API_KEY")).cse()
+        result = resource.list(q=f"{query}",
                                cx="ac76df62ee40c6a13",
                                searchType="image").execute()
         url = result["items"][ran]["link"]
-        embed1 = discord.Embed(title=f"Here's Your Image ({search})",
+        embed1 = discord.Embed(title=f"Here's Your Image ({query})",
                                color=discord.Color.random())
         embed1.set_image(url=url)
-        await ctx.reply(embed=embed1)
+        await interaction.response.send_message(embed=embed1)
 
-    @commands.command()
-    async def youtube(self, ctx, *, search):
-        query_string = urllib.parse.urlencode({'search_query': search})
+    @discord.slash_command(description="Gets a video from YouTube based on your query")
+    @cooldowns.cooldown(1, 10, cooldowns.SlashBucket.author)
+    async def youtube(self, interaction: Interaction,
+                      query: str = SlashOption(description="The query to search for")):
+        query_string = urllib.parse.urlencode({'search_query': query})
         html_content = urllib.request.urlopen('https://www.youtube.com/results?' +
                                               query_string)
         search_results = re.findall(r"watch\?v=(\S{11})",
                                     html_content.read().decode())
 
-        await ctx.reply(
-            f"Here's your video from query {search}!!\n{'https://www.youtube.com/watch?v=' + search_results[0]}")
+        await interaction.response.send_message(
+            f"Here's your video from query **{query}**!!\n{'https://www.youtube.com/watch?v=' + search_results[0]}")
 
 
 def setup(bot):

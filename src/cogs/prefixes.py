@@ -1,37 +1,34 @@
-import nextcord as discord
-from nextcord import SlashOption, Interaction
 from nextcord.ext import commands
-from src.utils import config
+from src.utils import functions
 
 
 class Prefixes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @discord.slash_command(name="prefix", description="Change the prefix for the bot in this server.")
-    @commands.has_permissions(manage_guild=True)
-    async def prefix(self, interaction: Interaction,
-                     prefix: str = SlashOption(description="The new prefix for the bot.", required=True),
-                     space: bool = SlashOption(description="Whether or not to add a space after the prefix.",
-                                               required=False)
-                     ):
-        if space:
-            prefix = prefix + " "
+    @commands.command()
+    async def prefix(self, ctx, prefix=None):
+        if ctx.author.id != ctx.guild.owner_id:
+            return await ctx.reply(
+                "Sorry, but only the owner of this server can change the prefix!")
+        if prefix is None:
+            await ctx.reply("Please enter the new prefix.")
+            return
+
         async with self.bot.db.cursor() as cursor:
-            await cursor.execute("SELECT prefix FROM prefixes WHERE guild = ?", (interaction.guild.id,))
+            await cursor.execute("SELECT prefix FROM prefixes WHERE guild = ?", (ctx.guild.id,))
             data = await cursor.fetchone()
             if data:
-                await cursor.execute("UPDATE prefixes SET prefix = ? WHERE guild = ?", (prefix, interaction.guild.id,))
-                await interaction.response.send_message(f"The prefix has been updated to `{prefix}`")
+                await cursor.execute("UPDATE prefixes SET prefix = ? WHERE guild = ?", (prefix, ctx.guild.id,))
+                await ctx.reply(f"The prefix has been updated to `{prefix}`")
             else:
                 await cursor.execute("INSERT INTO prefixes (prefix, guild) VALUES (?, ?)", (
-                    config.getenv("BOT_PREFIX"), interaction.guild.id,))
-                await cursor.execute("SELECT prefix FROM prefixes WHERE guild = ?", (interaction.guild.id,))
+                    functions.getenv("BOT_PREFIX"), ctx.guild.id,))
+                await cursor.execute("SELECT prefix FROM prefixes WHERE guild = ?", (ctx.guild.id,))
                 data = await cursor.fetchone()
                 if data:
-                    await cursor.execute("UPDATE prefixes SET prefix = ? WHERE guild = ?",
-                                         (prefix, interaction.guild.id,))
-                    await interaction.response.send_message(f"The prefix has been updated to `{prefix}`")
+                    await cursor.execute("UPDATE prefixes SET prefix = ? WHERE guild = ?", (prefix, ctx.guild.id,))
+                    await ctx.reply(f"The prefix has been updated to `{prefix}`")
                 else:
                     return
             await self.bot.db.commit()
@@ -46,7 +43,7 @@ class Prefixes(commands.Cog):
         # configs[str(guild.id)]["giveaway_role"] = "None"
         async with self.bot.db.cursor() as cursor:
             await cursor.execute("INSERT INTO prefixes (prefix, guild) VALUES (?, ?)", (
-                config.getenv("BOT_PREFIX"), guild.id,))
+                functions.getenv("BOT_PREFIX"), guild.id,))
             await cursor.execute("INSERT INTO levelSettings VALUES (?, ?, ?, ?)", (False, 0, 0, guild.id,))
         await self.bot.db.commit()
 
